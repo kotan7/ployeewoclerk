@@ -6,67 +6,51 @@ import { CustomCard } from "@tsamantanis/react-glassmorphism";
 import "@tsamantanis/react-glassmorphism/dist/index.css";
 import BlurText from "./components/blur";
 import SplitText from "./components/split";
+import Header from "./components/Header";
+
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="border-b border-gray-100/20 sticky top-0 z-50 bg-white/80 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-[#163300]">プロイー</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button className="text-[#163300] hover:text-[#9fe870] transition-colors font-medium">
-                ログイン
-              </button>
-              <button className="bg-[#9fe870] text-[#163300] px-6 py-2 rounded-full font-medium hover:bg-[#8fd960] transition-colors">
-                無料で始める
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
-      {/* Hero Section */}
-      <section className="relative min-h-[95vh] flex items-center py-20 lg:py-32 overflow-hidden">
-        <WaveBackground className="absolute inset-0 -mt-10" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center">
-            {/* Glass morphism frame */}
-            <div className="relative inline-block mb-25 ">
-              <CustomCard
-                effectColor="#e2ecd6"
-                blur={5}
-                borderRadius={20}
-              >
-                <div className="px-8 py-8">
-                  <h1 className="text-4xl lg:text-6xl font-bold text-[#163300] mb-6 leading-tight">
-                    内定まで、何度でも叩き込む。
-                    <br />
-                    <span className="text-[#9fe870]">AI面接官</span>
-                    、24時間フル稼働。
-                  </h1>
-                  <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-                    就活の「面接」って、練習の場がなかなかない。
-                    <br />
-                    でも、ぶっつけ本番で挑むには、あまりにリスクが大きい。
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <button className="bg-[#9fe870] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#8fd960] transition-colors shadow-lg">
-                      無料で体験する
-                    </button>
-                    <button className="border-2 border-[#163300] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#163300] hover:text-white transition-colors">
-                      サービス詳細
-                    </button>
-                  </div>
-                </div>
-              </CustomCard>
-            </div>
+{/* Hero Section */}
+<section className="relative h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden">
+  <WaveBackground className="absolute inset-0 -mt-10" />
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    {/* Glass morphism frame */}
+    <div className="relative inline-block">
+      <CustomCard
+        effectColor="#e2ecd6"
+        blur={4}
+        borderRadius={20}
+        className="mb-18"
+      >
+        <div className="px-8 pt-20 pb-12">
+          <h1 className="text-4xl text-center lg:text-6xl font-bold text-[#163300] mb-6 leading-tight">
+            内定まで、何度でも叩き込む。
+            <br />
+            <span className="text-[#9fe870]">AI面接官</span>
+            、24時間フル稼働。
+          </h1>
+          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto text-center">
+            就活の「面接」って、練習の場がなかなかない。
+            <br />
+            でも、ぶっつけ本番で挑むには、あまりにリスクが大きい。
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button className="bg-[#9fe870] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#8fd960] transition-colors shadow-lg">
+              無料で体験する
+            </button>
+            <button className="border-2 border-[#163300] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#163300] hover:text-white transition-colors">
+              サービス詳細
+            </button>
           </div>
         </div>
-      </section>
+      </CustomCard>
+    </div>
+  </div>
+</section>
 
       {/* Problem Section */}
       <section className="py-20 bg-gray-200/100 backdrop-blur-sm relative z-10">
@@ -176,28 +160,48 @@ export default function Home() {
       </section>
 
       {/* Transformation Section */}
-      <section className="py-20 bg-gray-50/80 backdrop-blur-sm relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl lg:text-4xl font-bold text-[#163300] mb-8">
-              面接が怖い、自信がない——
-              <br />
-              そんな不安を
-              <span className="text-[#9fe870]">「準備した」という安心</span>に
-              <br />
-              変えていきませんか？
+      <section className="py-20 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-[#163300] rounded-3xl py-16">
+          <div className="max-w-4xl mx-auto text-center text-white">
+            <div className="w-16 h-16 bg-[#9fe870] rounded-full flex items-center justify-center mx-auto mb-8">
+              <svg
+                className="w-8 h-8 text-[#163300]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a2 2 0 012-2h2a2 2 0 012 2v5m-6 0h6"
+                />
+              </svg>
+            </div>
+            <h2 className="text-5xl lg:text-5xl font-bold mb-8">
+            面接が怖い、自信がない
             </h2>
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-xl text-gray-300 mb-8">
+            そんな不安を「準備した」という安心変えていきませんか？
+              <br />
               就活の不安を「可視化」し、「成長」に変える。
               <br />
               あなたの本気に、本気で応えるAI面接サービス。
             </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button className="bg-[#9fe870] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#8fd960] transition-colors shadow-lg">
+                デモを試す
+              </button>
+              <button className="text-[#9fe870] px-8 py-4 rounded-full font-semibold text-lg hover:underline transition-colors">
+                詳細を見る
+              </button>
+            </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 relative z-10">
+      <section className="py-20 relative z-10 mb-17 mt-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl lg:text-4xl font-bold text-[#163300] mb-8">
