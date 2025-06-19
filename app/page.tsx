@@ -1,10 +1,11 @@
 import Image from "next/image";
+import WaveBackground from "./components/wave";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
+      <header className="border-b border-gray-100/20 sticky top-0 z-50 bg-white/80 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
@@ -23,8 +24,9 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-white py-20 lg:py-32">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative min-h-[80vh] flex items-center py-20 lg:py-32 overflow-hidden">
+        <WaveBackground className="absolute inset-0" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
             <h1 className="text-4xl lg:text-6xl font-bold text-[#163300] mb-6 leading-tight">
               内定まで、何度でも叩き込む。
@@ -49,7 +51,7 @@ export default function Home() {
       </section>
 
       {/* Problem Section */}
-      <section className="bg-[#edefec] py-20">
+      <section className="py-20 bg-gray-50/80 backdrop-blur-sm relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl lg:text-4xl font-bold text-[#163300] mb-8">
@@ -62,11 +64,11 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="bg-white py-20">
+      <section className="py-20 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Feature 1 */}
-            <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-shadow">
+            <div className="bg-white shadow-sm hover:shadow-lg transition-shadow rounded-2xl border border-gray-100">
               <div className="w-12 h-12 bg-[#9fe870] rounded-xl flex items-center justify-center mb-6">
                 <svg
                   className="w-6 h-6 text-[#163300]"
@@ -91,7 +93,7 @@ export default function Home() {
             </div>
 
             {/* Feature 2 */}
-            <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-shadow">
+            <div className="bg-white shadow-sm hover:shadow-lg transition-shadow rounded-2xl border border-gray-100">
               <div className="w-12 h-12 bg-[#9fe870] rounded-xl flex items-center justify-center mb-6">
                 <svg
                   className="w-6 h-6 text-[#163300]"
@@ -116,7 +118,7 @@ export default function Home() {
             </div>
 
             {/* Feature 3 */}
-            <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-shadow">
+            <div className="bg-white shadow-sm hover:shadow-lg transition-shadow rounded-2xl border border-gray-100">
               <div className="w-12 h-12 bg-[#9fe870] rounded-xl flex items-center justify-center mb-6">
                 <svg
                   className="w-6 h-6 text-[#163300]"
@@ -144,7 +146,7 @@ export default function Home() {
       </section>
 
       {/* Transformation Section */}
-      <section className="bg-[#edefec] py-20">
+      <section className="py-20 bg-gray-50/80 backdrop-blur-sm relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl lg:text-4xl font-bold text-[#163300] mb-8">
@@ -165,7 +167,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-white py-20">
+      <section className="py-20 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl lg:text-4xl font-bold text-[#163300] mb-8">
@@ -186,7 +188,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#163300] text-white py-12">
+      <footer className="bg-[#163300] text-white py-12 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
