@@ -1,5 +1,11 @@
+"use client";
+
 import Image from "next/image";
 import WaveBackground from "./components/wave";
+import { CustomCard } from "@tsamantanis/react-glassmorphism";
+import "@tsamantanis/react-glassmorphism/dist/index.css";
+import BlurText from "./components/blur";
+import SplitText from "./components/split";
 
 export default function Home() {
   return (
@@ -24,41 +30,65 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative min-h-[80vh] flex items-center py-20 lg:py-32 overflow-hidden">
-        <WaveBackground className="absolute inset-0" />
+      <section className="relative min-h-[95vh] flex items-center py-20 lg:py-32 overflow-hidden">
+        <WaveBackground className="absolute inset-0 -mt-10" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
-            <h1 className="text-4xl lg:text-6xl font-bold text-[#163300] mb-6 leading-tight">
-              内定まで、何度でも叩き込む。
-              <br />
-              <span className="text-[#9fe870]">AI面接官</span>、24時間フル稼働。
-            </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              就活の「面接」って、練習の場がなかなかない。
-              <br />
-              でも、ぶっつけ本番で挑むには、あまりにリスクが大きい。
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-[#9fe870] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#8fd960] transition-colors shadow-lg">
-                無料で体験する
-              </button>
-              <button className="border-2 border-[#163300] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#163300] hover:text-white transition-colors">
-                サービス詳細
-              </button>
+            {/* Glass morphism frame */}
+            <div className="relative inline-block mb-25 ">
+              <CustomCard
+                effectColor="#e2ecd6"
+                blur={5}
+                borderRadius={20}
+              >
+                <div className="px-8 py-8">
+                  <h1 className="text-4xl lg:text-6xl font-bold text-[#163300] mb-6 leading-tight">
+                    内定まで、何度でも叩き込む。
+                    <br />
+                    <span className="text-[#9fe870]">AI面接官</span>
+                    、24時間フル稼働。
+                  </h1>
+                  <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+                    就活の「面接」って、練習の場がなかなかない。
+                    <br />
+                    でも、ぶっつけ本番で挑むには、あまりにリスクが大きい。
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button className="bg-[#9fe870] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#8fd960] transition-colors shadow-lg">
+                      無料で体験する
+                    </button>
+                    <button className="border-2 border-[#163300] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#163300] hover:text-white transition-colors">
+                      サービス詳細
+                    </button>
+                  </div>
+                </div>
+              </CustomCard>
             </div>
           </div>
         </div>
       </section>
 
       {/* Problem Section */}
-      <section className="py-20 bg-gray-50/80 backdrop-blur-sm relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl lg:text-4xl font-bold text-[#163300] mb-8">
+      <section className="py-20 bg-gray-200/100 backdrop-blur-sm relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+          <div className="max-w-4xl text-left">
+            <h2 className="text-3xl lg:text-4xl font-bold text-[#163300] mr-10">
               そんなあなたのために、
               <br />
               私たちはAI面接官を開発しました。
             </h2>
+            <p className="text-gray-600 font-bold mt-6">
+              AIとリアルタイムで対話しながら、実際の面接に近い形式で練習ができます。
+              <br />
+              いつでも・何度でも挑戦可能。
+            </p>
+          </div>
+          <div className="flex-1">
+            <img
+              src="/soundwave.png"
+              alt="Soundwave"
+              className="w-full h-auto"
+            />
           </div>
         </div>
       </section>
@@ -68,7 +98,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Feature 1 */}
-            <div className="bg-white shadow-sm hover:shadow-lg transition-shadow rounded-2xl border border-gray-100">
+            <div className="bg-white shadow-sm hover:shadow-lg transition-shadow rounded-2xl border border-gray-100 p-6">
               <div className="w-12 h-12 bg-[#9fe870] rounded-xl flex items-center justify-center mb-6">
                 <svg
                   className="w-6 h-6 text-[#163300]"
@@ -85,7 +115,7 @@ export default function Home() {
                 </svg>
               </div>
               <h3 className="text-xl font-bold text-[#163300] mb-4">
-                リアルタイム対話で、実践さながらの面接練習
+                リアルタイム面接練習
               </h3>
               <p className="text-gray-600">
                 AIが面接官として質問し、自然な会話形式で面接の流れを体験できます。
@@ -93,7 +123,7 @@ export default function Home() {
             </div>
 
             {/* Feature 2 */}
-            <div className="bg-white shadow-sm hover:shadow-lg transition-shadow rounded-2xl border border-gray-100">
+            <div className="bg-white shadow-sm hover:shadow-lg transition-shadow rounded-2xl border border-gray-100 p-6">
               <div className="w-12 h-12 bg-[#9fe870] rounded-xl flex items-center justify-center mb-6">
                 <svg
                   className="w-6 h-6 text-[#163300]"
@@ -110,7 +140,7 @@ export default function Home() {
                 </svg>
               </div>
               <h3 className="text-xl font-bold text-[#163300] mb-4">
-                回答の内容、構成、表現、話し方を徹底的に評価
+                面接パフォーマンス評価
               </h3>
               <p className="text-gray-600">
                 多角的な視点からあなたの面接パフォーマンスを分析・評価します。
@@ -118,7 +148,7 @@ export default function Home() {
             </div>
 
             {/* Feature 3 */}
-            <div className="bg-white shadow-sm hover:shadow-lg transition-shadow rounded-2xl border border-gray-100">
+            <div className="bg-white shadow-sm hover:shadow-lg transition-shadow rounded-2xl border border-gray-100 p-6">
               <div className="w-12 h-12 bg-[#9fe870] rounded-xl flex items-center justify-center mb-6">
                 <svg
                   className="w-6 h-6 text-[#163300]"
@@ -135,7 +165,7 @@ export default function Home() {
                 </svg>
               </div>
               <h3 className="text-xl font-bold text-[#163300] mb-4">
-                改善点を具体的にフィードバック。あなたの強みも見つけ出します。
+                フィードバックと強み発見
               </h3>
               <p className="text-gray-600">
                 弱点の改善だけでなく、あなたの長所も発見し、より魅力的にアピールできるようサポートします。
