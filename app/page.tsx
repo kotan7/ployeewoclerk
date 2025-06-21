@@ -1,12 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import WaveBackground from "./components/wave";
-import { CustomCard } from "@tsamantanis/react-glassmorphism";
-import "@tsamantanis/react-glassmorphism/dist/index.css";
-import BlurText from "./components/blur";
-import SplitText from "./components/split";
-import Header from "./components/Header";
+import WaveBackground from "../components/ui/wave";
+import BlurText from "../components/ui/blur";
+import SplitText from "../components/ui/split";
+import Header from "../components/ui/Header";
 
 export default function Home() {
   return (
@@ -15,17 +13,22 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="relative h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden">
-        <WaveBackground className="absolute inset-0 -mt-10" />
+        <div className="absolute inset-0 w-full h-full">
+          <WaveBackground className="" />
+        </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          {/* Glass morphism frame */}
-          <div className="relative inline-block">
-            <CustomCard
-              effectColor="#e2ecd6"
-              blur={4}
-              borderRadius={20}
-              className="mb-18"
+          {/* Hero content frame */}
+          <div className="relative inline-block mb-15">
+            <div
+              className="rounded-3xl "
+              style={{
+                backgroundColor: "rgba(197, 228, 212, 0.1)",
+                backdropFilter: "blur(3px) saturate(65%)",
+                WebkitBackdropFilter: "blur(30px) saturate(65%)",
+                border: "2px solid rgba(210, 211, 210, 0.2)",
+              }}
             >
-              <div className="px-8 pt-20 pb-12">
+              <div className="px-8 pb-12 mt-28 mb-8">
                 <h1 className="text-4xl text-center lg:text-6xl font-bold text-[#163300] mb-6 leading-tight">
                   内定まで、何度でも叩き込む。
                   <br />
@@ -46,7 +49,7 @@ export default function Home() {
                   </button>
                 </div>
               </div>
-            </CustomCard>
+            </div>
           </div>
         </div>
       </section>
@@ -55,7 +58,7 @@ export default function Home() {
       <section className="py-20 bg-gray-200/100 backdrop-blur-sm relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
           <div className="max-w-4xl text-left">
-            <h2 className="text-3xl lg:text-4xl font-bold text-[#163300] mr-10">
+            <h2 className="text-3xl lg:text-4xl font-bold text-[#163300] mr-10 ">
               そんなあなたのために、
               <br />
               私たちはAI面接官を開発しました。
