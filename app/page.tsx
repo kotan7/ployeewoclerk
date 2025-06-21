@@ -8,49 +8,48 @@ import BlurText from "./components/blur";
 import SplitText from "./components/split";
 import Header from "./components/Header";
 
-
 export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       <Header />
 
-{/* Hero Section */}
-<section className="relative h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden">
-  <WaveBackground className="absolute inset-0 -mt-10" />
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-    {/* Glass morphism frame */}
-    <div className="relative inline-block">
-      <CustomCard
-        effectColor="#e2ecd6"
-        blur={4}
-        borderRadius={20}
-        className="mb-18"
-      >
-        <div className="px-8 pt-20 pb-12">
-          <h1 className="text-4xl text-center lg:text-6xl font-bold text-[#163300] mb-6 leading-tight">
-            内定まで、何度でも叩き込む。
-            <br />
-            <span className="text-[#9fe870]">AI面接官</span>
-            、24時間フル稼働。
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto text-center">
-            就活の「面接」って、練習の場がなかなかない。
-            <br />
-            でも、ぶっつけ本番で挑むには、あまりにリスクが大きい。
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-[#9fe870] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#8fd960] transition-colors shadow-lg">
-              無料で体験する
-            </button>
-            <button className="border-2 border-[#163300] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#163300] hover:text-white transition-colors">
-              サービス詳細
-            </button>
+      {/* Hero Section */}
+      <section className="relative h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden">
+        <WaveBackground className="absolute inset-0 -mt-10" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* Glass morphism frame */}
+          <div className="relative inline-block">
+            <CustomCard
+              effectColor="#e2ecd6"
+              blur={4}
+              borderRadius={20}
+              className="mb-18"
+            >
+              <div className="px-8 pt-20 pb-12">
+                <h1 className="text-4xl text-center lg:text-6xl font-bold text-[#163300] mb-6 leading-tight">
+                  内定まで、何度でも叩き込む。
+                  <br />
+                  <span className="text-[#9fe870]">AI面接官</span>
+                  、24時間フル稼働。
+                </h1>
+                <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto font-bold text-center">
+                  就活の「面接」って、練習の場がなかなかない。
+                  <br />
+                  でも、ぶっつけ本番で挑むには、あまりにリスクが大きい。
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <button className="bg-[#9fe870] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#8fd960] transition-colors shadow-lg">
+                    無料で体験する
+                  </button>
+                  <button className="border-2 border-[#163300] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#163300] hover:text-white transition-colors">
+                    サービス詳細
+                  </button>
+                </div>
+              </div>
+            </CustomCard>
           </div>
         </div>
-      </CustomCard>
-    </div>
-  </div>
-</section>
+      </section>
 
       {/* Problem Section */}
       <section className="py-20 bg-gray-200/100 backdrop-blur-sm relative z-10">
@@ -161,8 +160,8 @@ export default function Home() {
 
       {/* Transformation Section */}
       <section className="py-20 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-[#163300] rounded-3xl py-16">
-          <div className="max-w-4xl mx-auto text-center text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto text-center text-white bg-[#163300] rounded-3xl py-16">
             <div className="w-16 h-16 bg-[#9fe870] rounded-full flex items-center justify-center mx-auto mb-8">
               <svg
                 className="w-8 h-8 text-[#163300]"
@@ -179,10 +178,10 @@ export default function Home() {
               </svg>
             </div>
             <h2 className="text-5xl lg:text-5xl font-bold mb-8">
-            面接が怖い、自信がない
+              面接が怖い、自信がない
             </h2>
             <p className="text-xl text-gray-300 mb-8">
-            そんな不安を「準備した」という安心変えていきませんか？
+              そんな不安を「準備した」という安心変えていきませんか？
               <br />
               就活の不安を「可視化」し、「成長」に変える。
               <br />
