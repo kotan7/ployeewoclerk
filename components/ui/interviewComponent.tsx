@@ -27,7 +27,6 @@ export const useInterview = ({
   companyName,
   role,
   jobDescription,
-  interviewFocus,
   resume,
 }: UseInterviewProps) => {
   const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);

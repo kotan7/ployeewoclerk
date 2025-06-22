@@ -5,13 +5,34 @@ import { useRouter } from "next/navigation";
 import { useInterview, CallStatus } from "@/components/ui/interviewComponent";
 import soundwavesAnimation from "@/constants/soundwaves.json";
 
+interface Interview {
+  id: string;
+  company_name?: string;
+  companyName?: string;
+  role: string;
+  job_description?: string;
+  jobDescription?: string;
+  interview_focus?:
+    | "general"
+    | "technical"
+    | "product"
+    | "leadership"
+    | "custom";
+  interviewFocus?:
+    | "general"
+    | "technical"
+    | "product"
+    | "leadership"
+    | "custom";
+}
+
 interface InterviewSessionClientProps {
-  interview: any;
+  interview: Interview;
 }
 
 const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
   const router = useRouter();
-  const lottieRef = useRef<any>(null);
+  const lottieRef = useRef<HTMLDivElement>(null);
 
   const {
     callStatus,
@@ -22,7 +43,6 @@ const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
     endCall,
     toggleMute,
     getStatusText,
-    setCallStatus,
   } = useInterview({
     companyName: interview.company_name || interview.companyName,
     role: interview.role,
@@ -45,7 +65,7 @@ const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
         if (lottieRef.current) {
           lottieRef.current.innerHTML = ""; // Clear any existing animation
 
-          const animation = (lottie as any).default.loadAnimation({
+          const animation = lottie.default.loadAnimation({
             container: lottieRef.current,
             renderer: "svg",
             loop: true,

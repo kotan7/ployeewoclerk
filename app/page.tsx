@@ -1,10 +1,6 @@
 "use client";
 
-import Image from "next/image";
 import WaveBackground from "../components/ui/wave";
-import BlurText from "../components/ui/blur";
-import SplitText from "../components/ui/split";
-import Header from "../components/ui/Header";
 import { useRouter } from "next/navigation";
 
 export default function Home() {

@@ -7,7 +7,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+
 import {
   Form,
   FormControl,
@@ -26,8 +26,6 @@ import {
 } from "@/components/ui/select";
 import { createInterview } from "@/lib/actions/interview.actions";
 import { redirect } from "next/navigation";
-
-
 
 const formSchema = z.object({
   resume: z
@@ -66,8 +64,6 @@ const interviewFocusOptions = [
 ] as const;
 
 export function InterviewForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -79,13 +75,13 @@ export function InterviewForm() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const interview = await createInterview(values);
-    if(interview) {
-      redirect(`/interview/${interview.id}`)
+    if (interview) {
+      redirect(`/interview/${interview.id}`);
     } else {
-      console.error("Failed to create interview")
-      redirect("/")
+      console.error("Failed to create interview");
+      redirect("/");
     }
-  }
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
@@ -110,7 +106,7 @@ export function InterviewForm() {
               <FormField
                 control={form.control}
                 name="resume"
-                render={({ field: { onChange, value, ...field } }) => (
+                render={({ field: { onChange, ...field } }) => (
                   <FormItem>
                     <FormLabel className="text-base font-semibold text-[#163300]">
                       履歴書ファイル
@@ -254,12 +250,10 @@ export function InterviewForm() {
             <div className="pt-5">
               <Button
                 type="submit"
-                disabled={isSubmitting}
                 className="w-full h-14 bg-[#9fe870] text-[#163300] hover:bg-[#8fd960] 
-                  text-lg font-semibold rounded-full shadow-lg transition-colors
-                  disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" 
+                  text-lg font-semibold rounded-full shadow-lg transition-colors cursor-pointer"
               >
-                {isSubmitting ? "準備中..." : "AI面接を開始する"}
+                AI面接を開始する
               </Button>
             </div>
           </form>

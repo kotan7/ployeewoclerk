@@ -48,9 +48,9 @@ class Wave {
     ctx.strokeStyle = this.color;
     ctx.lineWidth = this.settings.lineWidth;
 
-    let firstX = 0;
+    const firstX = 0;
     const leftOffsetPx = (this.settings.leftOffset / 100) * this.canvas.height;
-    let firstY =
+    const firstY =
       this.yOffset +
       leftOffsetPx +
       Math.sin(firstX * 0.005 + this.phase) * this.settings.amplitude +
