@@ -1,11 +1,16 @@
 import React from "react";
 import { InterviewForm } from "@/components/ui/InterviewForm";
-import Header from "@/components/ui/Header";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
-const page = () => {
+const page = async () => {
+  const { userId } = await auth();
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
   return (
     <div className="min-h-screen bg-white">
-      <Header />
 
       {/* Header Section */}
       <div className="py-16">

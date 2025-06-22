@@ -10,17 +10,14 @@ import { useRouter } from "next/navigation";
 export default function Home() {
   const router = useRouter();
   const handleClick = () => {
-    router.push("/interview/new")
-  }
+    router.push("/interview/new");
+  };
   const handleClick2 = () => {
-    router.push("/interview")
-  }
-
+    router.push("/interview");
+  };
 
   return (
     <div className="min-h-screen bg-white">
-      <Header />
-
       {/* Hero Section */}
       <section className="relative h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 w-full h-full">
@@ -51,12 +48,16 @@ export default function Home() {
                   でも、ぶっつけ本番で挑むには、あまりにリスクが大きい。
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <button className="cursor-pointer bg-[#9fe870] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#8fd960] transition-colors shadow-lg"
-                  onClick={handleClick}>
+                  <button
+                    className="cursor-pointer bg-[#9fe870] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#8fd960] transition-colors shadow-lg"
+                    onClick={handleClick}
+                  >
                     無料で体験する
                   </button>
-                  <button className="cursor-pointer border-2 border-[#163300] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#163300] hover:text-white transition-colors"
-                  onClick={handleClick2}>
+                  <button
+                    className="cursor-pointer border-2 border-[#163300] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#163300] hover:text-white transition-colors"
+                    onClick={handleClick2}
+                  >
                     サービス詳細
                   </button>
                 </div>
@@ -92,7 +93,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 relative z-10">
+      <section className="py-20 relative z-10 mt-10 -mb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Feature 1 */}
@@ -203,12 +204,16 @@ export default function Home() {
               あなたの本気に、本気で応えるAI面接サービス。
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="cursor-pointer bg-[#9fe870] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#8fd960] transition-colors shadow-lg"
-              onClick={handleClick}>
+              <button
+                className="cursor-pointer bg-[#9fe870] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#8fd960] transition-colors shadow-lg"
+                onClick={handleClick}
+              >
                 デモを試す
               </button>
-              <button className="cursor-pointer text-[#9fe870] px-8 py-4 rounded-full font-semibold text-lg hover:underline transition-colors"
-              onClick={handleClick2}>
+              <button
+                className="cursor-pointer text-[#9fe870] px-8 py-4 rounded-full font-semibold text-lg hover:underline transition-colors"
+                onClick={handleClick2}
+              >
                 詳細を見る
               </button>
             </div>
@@ -226,8 +231,10 @@ export default function Home() {
               あなたの可能性、きっと広がります。
             </h2>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="cursor-pointer bg-[#9fe870] text-[#163300] px-10 py-4 rounded-full font-semibold text-xl hover:bg-[#8fd960] transition-colors shadow-lg"
-              onClick={handleClick}>
+              <button
+                className="cursor-pointer bg-[#9fe870] text-[#163300] px-10 py-4 rounded-full font-semibold text-xl hover:bg-[#8fd960] transition-colors shadow-lg"
+                onClick={handleClick}
+              >
                 今すぐ無料で始める
               </button>
             </div>

@@ -24,6 +24,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { createInterview } from "@/lib/actions/interview.actions";
+import { redirect } from "next/navigation";
+
+
 
 const formSchema = z.object({
   resume: z
@@ -73,21 +77,18 @@ export function InterviewForm() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true);
-    try {
-      console.log(values);
-      // Handle form submission here
-      // You can add API call or navigation logic
-    } catch (error) {
-      console.error("Form submission error:", error);
-    } finally {
-      setIsSubmitting(false);
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const interview = await createInterview(values);
+    if(interview) {
+      redirect(`/interview/${interview.id}`)
+    } else {
+      console.error("Failed to create interview")
+      redirect("/")
     }
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12">
+    <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
       {/* Form Container */}
       <div
         className="rounded-3xl p-8 shadow-lg"
@@ -250,13 +251,13 @@ export function InterviewForm() {
             </div>
 
             {/* Submit Button */}
-            <div className="pt-6">
+            <div className="pt-5">
               <Button
                 type="submit"
                 disabled={isSubmitting}
                 className="w-full h-14 bg-[#9fe870] text-[#163300] hover:bg-[#8fd960] 
                   text-lg font-semibold rounded-full shadow-lg transition-colors
-                  disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" 
               >
                 {isSubmitting ? "準備中..." : "AI面接を開始する"}
               </Button>
