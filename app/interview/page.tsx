@@ -41,17 +41,18 @@ interface InterviewData {
 }
 
 interface PageProps {
-  searchParams: {
+  searchParams: Promise<{
     page?: string;
     filter?: string;
     sort?: string;
-  };
+  }>;
 }
 
 const InterviewPage = async ({ searchParams }: PageProps) => {
-  const currentPage = parseInt(searchParams.page || "1");
-  const filter = searchParams.filter || "all";
-  const sortBy = searchParams.sort || "newest";
+  const resolvedSearchParams = await searchParams;
+  const currentPage = parseInt(resolvedSearchParams.page || "1");
+  const filter = resolvedSearchParams.filter || "all";
+  const sortBy = resolvedSearchParams.sort || "newest";
 
   let interviewData: InterviewData = {
     interviews: [],
