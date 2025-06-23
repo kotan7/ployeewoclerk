@@ -1,9 +1,39 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useInterview, CallStatus } from "@/components/ui/interviewComponent";
 import soundwavesAnimation from "@/constants/soundwaves.json";
+import { vapi } from "@/lib/vapi.sdk";
+
+// Type definitions for messages
+interface Message {
+  type: string;
+  transcriptType?: string;
+  role: "user" | "assistant";
+  transcript?: string;
+}
+
+interface SavedMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+// Helper function to translate interview focus to Japanese
+const getInterviewFocusLabel = (focus: string) => {
+  const focusMap: { [key: string]: string } = {
+    hr: "人事面接",
+    case: "ケース面接",
+    technical: "テクニカル面接",
+    final: "最終面接",
+    // Legacy mappings for backwards compatibility
+    general: "一般的な行動面接",
+    product: "プロダクト・ケース面接",
+    leadership: "リーダーシップ面接",
+    custom: "カスタム",
+  };
+  return focusMap[focus] || focus;
+};
 
 interface Interview {
   id: string;
@@ -33,6 +63,11 @@ interface InterviewSessionClientProps {
 const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
   const router = useRouter();
   const lottieRef = useRef<HTMLDivElement>(null);
+  const [messages, setMessages] = useState<SavedMessage[]>([]);
+
+  // Get company name for subtitle display
+  const name = interview.company_name || interview.companyName || "面接官";
+  const userName = "あなた"; // User name for subtitles
 
   const {
     callStatus,
@@ -88,6 +123,27 @@ const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
     loadLottie();
   }, [isSpeaking, callStatus]);
 
+  // Handle incoming messages for subtitles
+  useEffect(() => {
+    const OnMessage = (message: Message) => {
+      if (message.type === "transcript" && message.transcriptType === "final") {
+        const newMessage = {
+          role: message.role,
+          content: message.transcript || "",
+        };
+        setMessages((prev) => [newMessage, ...prev]);
+      }
+    };
+
+    // Add the message listener
+    vapi.on("message", OnMessage);
+
+    // Cleanup
+    return () => {
+      vapi.off("message", OnMessage);
+    };
+  });
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -98,19 +154,21 @@ const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
           </h1>
           <p className="text-lg text-gray-600 mb-2">{interview.role}</p>
           <span className="inline-block px-3 py-1 bg-[#9fe870]/20 text-[#163300] rounded-full text-sm font-medium">
-            {interview.interview_focus || interview.interviewFocus}
+            {getInterviewFocusLabel(
+              interview.interview_focus || interview.interviewFocus || ""
+            )}
           </span>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center py-8 px-6">
-        <div className="w-full max-w-lg text-center space-y-8">
+      <div className="flex-1 flex flex-col items-center justify-center py-4 px-6">
+        <div className="w-full max-w-2xl text-center space-y-6">
           {/* Single Soundwave Animation */}
-          <div className="flex justify-center -mt-8">
+          <div className="flex justify-center -mt-12">
             <div
               ref={lottieRef}
-              className={`w-80 h-80 transition-opacity duration-300 ${
+              className={`w-96 h-96 transition-opacity duration-300 ${
                 callStatus === CallStatus.ACTIVE && isSpeaking
                   ? "opacity-100"
                   : "opacity-30"
@@ -144,6 +202,31 @@ const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
               </p>
             )}
           </div>
+
+          {/* Subtitles - Only show during active call when there are messages */}
+          {callStatus === CallStatus.ACTIVE && messages.length > 0 && (
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg w-full max-w-4xl mx-auto">
+              <div className="text-base leading-relaxed">
+                {(() => {
+                  const latestMessage = messages[0];
+                  if (latestMessage.role === "assistant") {
+                    return (
+                      <p className="text-gray-700">
+                        {name.split(" ")[0].replace(/[.,]/g, "")}:{" "}
+                        {latestMessage.content}
+                      </p>
+                    );
+                  } else {
+                    return (
+                      <p className="text-[#163300] font-medium">
+                        {userName}: {latestMessage.content}
+                      </p>
+                    );
+                  }
+                })()}
+              </div>
+            </div>
+          )}
 
           {/* Controls */}
           <div className="flex justify-center gap-4 flex-wrap min-h-[60px] items-center">

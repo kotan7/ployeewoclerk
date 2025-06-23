@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   SignInButton,
@@ -10,6 +11,7 @@ import {
   SignedOut,
   UserButton,
 } from "@clerk/nextjs";
+import logo from "../../constants/logo.png";
 
 const Header = () => {
   const router = useRouter();
@@ -19,12 +21,19 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center -ml-12 space-x-8">
-            <h1
-              className="cursor-pointer text-2xl font-bold text-[#163300]"
+            <div
+              className="cursor-pointer flex items-center space-x-3"
               onClick={() => router.push("/")}
             >
-              プロイー
-            </h1>
+              <Image
+                src={logo}
+                alt="プロイー ロゴ"
+                width={32}
+                height={32}
+                className="object-contain"
+              />
+              <h1 className="text-2xl -ml-2 font-bold text-[#163300]">プロイー</h1>
+            </div>
 
             {/* Navigation Links */}
             <nav className="hidden md:flex items-center space-x-6">

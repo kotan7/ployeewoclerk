@@ -8,7 +8,7 @@ type CreateInterview = {
   companyName: string;
   role: string;
   jobDescription?: string;
-  interviewFocus: "general" | "technical" | "product" | "leadership" | "custom";
+  interviewFocus: "hr" | "case" | "technical" | "final";
   resume?: FileList;
 }
 
@@ -53,4 +53,57 @@ export const getUserInterviews = async () => {
     }
 
     return data || [];
+}
+
+export const getAllInterviews = async (
+    page: number = 1, 
+    limit: number = 12, 
+    filter?: string, 
+    sortBy: string = 'newest'
+) => {
+    const supabase = CreateSupabaseClient()
+    const offset = (page - 1) * limit;
+    
+    let query = supabase
+        .from("interviews")
+        .select("*", { count: 'exact' });
+    
+    // Apply filter
+    if (filter && filter !== 'all') {
+        query = query.eq('interviewFocus', filter);
+    }
+    
+    // Apply sorting
+    switch (sortBy) {
+        case 'oldest':
+            query = query.order("created_at", { ascending: true });
+            break;
+        case 'popularity':
+            // For now, we'll use creation date as a proxy for popularity
+            // In the future, you could add a views or interactions column
+            query = query.order("created_at", { ascending: false });
+            break;
+        case 'newest':
+        default:
+            query = query.order("created_at", { ascending: false });
+            break;
+    }
+    
+    query = query.range(offset, offset + limit - 1);
+
+    const {data, error, count} = await query;
+
+    if (error) {
+        console.error("Supabase error:", error)
+        throw new Error(`Database error: ${error.message}`)
+    }
+
+    return {
+        interviews: data || [],
+        total: count || 0,
+        currentPage: page,
+        totalPages: Math.ceil((count || 0) / limit),
+        hasNextPage: offset + limit < (count || 0),
+        hasPrevPage: page > 1
+    };
 }

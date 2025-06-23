@@ -47,20 +47,16 @@ const formSchema = z.object({
 
   jobDescription: z.string().optional(),
 
-  interviewFocus: z.enum(
-    ["general", "technical", "product", "leadership", "custom"],
-    {
-      required_error: "面接の種類を選択してください",
-    }
-  ),
+  interviewFocus: z.enum(["hr", "case", "technical", "final"], {
+    required_error: "面接の種類を選択してください",
+  }),
 });
 
 const interviewFocusOptions = [
-  { value: "general", label: "一般的な行動面接" },
-  { value: "technical", label: "技術面接" },
-  { value: "product", label: "プロダクト・ケース面接" },
-  { value: "leadership", label: "リーダーシップ面接" },
-  { value: "custom", label: "カスタム" },
+  { value: "hr", label: "人事面接" },
+  { value: "case", label: "ケース面接" },
+  { value: "technical", label: "テクニカル面接" },
+  { value: "final", label: "最終面接" },
 ] as const;
 
 export function InterviewForm() {

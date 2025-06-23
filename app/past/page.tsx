@@ -3,6 +3,22 @@ import Link from "next/link";
 import { getUserInterviews } from "@/lib/actions/interview.actions";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 
+// Helper function to translate interview focus to Japanese
+const getInterviewFocusLabel = (focus: string) => {
+  const focusMap: { [key: string]: string } = {
+    hr: "人事面接",
+    case: "ケース面接",
+    technical: "テクニカル面接",
+    final: "最終面接",
+    // Legacy mappings for backwards compatibility
+    general: "一般的な行動面接",
+    product: "プロダクト・ケース面接",
+    leadership: "リーダーシップ面接",
+    custom: "カスタム",
+  };
+  return focusMap[focus] || focus;
+};
+
 const InterviewHistoryPage = async () => {
   let interviews = [];
 
@@ -126,8 +142,11 @@ const InterviewHistoryPage = async () => {
                       </p>
                       <div className="flex items-center justify-between text-sm text-gray-500">
                         <span className="inline-block px-2 py-1 bg-[#9fe870]/20 text-[#163300] rounded-full text-xs font-medium">
-                          {interview.interviewFocus ||
-                            interview.interview_focus}
+                          {getInterviewFocusLabel(
+                            interview.interviewFocus ||
+                              interview.interview_focus ||
+                              ""
+                          )}
                         </span>
                         <time>
                           {new Date(interview.created_at).toLocaleDateString(
