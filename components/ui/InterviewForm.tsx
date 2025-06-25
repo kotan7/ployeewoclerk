@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,7 +26,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createInterview } from "@/lib/actions/interview.actions";
-import { redirect } from "next/navigation";
 
 const formSchema = z.object({
   resume: z
@@ -60,6 +60,7 @@ const interviewFocusOptions = [
 ] as const;
 
 export function InterviewForm() {
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -69,13 +70,21 @@ export function InterviewForm() {
     },
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const interview = await createInterview(values);
-    if (interview) {
-      redirect(`/interview/${interview.id}`);
-    } else {
-      console.error("Failed to create interview");
-      redirect("/");
+    setIsSubmitting(true);
+    try {
+      const interview = await createInterview(values);
+      if (interview) {
+        router.push(`/interview/${interview.id}`);
+      } else {
+        console.error("Failed to create interview");
+        router.push("/");
+      }
+    } catch (error) {
+      console.error("Error creating interview:", error);
+      setIsSubmitting(false);
     }
   };
 
@@ -246,10 +255,19 @@ export function InterviewForm() {
             <div className="pt-5">
               <Button
                 type="submit"
+                disabled={isSubmitting}
                 className="w-full h-14 bg-[#9fe870] text-[#163300] hover:bg-[#8fd960] 
-                  text-lg font-semibold rounded-full shadow-lg transition-colors cursor-pointer"
+                  text-lg font-semibold rounded-full shadow-lg transition-colors cursor-pointer
+                  disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                AI面接を開始する
+                {isSubmitting ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 border-2 border-[#163300] border-t-transparent rounded-full animate-spin" />
+                    質問を生成して面接を開始中...
+                  </div>
+                ) : (
+                  "面接セッションを開始する"
+                )}
               </Button>
             </div>
           </form>

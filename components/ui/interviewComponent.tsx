@@ -21,18 +21,33 @@ interface UseInterviewProps {
     | "leadership"
     | "custom";
   resume?: FileList;
+  questions?: string[]; // Pre-generated questions from database
 }
 
 export const useInterview = ({
   companyName,
   role,
   jobDescription,
+  interviewFocus,
   resume,
+  questions = [], // Default to empty array if no questions provided
 }: UseInterviewProps) => {
   const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Use pre-generated questions or fallback questions - ensure it's always an array
+  const interviewQuestions =
+    Array.isArray(questions) && questions.length > 0
+      ? questions
+      : [
+          "まずは簡単に自己紹介をお願いします。",
+          "なぜ弊社を志望されたのですか？",
+          "この職種を選んだ理由を教えてください。",
+          "あなたの強みと弱みを教えてください。",
+          "5年後のキャリアビジョンを聞かせてください。",
+        ];
 
   useEffect(() => {
     const onCallStart = () => {
@@ -82,9 +97,14 @@ export const useInterview = ({
       setCallStatus(CallStatus.CONNECTING);
       setError(null);
 
+      const questionsForPrompt = interviewQuestions
+        .map((q, i) => `${i + 1}. ${q}`)
+        .join("\n");
+
       await vapi.start({
         name: "AI Interview Assistant",
         firstMessage:
+          interviewQuestions[0] ||
           "こんにちは。本日はもぎ面接にご参加いただきありがとうございます。まずは簡単に自己紹介をお願いします。",
         model: {
           provider: "openai",
@@ -99,18 +119,25 @@ export const useInterview = ({
 - 志望企業: ${companyName || "未入力"}
 - 志望職種: ${role || "未入力"}
 - 職務内容: ${jobDescription || "未入力"}
+- 面接フォーカス: ${interviewFocus || "general"}
+
+【準備された面接質問】
+${questionsForPrompt}
 
 【面接の進め方ルール】
-- 1回につき1つの質問をしてください。
-- ユーザーの回答に応じて深掘り質問をしてください。
-- フィードバックは行わず、リアルな面接官のように振る舞ってください。
-- 丁寧かつ自然な日本語で話してください。`,
+- 上記の準備された質問を参考に面接を進めてください
+- 最初の質問は既に最初のメッセージとして設定されています
+- 必要に応じて、回答に対する深掘り質問も行ってください
+- フィードバックは行わず、リアルな面接官のように振る舞ってください
+- 丁寧かつ自然な日本語で話してください
+- 準備された質問をすべて消化した後は、面接を自然に終了してください`,
             },
           ],
         },
         voice: {
-          provider: "vapi",
-          voiceId: "Hana",
+          provider: "11labs",
+          voiceId: "3JDquces8E8bkmvbh6Bc",
+          model: "eleven_multilingual_v2",
         },
         transcriber: {
           provider: "deepgram",
@@ -119,7 +146,7 @@ export const useInterview = ({
       });
     } catch (error) {
       console.error("Failed to start call:", error);
-      setError("通話を開始できませんでした");
+      setError("面接を開始できませんでした");
       setCallStatus(CallStatus.INACTIVE);
     }
   };
@@ -165,5 +192,6 @@ export const useInterview = ({
     toggleMute,
     getStatusText,
     setCallStatus,
+    questions: interviewQuestions,
   };
 };

@@ -12,6 +12,48 @@ type CreateInterview = {
   resume?: FileList;
 }
 
+async function generateInterviewQuestions({
+  companyName,
+  role,
+  jobDescription,
+  interviewFocus,
+  resume,
+}: {
+  companyName: string;
+  role: string;
+  jobDescription?: string;
+  interviewFocus: string;
+  resume?: string;
+}): Promise<string[]> {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/generate-questions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        companyName,
+        role,
+        jobDescription,
+        interviewFocus,
+        resume,
+      }),
+    });
+
+    const data = await response.json();
+    return data.questions || [];
+  } catch (error) {
+    console.error('Error calling question generation API:', error);
+    return [
+      "まずは簡単に自己紹介をお願いします。",
+      "なぜ弊社を志望されたのですか？",
+      "この職種を選んだ理由を教えてください。",
+      "あなたの強みと弱みを教えてください。",
+      "5年後のキャリアビジョンを聞かせてください。"
+    ];
+  }
+}
+
 export const createInterview = async (formData: CreateInterview) => {
     const {userId: author} = await auth()
     
@@ -19,10 +61,23 @@ export const createInterview = async (formData: CreateInterview) => {
         throw new Error("User not authenticated")
     }
     
+    // Generate questions using OpenAI
+    const questions = await generateInterviewQuestions({
+        companyName: formData.companyName,
+        role: formData.role,
+        jobDescription: formData.jobDescription,
+        interviewFocus: formData.interviewFocus,
+        resume: formData.resume ? "提出済み" : undefined,
+    });
+    
     const supabase = CreateSupabaseClient()
     const {data, error} = await supabase
         .from("interviews")
-        .insert({...formData, author})
+        .insert({
+            ...formData,
+            author,
+            questions: questions // Store the generated questions
+        })
         .select();
 
     if (error) {

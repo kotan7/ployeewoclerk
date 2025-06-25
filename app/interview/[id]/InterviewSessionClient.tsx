@@ -54,6 +54,7 @@ interface Interview {
     | "product"
     | "leadership"
     | "custom";
+  questions?: string[];
 }
 
 interface InterviewSessionClientProps {
@@ -83,6 +84,7 @@ const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
     role: interview.role,
     jobDescription: interview.job_description || interview.jobDescription,
     interviewFocus: interview.interview_focus || interview.interviewFocus,
+    questions: interview.questions,
   });
 
   // Redirect to feedback page when interview is finished
