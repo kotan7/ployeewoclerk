@@ -104,33 +104,42 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
 
               <div className="space-y-6">
                 {/* Overall Score Display */}
-                <div className="text-center mb-6">
-                  <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-[#9fe870] to-[#7dd141] rounded-full mb-4">
-                    <span className="text-3xl font-bold text-[#163300]">
-                      {overallFeedback.score}
-                    </span>
+                <div className="text-center mb-8">
+                  <div className="relative inline-block">
+                    <div className="w-32 h-32 rounded-full border-8 border-[#9fe870] bg-white flex items-center justify-center shadow-lg">
+                      <span className="text-4xl font-bold text-[#163300]">
+                        {overallFeedback.score}
+                      </span>
+                    </div>
+                    <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-[#163300] text-white px-3 py-1 rounded-full text-sm font-medium">
+                      100点満点
+                    </div>
                   </div>
-                  <p className="text-gray-600 text-lg font-medium">
-                    総合スコア (100点満点)
+                  <p className="text-gray-700 text-xl font-semibold mt-6">
+                    総合スコア
                   </p>
                 </div>
 
                 {/* Overall Feedback Text */}
-                <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6">
-                  <h3 className="text-lg font-semibold text-[#163300] mb-3">
+                <div className="bg-white border-2 border-[#9fe870] rounded-xl p-6 shadow-sm">
+                  <h3 className="text-xl font-bold text-[#163300] mb-4 flex items-center">
+                    <svg
+                      className="w-6 h-6 mr-2 text-[#9fe870]"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
                     面接官からの総評
                   </h3>
-                  <p className="text-gray-800 leading-relaxed text-base">
+                  <p className="text-gray-800 leading-relaxed text-lg">
                     {overallFeedback.feedback}
                   </p>
                 </div>
-
-                {feedbackData?.createdAt && (
-                  <div className="text-sm text-gray-500 text-center">
-                    評価日時:{" "}
-                    {new Date(feedbackData.createdAt).toLocaleString("ja-JP")}
-                  </div>
-                )}
               </div>
             </div>
           ) : (
@@ -189,22 +198,6 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
               <h2 className="text-xl font-semibold text-[#163300] mb-6">
                 AI評価結果
               </h2>
-
-              {/* Overall Score */}
-              <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#9fe870] to-[#7dd141] rounded-full mb-4">
-                  <span className="text-2xl font-bold text-[#163300]">
-                    {Math.round(
-                      parsedFeedback.reduce(
-                        (acc: number, item: FeedbackItem) =>
-                          acc + parseInt(item.score),
-                        0
-                      ) / parsedFeedback.length
-                    )}
-                  </span>
-                </div>
-                <p className="text-gray-600">総合スコア (平均)</p>
-              </div>
 
               {/* Individual Question Evaluations */}
               <div className="space-y-6">
