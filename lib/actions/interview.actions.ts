@@ -70,15 +70,13 @@ export const createInterview = async (formData: CreateInterview) => {
         resume: formData.resume ? "提出済み" : undefined,
     });
 
-    console.log("Generated questions:", questions);
-    
     const supabase = CreateSupabaseClient()
     const {data, error} = await supabase
         .from("interviews")
         .insert({
             ...formData,
             author,
-            questions: JSON.stringify(questions) // Explicitly stringify for storage
+            questions: JSON.stringify(questions)
         })
         .select();
 
@@ -250,53 +248,24 @@ export const getQuestions = async (interviewId: string) => {
 
   if (error) {
     if (error.code === 'PGRST116') {
-      // No interview found
       return null;
     }
-    console.error("Database error:", error);
     throw new Error(`Failed to fetch questions: ${error.message}`);
   }
 
-  // Parse the questions if they're stored as JSON string
   let parsedQuestions: string[] = [];
   
   if (data.questions) {
-    try {
-      // If questions is already an array, use it directly
-      if (Array.isArray(data.questions)) {
-        parsedQuestions = data.questions;
-      } 
-      // If questions is a string, try to parse it as JSON
-      else if (typeof data.questions === 'string') {
+    if (Array.isArray(data.questions)) {
+      parsedQuestions = data.questions;
+    } else if (typeof data.questions === 'string') {
+      try {
         parsedQuestions = JSON.parse(data.questions);
+      } catch {
+        parsedQuestions = [];
       }
-      else {
-        console.error("Unexpected questions format:", typeof data.questions, data.questions);
-        // Fallback to default questions
-        parsedQuestions = [
-          "まずは簡単に自己紹介をお願いします。",
-          "なぜ弊社を志望されたのですか？",
-          "この職種を選んだ理由を教えてください。",
-          "あなたの強みと弱みを教えてください。",
-          "5年後のキャリアビジョンを聞かせてください。"
-        ];
-      }
-    } catch (parseError) {
-      console.error("Error parsing questions JSON:", parseError);
-      console.error("Raw questions data:", data.questions);
-      
-      // Fallback to default questions if parsing fails
-      parsedQuestions = [
-        "まずは簡単に自己紹介をお願いします。",
-        "なぜ弊社を志望されたのですか？",
-        "この職種を選んだ理由を教えてください。",
-        "あなたの強みと弱みを教えてください。",
-        "5年後のキャリアビジョンを聞かせてください。"
-      ];
     }
   }
-
-  console.log("Parsed questions:", parsedQuestions);
 
   return {
     questions: parsedQuestions,
@@ -314,7 +283,7 @@ export const getFeedback = async (interviewId: string) => {
     const supabase = CreateSupabaseClient();
     const { data, error } = await supabase
         .from('session_history')
-        .select('feedback, id, created_at')
+        .select('feedback, overall_feedback, id, created_at')
         .eq('user_id', userId)
         .eq('interview_id', interviewId)
         .not('feedback', 'is', null)
@@ -333,30 +302,35 @@ export const getFeedback = async (interviewId: string) => {
 
     return {
         feedback: data.feedback,
+        overallFeedback: data.overall_feedback,
         sessionId: data.id,
         createdAt: data.created_at
     };
 }
 
-export const saveFeedback = async (feedback: object, interviewId?: string, sessionId?: string) => {
+export const saveFeedback = async (feedbackData: any, interviewId?: string, sessionId?: string) => {
     const { userId } = await auth();
     
     if (!userId) {
         throw new Error("User not authenticated");
     }
 
-    if (!feedback) {
+    if (!feedbackData) {
         throw new Error("Feedback is required");
     }
 
     const supabase = CreateSupabaseClient();
+    
+    // Extract overall feedback to save in separate column
+    const overallFeedback = feedbackData.overallFeedback || null;
     
     // If sessionId is provided, update existing session_history record
     if (sessionId) {
         const { data, error } = await supabase
             .from('session_history')
             .update({
-                feedback: feedback
+                feedback: feedbackData,
+                overall_feedback: overallFeedback
             })
             .eq('id', sessionId)
             .eq('user_id', userId)
@@ -377,7 +351,8 @@ export const saveFeedback = async (feedback: object, interviewId?: string, sessi
         const { data, error } = await supabase
             .from('session_history')
             .insert({
-                feedback: feedback,
+                feedback: feedbackData,
+                overall_feedback: overallFeedback,
                 user_id: userId,
                 interview_id: interviewId,
                 created_at: new Date().toISOString()
