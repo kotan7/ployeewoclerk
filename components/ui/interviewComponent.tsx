@@ -38,11 +38,6 @@ interface TranscriptMessage {
   timestamp: number;
 }
 
-interface Feedback {
-  score: string;
-  feedback: string;
-}
-
 export const useInterview = ({
   companyName,
   role,
@@ -57,13 +52,36 @@ export const useInterview = ({
   const [isMuted, setIsMuted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fullTranscript, setFullTranscript] = useState<TranscriptMessage[]>([]);
-  const [feedback, setFeedback] = useState<Feedback[] | null>(null);
   const [isGeneratingFeedback, setIsGeneratingFeedback] = useState(false);
 
-  // Use pre-generated questions or fallback questions - ensure it's always an array
-  const interviewQuestions =
-    Array.isArray(questions) && questions.length > 0
-      ? questions
+  // Parse questions if they come as a string from database
+  const parseQuestions = (questionsData: any): string[] => {
+    if (!questionsData) return [];
+
+    // If it's already an array, return it
+    if (Array.isArray(questionsData)) {
+      return questionsData;
+    }
+
+    // If it's a string, try to parse it
+    if (typeof questionsData === "string") {
+      try {
+        const parsed = JSON.parse(questionsData);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        console.error("Error parsing questions string:", error);
+        return [];
+      }
+    }
+
+    return [];
+  };
+
+  const interviewQuestions = (() => {
+    const parsedQuestions = parseQuestions(questions);
+
+    return parsedQuestions.length > 0
+      ? parsedQuestions
       : [
           "まずは簡単に自己紹介をお願いします。",
           "なぜ弊社を志望されたのですか？",
@@ -71,6 +89,7 @@ export const useInterview = ({
           "あなたの強みと弱みを教えてください。",
           "5年後のキャリアビジョンを聞かせてください。",
         ];
+  })();
 
   // Function to save transcript to database
   const saveTranscriptToDatabase = async (transcript: TranscriptMessage[]) => {
@@ -119,7 +138,6 @@ export const useInterview = ({
       setCallStatus(CallStatus.ACTIVE);
       setError(null);
       setFullTranscript([]); // Reset transcript when starting new call
-      setFeedback(null);
     };
 
     const onCallEnd = async () => {
@@ -247,97 +265,126 @@ ${questionsForPrompt}
 
   // Add this improved handleGenerateFeedback function to your interviewComponent.tsx
 
-const handleGenerateFeedback = async () => {
-  if (!interviewId) {
-    setError("Interview ID is missing");
-    return;
-  }
-  
-  setIsGeneratingFeedback(true);
-  setError(null); // Clear any previous errors
-  
-  try {
-    console.log("Generating feedback for interview:", interviewId);
-    
-    // Get transcript and questions data
-    const [transcriptData, questionsData] = await Promise.all([
-      getTranscript(interviewId),
-      getQuestions(interviewId)
-    ]);
-
-    console.log("Transcript data:", transcriptData);
-    console.log("Questions data:", questionsData);
-
-    if (!transcriptData || !transcriptData.transcript) {
-      throw new Error("面接の記録が見つかりません。面接を完了してから再試行してください。");
+  const handleGenerateFeedback = async () => {
+    if (!interviewId) {
+      setError("Interview ID is missing");
+      return;
     }
 
-    if (!questionsData || !questionsData.questions || questionsData.questions.length === 0) {
-      throw new Error("面接の質問が見つかりません。");
+    setIsGeneratingFeedback(true);
+    setError(null);
+
+    try {
+      console.log("Generating feedback for interview:", interviewId);
+
+      // Get transcript and questions data
+      const [transcriptData, questionsData] = await Promise.all([
+        getTranscript(interviewId),
+        getQuestions(interviewId),
+      ]);
+
+      console.log("Transcript data:", transcriptData);
+      console.log("Questions data:", questionsData);
+
+      if (!transcriptData || !transcriptData.transcript) {
+        throw new Error(
+          "面接の記録が見つかりません。面接を完了してから再試行してください。"
+        );
+      }
+
+      if (
+        !questionsData ||
+        !questionsData.questions ||
+        questionsData.questions.length === 0
+      ) {
+        throw new Error("面接の質問が見つかりません。");
+      }
+
+      // Validate transcript is not empty
+      if (transcriptData.transcript.trim().length === 0) {
+        throw new Error(
+          "面接の記録が空です。面接を行ってから再試行してください。"
+        );
+      }
+
+      // Ensure questions is an array
+      const questionsArray = Array.isArray(questionsData.questions)
+        ? questionsData.questions
+        : parseQuestions(questionsData.questions);
+
+      if (questionsArray.length === 0) {
+        throw new Error("有効な質問が見つかりません。");
+      }
+
+      const baseUrl =
+        process.env.NEXT_PUBLIC_BASE_URL ||
+        (typeof window !== "undefined"
+          ? window.location.origin
+          : "http://localhost:3000");
+
+      console.log("Calling feedback API with:", {
+        transcript: transcriptData.transcript.substring(0, 100) + "...",
+        questionsCount: questionsArray.length,
+        questionsType: typeof questionsArray,
+        isArray: Array.isArray(questionsArray),
+      });
+
+      // Call the generate-feedback API
+      const response = await fetch(`${baseUrl}/api/generate-feedback`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          transcript: transcriptData.transcript,
+          questions: questionsArray, // Make sure this is an array
+        }),
+      });
+
+      console.log("API response status:", response.status);
+
+      if (!response.ok) {
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: "Unknown error" }));
+        console.error("API error response:", errorData);
+        throw new Error(
+          errorData.error || `API request failed with status ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+      console.log("Feedback data received:", data);
+
+      if (!data.feedback || !Array.isArray(data.feedback)) {
+        throw new Error("Invalid feedback format received from server");
+      }
+
+      // Save feedback to database
+      await saveFeedback(data.feedback, interviewId, transcriptData.sessionId);
+
+      console.log("Feedback generated and saved successfully");
+
+      // Redirect to feedback page
+      if (typeof window !== "undefined") {
+        window.location.href = `/feedback/${interviewId}`;
+      }
+    } catch (error) {
+      console.error("Error generating feedback:", error);
+
+      let errorMessage = "フィードバックの生成に失敗しました。";
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === "string") {
+        errorMessage = error;
+      }
+
+      setError(errorMessage);
+    } finally {
+      setIsGeneratingFeedback(false);
     }
-
-    // Validate transcript is not empty
-    if (transcriptData.transcript.trim().length === 0) {
-      throw new Error("面接の記録が空です。面接を行ってから再試行してください。");
-    }
-
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
-                   (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
-    
-    console.log("Calling feedback API with:", {
-      transcript: transcriptData.transcript.substring(0, 100) + "...", // Log first 100 chars
-      questionsCount: questionsData.questions.length
-    });
-
-    // Call the generate-feedback API
-    const response = await fetch(`${baseUrl}/api/generate-feedback`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        transcript: transcriptData.transcript,
-        questions: questionsData.questions,
-      }),
-    });
-
-    console.log("API response status:", response.status);
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
-      console.error("API error response:", errorData);
-      throw new Error(errorData.error || `API request failed with status ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log("Feedback data received:", data);
-
-    if (!data.feedback || !Array.isArray(data.feedback)) {
-      throw new Error("Invalid feedback format received from server");
-    }
-
-    // Save feedback to database
-    await saveFeedback(data.feedback, interviewId, transcriptData.sessionId);
-    setFeedback(data.feedback);
-    
-    console.log("Feedback generated and saved successfully");
-
-  } catch (error) {
-    console.error("Error generating feedback:", error);
-    
-    let errorMessage = "フィードバックの生成に失敗しました。";
-    
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    } else if (typeof error === 'string') {
-      errorMessage = error;
-    }
-    
-    setError(errorMessage);
-  } finally {
-    setIsGeneratingFeedback(false);
-  }
-};
+  };
 
   const toggleMute = () => {
     setIsMuted(!isMuted);
@@ -370,8 +417,7 @@ const handleGenerateFeedback = async () => {
     getStatusText,
     setCallStatus,
     questions: interviewQuestions,
-    fullTranscript, // Expose the full transcript
-    feedback,
+    fullTranscript,
     isGeneratingFeedback,
     handleGenerateFeedback,
   };

@@ -69,6 +69,8 @@ export const createInterview = async (formData: CreateInterview) => {
         interviewFocus: formData.interviewFocus,
         resume: formData.resume ? "提出済み" : undefined,
     });
+
+    console.log("Generated questions:", questions);
     
     const supabase = CreateSupabaseClient()
     const {data, error} = await supabase
@@ -76,7 +78,7 @@ export const createInterview = async (formData: CreateInterview) => {
         .insert({
             ...formData,
             author,
-            questions: questions // Store the generated questions
+            questions: JSON.stringify(questions) // Explicitly stringify for storage
         })
         .select();
 
@@ -255,10 +257,85 @@ export const getQuestions = async (interviewId: string) => {
     throw new Error(`Failed to fetch questions: ${error.message}`);
   }
 
+  // Parse the questions if they're stored as JSON string
+  let parsedQuestions: string[] = [];
+  
+  if (data.questions) {
+    try {
+      // If questions is already an array, use it directly
+      if (Array.isArray(data.questions)) {
+        parsedQuestions = data.questions;
+      } 
+      // If questions is a string, try to parse it as JSON
+      else if (typeof data.questions === 'string') {
+        parsedQuestions = JSON.parse(data.questions);
+      }
+      else {
+        console.error("Unexpected questions format:", typeof data.questions, data.questions);
+        // Fallback to default questions
+        parsedQuestions = [
+          "まずは簡単に自己紹介をお願いします。",
+          "なぜ弊社を志望されたのですか？",
+          "この職種を選んだ理由を教えてください。",
+          "あなたの強みと弱みを教えてください。",
+          "5年後のキャリアビジョンを聞かせてください。"
+        ];
+      }
+    } catch (parseError) {
+      console.error("Error parsing questions JSON:", parseError);
+      console.error("Raw questions data:", data.questions);
+      
+      // Fallback to default questions if parsing fails
+      parsedQuestions = [
+        "まずは簡単に自己紹介をお願いします。",
+        "なぜ弊社を志望されたのですか？",
+        "この職種を選んだ理由を教えてください。",
+        "あなたの強みと弱みを教えてください。",
+        "5年後のキャリアビジョンを聞かせてください。"
+      ];
+    }
+  }
+
+  console.log("Parsed questions:", parsedQuestions);
+
   return {
-    questions: data.questions || [],
+    questions: parsedQuestions,
     interviewId: interviewId
   };
+}
+
+export const getFeedback = async (interviewId: string) => {
+    const { userId } = await auth();
+    
+    if (!userId) {
+        throw new Error("User not authenticated");
+    }
+
+    const supabase = CreateSupabaseClient();
+    const { data, error } = await supabase
+        .from('session_history')
+        .select('feedback, id, created_at')
+        .eq('user_id', userId)
+        .eq('interview_id', interviewId)
+        .not('feedback', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+    if (error) {
+        if (error.code === 'PGRST116') {
+            // No feedback found
+            return null;
+        }
+        console.error("Database error:", error);
+        throw new Error(`Failed to fetch feedback: ${error.message}`);
+    }
+
+    return {
+        feedback: data.feedback,
+        sessionId: data.id,
+        createdAt: data.created_at
+    };
 }
 
 export const saveFeedback = async (feedback: object, interviewId?: string, sessionId?: string) => {
@@ -279,8 +356,7 @@ export const saveFeedback = async (feedback: object, interviewId?: string, sessi
         const { data, error } = await supabase
             .from('session_history')
             .update({
-                feedback: feedback,
-                updated_at: new Date().toISOString()
+                feedback: feedback
             })
             .eq('id', sessionId)
             .eq('user_id', userId)
@@ -320,6 +396,3 @@ export const saveFeedback = async (feedback: object, interviewId?: string, sessi
         };
     }
 }
-
-
-

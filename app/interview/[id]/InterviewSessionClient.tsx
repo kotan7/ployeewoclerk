@@ -79,7 +79,6 @@ const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
     endCall,
     toggleMute,
     getStatusText,
-    feedback,
     isGeneratingFeedback,
     handleGenerateFeedback,
     questions,
@@ -314,26 +313,12 @@ const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
                 disabled={isGeneratingFeedback}
                 className="cursor-pointer bg-[#9fe870] text-[#163300] px-10 py-4 rounded-full font-semibold text-lg hover:bg-[#8fd960] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
-                {isGeneratingFeedback ? "フィードバックを生成中..." : "フィードバックを生成"}
+                {isGeneratingFeedback
+                  ? "フィードバックを生成中..."
+                  : "フィードバックを生成"}
               </button>
             )}
           </div>
-
-          {/* Feedback Section */}
-          {feedback && (
-            <div className="mt-8 p-6 bg-gray-50 rounded-lg w-full max-w-4xl mx-auto text-left">
-              <h2 className="text-2xl font-bold text-[#163300] mb-4">フィードバック</h2>
-              <div className="space-y-4">
-                {questions.map((question, index) => (
-                  <div key={index} className="p-4 border rounded-lg">
-                    <h3 className="font-semibold text-lg">{question}</h3>
-                    <p className="text-gray-700 mt-2">スコア: {feedback[index]?.score || 'N/A'}/10</p>
-                    <p className="text-gray-700 mt-1">{feedback[index]?.feedback || 'フィードバックはありません'}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
