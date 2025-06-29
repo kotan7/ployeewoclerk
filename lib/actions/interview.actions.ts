@@ -162,3 +162,164 @@ export const getAllInterviews = async (
         hasPrevPage: page > 1
     };
 }
+
+export const saveTranscript = async (transcript: string, interviewId?: string) => {
+    const { userId } = await auth();
+    
+    if (!userId) {
+        throw new Error("User not authenticated");
+    }
+
+    if (!transcript) {
+        throw new Error("Transcript is required");
+    }
+
+    const supabase = CreateSupabaseClient();
+    const { data, error } = await supabase
+        .from('session_history')
+        .insert({
+            transcript: transcript,
+            user_id: userId,
+            interview_id: interviewId,
+            created_at: new Date().toISOString()
+        })
+        .select();
+
+    if (error) {
+        console.error("Database error:", error);
+        throw new Error(`Failed to save transcript: ${error.message}`);
+    }
+
+    return {
+        success: true,
+        sessionId: data[0].id,
+        message: "Transcript saved successfully"
+    };
+}
+
+export const getTranscript = async (interviewId: string) => {
+    const { userId } = await auth();
+    
+    if (!userId) {
+        throw new Error("User not authenticated");
+    }
+
+    const supabase = CreateSupabaseClient();
+    const { data, error } = await supabase
+        .from('session_history')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('interview_id', interviewId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+    if (error) {
+        if (error.code === 'PGRST116') {
+            // No transcript found
+            return null;
+        }
+        console.error("Database error:", error);
+        throw new Error(`Failed to fetch transcript: ${error.message}`);
+    }
+
+    return {
+        transcript: data.transcript,
+        sessionId: data.id,
+        createdAt: data.created_at
+    };
+}
+
+export const getQuestions = async (interviewId: string) => {
+  const { userId } = await auth();
+
+  if (!userId) {
+    throw new Error("User not authenticated");
+  }
+
+  const supabase = CreateSupabaseClient();
+
+  const { data, error } = await supabase
+    .from('interviews')
+    .select('questions')
+    .eq('id', interviewId)
+    .eq('author', userId)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      // No interview found
+      return null;
+    }
+    console.error("Database error:", error);
+    throw new Error(`Failed to fetch questions: ${error.message}`);
+  }
+
+  return {
+    questions: data.questions || [],
+    interviewId: interviewId
+  };
+}
+
+export const saveFeedback = async (feedback: object, interviewId?: string, sessionId?: string) => {
+    const { userId } = await auth();
+    
+    if (!userId) {
+        throw new Error("User not authenticated");
+    }
+
+    if (!feedback) {
+        throw new Error("Feedback is required");
+    }
+
+    const supabase = CreateSupabaseClient();
+    
+    // If sessionId is provided, update existing session_history record
+    if (sessionId) {
+        const { data, error } = await supabase
+            .from('session_history')
+            .update({
+                feedback: feedback,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', sessionId)
+            .eq('user_id', userId)
+            .select();
+
+        if (error) {
+            console.error("Database error:", error);
+            throw new Error(`Failed to update feedback: ${error.message}`);
+        }
+
+        return {
+            success: true,
+            sessionId: sessionId,
+            message: "Feedback updated successfully"
+        };
+    } else {
+        // Create new session_history record with feedback
+        const { data, error } = await supabase
+            .from('session_history')
+            .insert({
+                feedback: feedback,
+                user_id: userId,
+                interview_id: interviewId,
+                created_at: new Date().toISOString()
+            })
+            .select();
+
+        if (error) {
+            console.error("Database error:", error);
+            throw new Error(`Failed to save feedback: ${error.message}`);
+        }
+
+        return {
+            success: true,
+            sessionId: data[0].id,
+            message: "Feedback saved successfully"
+        };
+    }
+}
+
+
+

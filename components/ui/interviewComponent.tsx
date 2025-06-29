@@ -2,6 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { vapi } from "@/lib/vapi.sdk";
+import {
+  saveTranscript,
+  getTranscript,
+  getQuestions,
+  saveFeedback,
+} from "@/lib/actions/interview.actions";
 
 export enum CallStatus {
   INACTIVE = "INACTIVE",
@@ -22,6 +28,19 @@ interface UseInterviewProps {
     | "custom";
   resume?: FileList;
   questions?: string[]; // Pre-generated questions from database
+  interviewId?: string; // Add interview ID to link transcript
+}
+
+// Interface for transcript messages
+interface TranscriptMessage {
+  role: "user" | "assistant";
+  content: string;
+  timestamp: number;
+}
+
+interface Feedback {
+  score: string;
+  feedback: string;
 }
 
 export const useInterview = ({
@@ -31,11 +50,15 @@ export const useInterview = ({
   interviewFocus,
   resume,
   questions = [], // Default to empty array if no questions provided
+  interviewId,
 }: UseInterviewProps) => {
   const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fullTranscript, setFullTranscript] = useState<TranscriptMessage[]>([]);
+  const [feedback, setFeedback] = useState<Feedback[] | null>(null);
+  const [isGeneratingFeedback, setIsGeneratingFeedback] = useState(false);
 
   // Use pre-generated questions or fallback questions - ensure it's always an array
   const interviewQuestions =
@@ -49,19 +72,79 @@ export const useInterview = ({
           "5年後のキャリアビジョンを聞かせてください。",
         ];
 
+  // Function to save transcript to database
+  const saveTranscriptToDatabase = async (transcript: TranscriptMessage[]) => {
+    try {
+      // Group consecutive messages by speaker
+      const groupedTranscript: { speaker: string; content: string[] }[] = [];
+
+      transcript.forEach((msg) => {
+        const speaker = msg.role === "assistant" ? "面接官" : "あなた";
+
+        // Check if the last group has the same speaker
+        const lastGroup = groupedTranscript[groupedTranscript.length - 1];
+
+        if (lastGroup && lastGroup.speaker === speaker) {
+          // Same speaker, add to existing group
+          lastGroup.content.push(msg.content);
+        } else {
+          // Different speaker or first message, create new group
+          groupedTranscript.push({
+            speaker: speaker,
+            content: [msg.content],
+          });
+        }
+      });
+
+      // Format the grouped transcript
+      const formattedTranscript = groupedTranscript
+        .map((group) => {
+          const combinedContent = group.content.join(" ");
+          return `${group.speaker}: ${combinedContent}`;
+        })
+        .join("\n\n");
+
+      // Use the action instead of API route
+      const result = await saveTranscript(formattedTranscript, interviewId);
+      console.log("Transcript saved successfully:", result.sessionId);
+      return result.sessionId;
+    } catch (error) {
+      console.error("Error saving transcript:", error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     const onCallStart = () => {
       setCallStatus(CallStatus.ACTIVE);
       setError(null);
+      setFullTranscript([]); // Reset transcript when starting new call
+      setFeedback(null);
     };
 
-    const onCallEnd = () => {
+    const onCallEnd = async () => {
       setCallStatus(CallStatus.FINISHED);
       setIsSpeaking(false);
+
+      // Save the full transcript when call ends
+      if (fullTranscript.length > 0) {
+        await saveTranscriptToDatabase(fullTranscript);
+      }
     };
 
     const onMessage = (message: any) => {
       console.log("Vapi message:", message);
+
+      // Capture transcript messages
+      if (message.type === "transcript" && message.transcriptType === "final") {
+        const newMessage: TranscriptMessage = {
+          role: message.role,
+          content: message.transcript || "",
+          timestamp: Date.now(),
+        };
+
+        setFullTranscript((prev) => [...prev, newMessage]);
+      }
     };
 
     const onSpeechStart = () => setIsSpeaking(true);
@@ -86,11 +169,12 @@ export const useInterview = ({
       vapi.off("call-start", onCallStart);
       vapi.off("call-end", onCallEnd);
       vapi.off("message", onMessage);
-      vapi.off("error", onError);
+      vapi.on("error", onError as (error: any) => void);
+      vapi.off("error", onError as (error: any) => void);
       vapi.off("speech-start", onSpeechStart);
       vapi.off("speech-end", onSpeechEnd);
     };
-  }, []);
+  }, [fullTranscript, interviewId]); // Add dependencies
 
   const startCall = async () => {
     try {
@@ -154,13 +238,106 @@ ${questionsForPrompt}
   const endCall = async () => {
     try {
       await vapi.stop();
-      setCallStatus(CallStatus.FINISHED);
-      setIsSpeaking(false);
+      // Note: The onCallEnd event will handle saving the transcript
     } catch (error) {
       console.error("Failed to end call:", error);
       setError("通話を終了できませんでした");
     }
   };
+
+  // Add this improved handleGenerateFeedback function to your interviewComponent.tsx
+
+const handleGenerateFeedback = async () => {
+  if (!interviewId) {
+    setError("Interview ID is missing");
+    return;
+  }
+  
+  setIsGeneratingFeedback(true);
+  setError(null); // Clear any previous errors
+  
+  try {
+    console.log("Generating feedback for interview:", interviewId);
+    
+    // Get transcript and questions data
+    const [transcriptData, questionsData] = await Promise.all([
+      getTranscript(interviewId),
+      getQuestions(interviewId)
+    ]);
+
+    console.log("Transcript data:", transcriptData);
+    console.log("Questions data:", questionsData);
+
+    if (!transcriptData || !transcriptData.transcript) {
+      throw new Error("面接の記録が見つかりません。面接を完了してから再試行してください。");
+    }
+
+    if (!questionsData || !questionsData.questions || questionsData.questions.length === 0) {
+      throw new Error("面接の質問が見つかりません。");
+    }
+
+    // Validate transcript is not empty
+    if (transcriptData.transcript.trim().length === 0) {
+      throw new Error("面接の記録が空です。面接を行ってから再試行してください。");
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+                   (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+    
+    console.log("Calling feedback API with:", {
+      transcript: transcriptData.transcript.substring(0, 100) + "...", // Log first 100 chars
+      questionsCount: questionsData.questions.length
+    });
+
+    // Call the generate-feedback API
+    const response = await fetch(`${baseUrl}/api/generate-feedback`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        transcript: transcriptData.transcript,
+        questions: questionsData.questions,
+      }),
+    });
+
+    console.log("API response status:", response.status);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+      console.error("API error response:", errorData);
+      throw new Error(errorData.error || `API request failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Feedback data received:", data);
+
+    if (!data.feedback || !Array.isArray(data.feedback)) {
+      throw new Error("Invalid feedback format received from server");
+    }
+
+    // Save feedback to database
+    await saveFeedback(data.feedback, interviewId, transcriptData.sessionId);
+    setFeedback(data.feedback);
+    
+    console.log("Feedback generated and saved successfully");
+
+  } catch (error) {
+    console.error("Error generating feedback:", error);
+    
+    let errorMessage = "フィードバックの生成に失敗しました。";
+    
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else if (typeof error === 'string') {
+      errorMessage = error;
+    }
+    
+    setError(errorMessage);
+  } finally {
+    setIsGeneratingFeedback(false);
+  }
+};
 
   const toggleMute = () => {
     setIsMuted(!isMuted);
@@ -193,5 +370,9 @@ ${questionsForPrompt}
     getStatusText,
     setCallStatus,
     questions: interviewQuestions,
+    fullTranscript, // Expose the full transcript
+    feedback,
+    isGeneratingFeedback,
+    handleGenerateFeedback,
   };
 };

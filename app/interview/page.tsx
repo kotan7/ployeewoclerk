@@ -154,7 +154,7 @@ const InterviewPage = async ({ searchParams }: PageProps) => {
                 {interviews.map((interview: Interview) => (
                   <Link
                     key={interview.id}
-                    href={`/interview/${interview.id}`}
+                    href={`/feedback/${interview.id}`}
                     className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer block"
                   >
                     {/* Placeholder Image */}
