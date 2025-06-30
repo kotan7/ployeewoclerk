@@ -73,10 +73,10 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: "MRkktSvX3F3koypcRtW8nGD2F43fHlB-G04Ga60HZPQ",
+    google: "XJ-vAmABbw4EGfp06PisjYYfdO8v6yxpo-BAIZv-OjM",
   },
   other: {
-    "google-site-verification": "MRkktSvX3F3koypcRtW8nGD2F43fHlB-G04Ga60HZPQ",
+    "google-site-verification": "XJ-vAmABbw4EGfp06PisjYYfdO8v6yxpo-BAIZv-OjM",
   },
 };
 
