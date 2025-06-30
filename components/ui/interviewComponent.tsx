@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { vapi } from "@/lib/vapi.sdk";
 import {
   saveTranscript,
@@ -65,47 +65,26 @@ export const useInterview = ({
           "5年後のキャリアビジョンを聞かせてください。",
         ];
 
-  // Function to save transcript to database
-  const saveTranscriptToDatabase = async (transcript: TranscriptMessage[]) => {
-    try {
-      // Group consecutive messages by speaker
-      const groupedTranscript: { speaker: string; content: string[] }[] = [];
+  const saveTranscriptToDatabase = useCallback(
+    async (transcript: TranscriptMessage[]) => {
+      if (!interviewId) return;
 
-      transcript.forEach((msg) => {
-        const speaker = msg.role === "assistant" ? "面接官" : "あなた";
+      try {
+        // Convert to the expected format
+        const formattedTranscript = transcript
+          .map(
+            (msg) =>
+              `${msg.role === "user" ? "応募者" : "面接官"}: ${msg.content}`
+          )
+          .join("\n\n");
 
-        // Check if the last group has the same speaker
-        const lastGroup = groupedTranscript[groupedTranscript.length - 1];
-
-        if (lastGroup && lastGroup.speaker === speaker) {
-          // Same speaker, add to existing group
-          lastGroup.content.push(msg.content);
-        } else {
-          // Different speaker or first message, create new group
-          groupedTranscript.push({
-            speaker: speaker,
-            content: [msg.content],
-          });
-        }
-      });
-
-      // Format the grouped transcript
-      const formattedTranscript = groupedTranscript
-        .map((group) => {
-          const combinedContent = group.content.join(" ");
-          return `${group.speaker}: ${combinedContent}`;
-        })
-        .join("\n\n");
-
-      // Use the action instead of API route
-      const result = await saveTranscript(formattedTranscript, interviewId);
-      console.log("Transcript saved successfully:", result.sessionId);
-      return result.sessionId;
-    } catch (error) {
-      console.error("Error saving transcript:", error);
-      return null;
-    }
-  };
+        await saveTranscript(formattedTranscript, interviewId);
+      } catch (error) {
+        console.error("Failed to save transcript:", error);
+      }
+    },
+    [interviewId]
+  );
 
   useEffect(() => {
     const onCallStart = () => {
@@ -166,7 +145,7 @@ export const useInterview = ({
       vapi.off("speech-start", onSpeechStart);
       vapi.off("speech-end", onSpeechEnd);
     };
-  }, [fullTranscript, interviewId]); // Add dependencies
+  }, [fullTranscript, interviewId, saveTranscriptToDatabase]); // Add dependencies
 
   const startCall = async () => {
     try {
