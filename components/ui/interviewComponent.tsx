@@ -8,6 +8,17 @@ import {
   getQuestions,
   saveFeedback,
 } from "@/lib/actions/interview.actions";
+import {
+  addSessionUsage,
+  canStartSession,
+  getUserPlanLimit,
+  getCurrentUsage,
+} from "@/lib/actions/usage.actions";
+import {
+  calculateSessionMinutes,
+  redirectToPricing,
+  checkUsageLimitExceeded,
+} from "@/lib/utils";
 
 export enum CallStatus {
   INACTIVE = "INACTIVE",
@@ -53,6 +64,9 @@ export const useInterview = ({
   const [error, setError] = useState<string | null>(null);
   const [fullTranscript, setFullTranscript] = useState<TranscriptMessage[]>([]);
   const [isGeneratingFeedback, setIsGeneratingFeedback] = useState(false);
+  const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
+  const [usageMonitorInterval, setUsageMonitorInterval] =
+    useState<NodeJS.Timeout | null>(null);
 
   const interviewQuestions =
     Array.isArray(questions) && questions.length > 0
@@ -70,12 +84,28 @@ export const useInterview = ({
       if (!interviewId) return;
 
       try {
-        // Convert to the expected format
-        const formattedTranscript = transcript
-          .map(
-            (msg) =>
-              `${msg.role === "user" ? "応募者" : "面接官"}: ${msg.content}`
-          )
+        // Group consecutive messages from the same speaker
+        const groupedMessages: { role: string; content: string[] }[] = [];
+
+        transcript.forEach((msg) => {
+          const speakerLabel = msg.role === "user" ? "応募者" : "面接官";
+          const lastGroup = groupedMessages[groupedMessages.length - 1];
+
+          // If the last group has the same speaker, add to existing group
+          if (lastGroup && lastGroup.role === speakerLabel) {
+            lastGroup.content.push(msg.content);
+          } else {
+            // Create a new group for this speaker
+            groupedMessages.push({
+              role: speakerLabel,
+              content: [msg.content],
+            });
+          }
+        });
+
+        // Format the grouped messages
+        const formattedTranscript = groupedMessages
+          .map((group) => `${group.role}: ${group.content.join(" ")}`)
           .join("\n\n");
 
         await saveTranscript(formattedTranscript, interviewId);
@@ -91,11 +121,66 @@ export const useInterview = ({
       setCallStatus(CallStatus.ACTIVE);
       setError(null);
       setFullTranscript([]); // Reset transcript when starting new call
+      setSessionStartTime(new Date()); // Track session start time for usage
+
+      // Start monitoring usage every 60 seconds
+      const interval = setInterval(async () => {
+        try {
+          if (!sessionStartTime) return;
+
+          const currentUsage = await getCurrentUsage();
+          const planLimit = await getUserPlanLimit();
+          const currentSessionTime = Math.ceil(
+            (new Date().getTime() - sessionStartTime.getTime()) / (1000 * 60)
+          );
+          const totalUsage = currentUsage + currentSessionTime;
+
+          if (checkUsageLimitExceeded(totalUsage, planLimit)) {
+            console.log(
+              `Usage limit exceeded: ${totalUsage}/${planLimit} minutes. Ending session.`
+            );
+            await vapi.stop(); // This will trigger onCallEnd
+            redirectToPricing();
+          }
+        } catch (error) {
+          console.error("Error during usage monitoring:", error);
+        }
+      }, 60000); // Check every 60 seconds
+
+      setUsageMonitorInterval(interval);
     };
 
     const onCallEnd = async () => {
       setCallStatus(CallStatus.FINISHED);
       setIsSpeaking(false);
+
+      // Clear usage monitoring interval
+      if (usageMonitorInterval) {
+        clearInterval(usageMonitorInterval);
+        setUsageMonitorInterval(null);
+      }
+
+      // Calculate and save session usage
+      if (sessionStartTime) {
+        try {
+          const sessionEndTime = new Date();
+          const sessionMinutes = calculateSessionMinutes(
+            sessionStartTime,
+            sessionEndTime
+          );
+
+          if (sessionMinutes > 0) {
+            await addSessionUsage(sessionMinutes);
+            console.log(
+              `Session completed: ${sessionMinutes} minutes added to usage`
+            );
+          }
+        } catch (error) {
+          console.error("Failed to track session usage:", error);
+          // Continue with the rest of the function even if usage tracking fails
+        }
+        setSessionStartTime(null);
+      }
 
       // Save the full transcript when call ends
       if (fullTranscript.length > 0) {
@@ -121,10 +206,37 @@ export const useInterview = ({
     const onSpeechStart = () => setIsSpeaking(true);
     const onSpeechEnd = () => setIsSpeaking(false);
 
-    const onError = (error: Error) => {
+    const onError = async (error: Error) => {
       console.error("Vapi error:", error);
       setError(error.message);
       setCallStatus(CallStatus.INACTIVE);
+
+      // Clear usage monitoring interval
+      if (usageMonitorInterval) {
+        clearInterval(usageMonitorInterval);
+        setUsageMonitorInterval(null);
+      }
+
+      // Track usage if session was active when error occurred
+      if (sessionStartTime) {
+        try {
+          const sessionEndTime = new Date();
+          const sessionMinutes = calculateSessionMinutes(
+            sessionStartTime,
+            sessionEndTime
+          );
+
+          if (sessionMinutes > 0) {
+            await addSessionUsage(sessionMinutes);
+            console.log(
+              `Session ended due to error: ${sessionMinutes} minutes added to usage`
+            );
+          }
+        } catch (usageError) {
+          console.error("Failed to track session usage on error:", usageError);
+        }
+        setSessionStartTime(null);
+      }
     };
 
     // Add event listeners
@@ -145,12 +257,39 @@ export const useInterview = ({
       vapi.off("speech-start", onSpeechStart);
       vapi.off("speech-end", onSpeechEnd);
     };
-  }, [fullTranscript, interviewId, saveTranscriptToDatabase]); // Add dependencies
+  }, [
+    fullTranscript,
+    interviewId,
+    saveTranscriptToDatabase,
+    sessionStartTime,
+    callStatus,
+    usageMonitorInterval,
+  ]); // Add dependencies
+
+  // Cleanup interval on component unmount
+  useEffect(() => {
+    return () => {
+      if (usageMonitorInterval) {
+        clearInterval(usageMonitorInterval);
+      }
+    };
+  }, [usageMonitorInterval]);
 
   const startCall = async () => {
     try {
       setCallStatus(CallStatus.CONNECTING);
       setError(null);
+
+      // Pre-session usage check
+      const usageCheck = await canStartSession();
+      if (!usageCheck.canStart) {
+        setError(
+          `月間利用制限に達しました (${usageCheck.currentUsage}/${usageCheck.planLimit}分)`
+        );
+        setCallStatus(CallStatus.INACTIVE);
+        redirectToPricing();
+        return;
+      }
 
       const questionsForPrompt = interviewQuestions
         .map((q: string, i: number) => `${i + 1}. ${q}`)
@@ -209,10 +348,40 @@ ${questionsForPrompt}
   const endCall = async () => {
     try {
       await vapi.stop();
-      // Note: The onCallEnd event will handle saving the transcript
+      // Note: The onCallEnd event will handle saving the transcript and usage tracking
     } catch (error) {
       console.error("Failed to end call:", error);
       setError("通話を終了できませんでした");
+
+      // Clear usage monitoring interval if vapi.stop() fails
+      if (usageMonitorInterval) {
+        clearInterval(usageMonitorInterval);
+        setUsageMonitorInterval(null);
+      }
+
+      // If vapi.stop() fails, we should still track usage if session was active
+      if (sessionStartTime && callStatus === CallStatus.ACTIVE) {
+        try {
+          const sessionEndTime = new Date();
+          const sessionMinutes = calculateSessionMinutes(
+            sessionStartTime,
+            sessionEndTime
+          );
+
+          if (sessionMinutes > 0) {
+            await addSessionUsage(sessionMinutes);
+            console.log(
+              `Session force-ended: ${sessionMinutes} minutes added to usage`
+            );
+          }
+          setSessionStartTime(null);
+        } catch (usageError) {
+          console.error(
+            "Failed to track session usage on force end:",
+            usageError
+          );
+        }
+      }
     }
   };
 
@@ -321,5 +490,6 @@ ${questionsForPrompt}
     fullTranscript,
     isGeneratingFeedback,
     handleGenerateFeedback,
+    sessionStartTime,
   };
 };
