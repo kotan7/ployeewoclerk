@@ -1,6 +1,31 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
-export default clerkMiddleware();
+// Define routes that require authentication
+const isProtectedRoute = createRouteMatcher([
+  '/interview/new(.*)', 
+  '/interview/[id](.*)',  // matches /interview/[id] and its sub-routes
+  '/feedback/(.*)',
+  '/past(.*)',
+  '/billing(.*)'
+]);
+
+export default clerkMiddleware(async (auth, req) => {
+  // Allow search engine crawlers to access all pages without authentication
+  const userAgent = req.headers.get('user-agent') || '';
+  const isBot = /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|facebookexternalhit|twitterbot|rogerbot|linkedinbot|embedly|quora link preview|showyoubot|outbrain|pinterest\/0\.|developers\.google\.com\/\+\/web\/snippet|www\.google\.com\/webmasters\/tools\/richsnippets|slackbot|vkshare|w3c_validator|redditbot|applebot|whatsapp|flipboard|tumblr|bitlybot|skypeuripreview|nuzzel|discordbot|google page speed|qwantify|pinterestbot|bitrix link preview|xing-contenttabrequest|chrome-lighthouse|telegrambot/i.test(userAgent);
+  
+  if (isBot) {
+    return NextResponse.next();
+  }
+
+  // For regular users, protect authenticated routes
+  if (isProtectedRoute(req)) {
+    await auth.protect();
+  }
+  
+  return NextResponse.next();
+});
 
 export const config = {
   matcher: [
