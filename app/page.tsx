@@ -109,7 +109,7 @@ export default function Home() {
       y: 0,
       duration: 0.8,
       ease: "power2.out"
-    }, "-=0.4") // Start 0.4s before previous animation ends
+    }, "-=0.4") 
     .to(heroSubtitleRef.current, {
       opacity: 1,
       y: 0,
@@ -146,13 +146,13 @@ export default function Home() {
         y: 0,
         duration: 1,
         ease: "power2.out"
-      }, 0.3) // Start after 30% of the scroll progress
+      }, 0.3) 
       .to(problemImageRef.current, {
         opacity: 1,
         x: 0,
         duration: 1,
         ease: "power2.out"
-      }, 0.5); // Start after 50% of the scroll progress
+      }, 0.5);
     }
 
     // Features section scroll-triggered animations
@@ -160,16 +160,16 @@ export default function Home() {
       // Define initial and final positions for each box
       const boxPositions = {
         box1: {
-          initial: { x: 415, y: 0, scale: 1, opacity: 1, rotation: 0, zIndex: 1 }, // Start at center (Box 2's position)
-          final: { x: 0, y: 0, scale: 1, opacity: 1, rotation: 0, zIndex: 1 }   // End at natural grid position (left)
+          initial: { x: 415, y: 0, scale: 1, opacity: 1, rotation: 0, zIndex: 1 }, 
+          final: { x: 0, y: 0, scale: 1, opacity: 1, rotation: 0, zIndex: 1 }   
         },
         box2: {
-          initial: { x: 0, y: 0, scale: 1, opacity: 1, rotation: 0, zIndex: 3 }, // Start at center (on top)
-          final: { x: 0, y: 0, scale: 1, opacity: 1, rotation: 0, zIndex: 3 }   // End at natural grid position (center)
+          initial: { x: 0, y: 0, scale: 1, opacity: 1, rotation: 0, zIndex: 3 }, 
+          final: { x: 0, y: 0, scale: 1, opacity: 1, rotation: 0, zIndex: 3 }  
         },
         box3: {
-          initial: { x: -415, y: 0, scale: 1, opacity: 1, rotation: 0, zIndex: 2 }, // Start at center (Box 2's position)
-          final: { x: 0, y: 0, scale: 1, opacity: 1, rotation: 0, zIndex: 1 }   // End at natural grid position (right)
+          initial: { x: -415, y: 0, scale: 1, opacity: 1, rotation: 0, zIndex: 2 }, 
+          final: { x: 0, y: 0, scale: 1, opacity: 1, rotation: 0, zIndex: 1 }   
         }
       };
       
@@ -210,43 +210,43 @@ export default function Home() {
     if (line1Ref.current && line2Ref.current && line3Ref.current) {
       // Line 1 character animation - scroll based
       gsap.to(line1Ref.current.querySelectorAll('.char'), {
-        color: "#ffffff", // Bright white
-        duration: 0.1, // Short duration for smooth transition
-        stagger: 0.02, // Small stagger for character-by-character effect
+        color: "#ffffff", 
+        duration: 0.1, 
+        stagger: 0.02, 
         ease: "none",
         scrollTrigger: {
           trigger: line1Ref.current,
-          start: "top center", // Start when line enters viewport
-          end: "bottom center", // End when line exits viewport
-          scrub: 1, // Enable scrub for scroll-based animation
+          start: "top center",
+          end: "bottom center",
+          scrub: 1,
         }
       });
 
       // Line 2 character animation - scroll based
       gsap.to(line2Ref.current.querySelectorAll('.char'), {
-        color: "#ffffff", // Bright white
-        duration: 0.1, // Short duration for smooth transition
-        stagger: 0.02, // Small stagger for character-by-character effect
+        color: "#ffffff", 
+        duration: 0.1, 
+        stagger: 0.02, 
         ease: "none",
         scrollTrigger: {
           trigger: line2Ref.current,
-          start: "top center", // Start when line enters viewport
-          end: "bottom center", // End when line exits viewport
-          scrub: 1, // Enable scrub for scroll-based animation
+          start: "top center", 
+          end: "bottom center", 
+          scrub: 1, 
         }
       });
 
       // Line 3 character animation - scroll based
       gsap.to(line3Ref.current.querySelectorAll('.char'), {
-        color: "#ffffff", // Bright white
-        duration: 0.1, // Short duration for smooth transition
-        stagger: 0.02, // Small stagger for character-by-character effect
+        color: "#ffffff", 
+        duration: 0.1, 
+        stagger: 0.02, 
         ease: "none",
         scrollTrigger: {
           trigger: line3Ref.current,
-          start: "top center", // Start when line enters viewport
-          end: "bottom center", // End when line exits viewport
-          scrub: 1, // Enable scrub for scroll-based animation
+          start: "top center", 
+          end: "bottom center", 
+          scrub: 1, 
         }
       });
     }
@@ -254,13 +254,13 @@ export default function Home() {
     // Post Labs-style reveal animation - main content slides up to reveal footer
     if (mainContentRef.current && footerRef.current) {
       gsap.to(mainContentRef.current, {
-        y: "-30vh", // Slide up by 30vh to fully reveal footer
-        ease: "none", // Linear animation for perfect speed matching
+        y: "-30vh", 
+        ease: "none", 
         scrollTrigger: {
           trigger: mainContentRef.current,
-          start: "bottom bottom", // Start when bottom of main content hits bottom of viewport
-          end: "+=30vh", // Match the scroll distance to the animation distance
-          scrub: 1, // 1 second delay for natural scroll speed
+          start: "bottom bottom", 
+          end: "+=30vh", 
+          scrub: 1, 
         }
       });
     }
@@ -268,15 +268,15 @@ export default function Home() {
     // Transformation section box width animation
     if (transformationBoxRef.current) {
       gsap.to(transformationBoxRef.current, {
-        width: "100vw", // Expand to full viewport width
-        maxWidth: "100vw", // Also animate maxWidth
-        x: "-25vw", // Move left by 25vw to keep it centered as it expands
+        width: "100vw", 
+        maxWidth: "100vw", 
+        x: "-25vw", 
         ease: "power2.out",
         scrollTrigger: {
           trigger: transformationSectionRef.current,
-          start: "top center", // Start when section top hits center
-          end: "center center", // End when section center hits center
-          scrub: 1, // Smooth scroll-based animation
+          start: "top center", 
+          end: "center center", 
+          scrub: 1, 
         }
       });
     }
@@ -286,7 +286,7 @@ export default function Home() {
       ScrollTrigger.create({
         trigger: transformationSectionRef.current,
         start: "top top",
-        end: "+=200%", // how much you want the inner content to scroll
+        end: "+=200%", 
         pin: transformationBoxRef.current,
         anticipatePin: 1,
         scrub: true,
@@ -299,7 +299,7 @@ export default function Home() {
         scrollTrigger: {
           trigger: transformationSectionRef.current,
           start: "top top",
-          end: "+=200%", // match the pin duration
+          end: "+=200%", 
           scrub: true,
         },
       });
