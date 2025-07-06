@@ -1,5 +1,9 @@
 "use client";
 import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface WaveSettings {
   waveCount: number;
@@ -75,12 +79,12 @@ class Wave {
     ctx.stroke();
   }
 
-  update() {
-    const speed =
-      this.settings.direction === "right"
-        ? -this.settings.baseSpeed
-        : this.settings.baseSpeed;
-    this.phase += speed;
+  setPhase(phase: number) {
+    this.phase = phase;
+  }
+
+  getBasePhase() {
+    return this.index * 0.3;
   }
 }
 
@@ -90,6 +94,7 @@ class WavesCanvas {
   private settings: WaveSettings;
   private waves: Wave[] = [];
   private animationFrame: number = 0;
+  private scrollPhase: number = 0;
 
   constructor(
     elm: HTMLCanvasElement | null,
@@ -107,7 +112,7 @@ class WavesCanvas {
       waveCount: parseInt(data.waveCount as string) || options.waveCount || 6,
       amplitude: parseInt(data.amplitude as string) || options.amplitude || 40,
       baseSpeed:
-        parseFloat(data.baseSpeed as string) || options.baseSpeed || 0.005,
+        parseFloat(data.baseSpeed as string) || options.baseSpeed || 0.015, 
       waveSpacing:
         parseInt(data.waveSpacing as string) || options.waveSpacing || 40,
       baseColor: data.baseColor
@@ -148,12 +153,19 @@ class WavesCanvas {
 
     this.waves.forEach((wave) => {
       wave.updateOffset();
-      wave.update();
+      const speed = this.settings.direction === "right" 
+        ? -this.settings.baseSpeed 
+        : this.settings.baseSpeed;
+      wave.setPhase(wave.getBasePhase() + this.scrollPhase * speed);
       wave.draw(this.ctx);
     });
 
     this.animationFrame = requestAnimationFrame(this.animate);
   };
+
+  updateScrollPhase(phase: number) {
+    this.scrollPhase = phase;
+  }
 
   destroy() {
     window.removeEventListener("resize", this.resizeCanvas);
@@ -186,8 +198,28 @@ export default function WaveBackground({
 
     wavesInstanceRef.current = new WavesCanvas(canvasRef.current);
 
+    const dummy = { progress: 0, scrollPhase: 0 };
+
+    gsap.to(dummy, {
+      progress: 1,
+      scrollPhase: 3000, 
+      scrollTrigger: {
+        id: "waveScroll",
+        trigger: canvasRef.current,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: true,
+      },
+      onUpdate: () => {
+        const newAmplitude = 20 + 60 * dummy.progress;
+        wavesInstanceRef.current?.updateSettings({ amplitude: newAmplitude });
+        wavesInstanceRef.current?.updateScrollPhase(dummy.scrollPhase);
+      },
+    });
+
     return () => {
       wavesInstanceRef.current?.destroy();
+      ScrollTrigger.getById("waveScroll")?.kill();
     };
   }, []);
 

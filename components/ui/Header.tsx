@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -11,17 +11,61 @@ import {
   SignedOut,
   UserButton,
 } from "@clerk/nextjs";
+import { gsap } from "gsap";
 import logo from "../../constants/logo.png";
 
 const Header = () => {
   const router = useRouter();
+  
+  // Refs for header animations
+  const headerRef = useRef<HTMLElement>(null);
+  const logoRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+  const buttonsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Header animations on page load
+    if (headerRef.current && logoRef.current && navRef.current && buttonsRef.current) {
+      // Set initial states
+      gsap.set([logoRef.current, navRef.current, buttonsRef.current], {
+        opacity: 0,
+        y: -20
+      });
+
+      // Create timeline for staggered animation
+      const tl = gsap.timeline();
+
+      // Animate logo first
+      tl.to(logoRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: "power2.out"
+      })
+      // Then animate navigation links
+      .to(navRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: "power2.out"
+      }, "-=0.3") // Start slightly before logo animation ends
+      // Finally animate buttons
+      .to(buttonsRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: "power2.out"
+      }, "-=0.3"); // Start slightly before nav animation ends
+    }
+  }, []);
 
   return (
-    <header className="border-b border-gray-100/20 sticky top-0 z-50 bg-white/80 backdrop-blur-sm">
+    <header ref={headerRef} className="border-b border-gray-100/20 sticky top-0 z-50 bg-white/80 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center -ml-12 space-x-8">
             <div
+              ref={logoRef}
               className="cursor-pointer flex items-center space-x-3"
               onClick={() => router.push("/")}
             >
@@ -36,7 +80,7 @@ const Header = () => {
             </div>
 
             {/* Navigation Links */}
-            <nav className="hidden md:flex items-center space-x-6">
+            <nav ref={navRef} className="hidden md:flex items-center space-x-6">
               <Link
                 href="/"
                 className="text-[#163300] hover:text-[#9fe870] transition-colors font-medium"
@@ -64,7 +108,7 @@ const Header = () => {
             </nav>
           </div>
 
-          <div className="flex items-center space-x-4 -mr-6">
+          <div ref={buttonsRef} className="flex items-center space-x-4 -mr-6">
             <SignedOut>
               <SignInButton mode="modal">
                 <button className="text-[#163300] hover:text-[#9fe870] transition-colors font-medium">
