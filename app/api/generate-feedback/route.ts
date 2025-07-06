@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
+// Configure runtime for Vercel
+export const runtime = 'nodejs';
+export const maxDuration = 30;
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -71,6 +75,8 @@ ${questions.map((q: string, i: number) => `${i + 1}. ${q}`).join('\n')}
         max_tokens: 2000,
         temperature: 0.7,
         response_format: { type: "json_object" },
+    }, {
+        timeout: 25000, // 25 seconds timeout
     });
 
     const result = JSON.parse(completion.choices[0]?.message?.content || '{}');
@@ -84,6 +90,28 @@ ${questions.map((q: string, i: number) => `${i + 1}. ${q}`).join('\n')}
 
   } catch (error) {
     console.error("Error in generate-feedback route:", error);
-    return NextResponse.json({ error: "Failed to generate feedback" }, { status: 500 });
+    
+    // Handle specific OpenAI errors
+    if (error instanceof Error) {
+      if (error.message.includes('timeout') || error.message.includes('ETIMEDOUT')) {
+        return NextResponse.json({ 
+          error: "Request timeout. Please try again." 
+        }, { status: 408 });
+      }
+      
+      if (error.message.includes('API key')) {
+        return NextResponse.json({ 
+          error: "API configuration error" 
+        }, { status: 500 });
+      }
+      
+      return NextResponse.json({ 
+        error: `Failed to generate feedback: ${error.message}` 
+      }, { status: 500 });
+    }
+    
+    return NextResponse.json({ 
+      error: "Failed to generate feedback" 
+    }, { status: 500 });
   }
 }

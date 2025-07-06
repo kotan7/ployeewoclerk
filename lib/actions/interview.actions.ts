@@ -10,6 +10,7 @@ type CreateInterview = {
   jobDescription?: string;
   interviewFocus: "hr" | "case" | "technical" | "final";
   resume?: FileList;
+  resumeText?: string; // Add extracted text field
 }
 
 async function generateInterviewQuestions({
@@ -61,20 +62,27 @@ export const createInterview = async (formData: CreateInterview) => {
         throw new Error("User not authenticated")
     }
     
+    // Use extracted text from client-side OCR
+    const extractedText = formData.resumeText || null;
+    
     // Generate questions using OpenAI
     const questions = await generateInterviewQuestions({
         companyName: formData.companyName,
         role: formData.role,
         jobDescription: formData.jobDescription,
         interviewFocus: formData.interviewFocus,
-        resume: formData.resume ? "提出済み" : undefined,
+        resume: extractedText || undefined,
     });
 
     const supabase = CreateSupabaseClient()
+    
+    // Exclude resume field (FileList) and only include database columns
+    const { resume, ...dataToInsert } = formData;
+    
     const {data, error} = await supabase
         .from("interviews")
         .insert({
-            ...formData,
+            ...dataToInsert,
             author,
             questions: JSON.stringify(questions)
         })

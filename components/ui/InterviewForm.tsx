@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createInterview } from "@/lib/actions/interview.actions";
+import { createWorker } from "tesseract.js";
 
 const formSchema = z.object({
   resume: z
@@ -34,8 +35,11 @@ const formSchema = z.object({
     .refine((files) => {
       if (!files || !files.length) return true;
       const file = files[0];
-      return file.size <= 10 * 1024 * 1024; // 10MB limit
-    }, "ファイルサイズは10MB以下にしてください"),
+      const validTypes = ["image/jpeg", "image/png", "image/webp"];
+      return validTypes.includes(file.type) && file.size <= 10 * 1024 * 1024;
+    }, "JPG、PNG、WEBP形式で10MB以下のファイルをアップロードしてください"),
+
+  resumeText: z.string().optional(),
 
   companyName: z.string().min(1, {
     message: "会社名を入力してください",
@@ -71,6 +75,79 @@ export function InterviewForm() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isProcessingOCR, setIsProcessingOCR] = useState(false);
+  const [ocrProgress, setOcrProgress] = useState<string>("");
+  const [resumeProcessed, setResumeProcessed] = useState(false);
+
+  const performOCR = async (file: File) => {
+    setIsProcessingOCR(true);
+    setOcrProgress("画像を処理中...");
+
+    try {
+      // Process image using the extract-pdf-text route
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/extract-pdf-text", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "画像の処理に失敗しました");
+      }
+
+      setOcrProgress("OCRエンジンを初期化中...");
+
+      // Initialize Tesseract worker with Japanese language
+      const worker = await createWorker("jpn", 1, {
+        logger: (m) => {
+          console.log("OCR Progress:", m);
+          if (m.status === "recognizing text") {
+            setOcrProgress(
+              `テキストを認識中... ${Math.round(m.progress * 100)}%`
+            );
+          } else {
+            setOcrProgress(m.status || "処理中...");
+          }
+        },
+      });
+
+      setOcrProgress("画像からテキストを抽出中...");
+
+      // Perform OCR on the processed image
+      const {
+        data: { text },
+      } = await worker.recognize(data.processedImage);
+
+      // Clean up worker
+      await worker.terminate();
+
+      // Set the extracted text in the form
+      form.setValue("resumeText", text.trim());
+      setResumeProcessed(true);
+      setOcrProgress("");
+    } catch (error) {
+      console.error("OCR Error:", error);
+      setOcrProgress("");
+      // Show error to user but don't prevent form submission
+      alert(
+        error instanceof Error
+          ? error.message
+          : "OCR処理中にエラーが発生しました"
+      );
+    } finally {
+      setIsProcessingOCR(false);
+    }
+  };
+
+  const handleFileChange = (files: FileList | null) => {
+    if (files && files.length > 0) {
+      const file = files[0];
+      performOCR(file);
+    }
+  };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
@@ -111,7 +188,7 @@ export function InterviewForm() {
               <FormField
                 control={form.control}
                 name="resume"
-                render={({ field: { onChange, ...field } }) => (
+                render={({ field: { onChange, value, ...field } }) => (
                   <FormItem>
                     <FormLabel className="text-base font-semibold text-[#163300]">
                       履歴書ファイル
@@ -119,18 +196,33 @@ export function InterviewForm() {
                     <FormControl>
                       <Input
                         type="file"
-                        accept=".pdf,.doc,.docx"
-                        onChange={(e) => onChange(e.target.files)}
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={(e) => {
+                          onChange(e.target.files);
+                          handleFileChange(e.target.files);
+                        }}
+                        disabled={isProcessingOCR}
                         className="h-auto py-3 file:mr-4 file:py-2 file:px-4 
                           file:rounded-full file:border-0 file:text-sm 
                           file:font-semibold file:bg-[#9fe870] file:text-[#163300]
                           hover:file:bg-[#8fd960] file:cursor-pointer cursor-pointer
+                          disabled:opacity-50 disabled:cursor-not-allowed
                           "
                         {...field}
                       />
                     </FormControl>
                     <FormDescription>
-                      最大ファイルサイズ: 10MB（PDF, DOC, DOCX形式対応）
+                      最大ファイルサイズ: 10MB（JPG, PNG, WEBP形式対応）
+                      {isProcessingOCR && (
+                        <span className="block mt-2 text-sm text-blue-600">
+                          {ocrProgress}
+                        </span>
+                      )}
+                      {resumeProcessed && (
+                        <span className="block mt-2 text-sm text-green-600">
+                          ✓ 履歴書のテキスト抽出が完了しました
+                        </span>
+                      )}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -255,7 +347,7 @@ export function InterviewForm() {
             <div className="pt-5">
               <Button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isProcessingOCR}
                 className="w-full h-14 bg-[#9fe870] text-[#163300] hover:bg-[#8fd960] 
                   text-lg font-semibold rounded-full shadow-lg transition-colors cursor-pointer
                   disabled:opacity-50 disabled:cursor-not-allowed"
@@ -264,6 +356,11 @@ export function InterviewForm() {
                   <div className="flex items-center gap-2">
                     <div className="w-5 h-5 border-2 border-[#163300] border-t-transparent rounded-full animate-spin" />
                     質問を生成して面接を開始中...
+                  </div>
+                ) : isProcessingOCR ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 border-2 border-[#163300] border-t-transparent rounded-full animate-spin" />
+                    履歴書を処理中...
                   </div>
                 ) : (
                   "面接セッションを開始する"

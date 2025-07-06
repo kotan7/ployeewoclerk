@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
+// Configure runtime for Vercel
+export const runtime = 'nodejs';
+export const maxDuration = 30;
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -44,6 +48,8 @@ export async function POST(request: NextRequest) {
       ],
       max_tokens: 1000,
       temperature: 0.7,
+    }, {
+      timeout: 25000, // 25 seconds timeout
     });
 
     const questionsText = completion.choices[0]?.message?.content || "";
