@@ -36,9 +36,7 @@ const formSchema = z.object({
     message: "学歴を入力してください",
   }),
 
-  experience: z.string().min(1, {
-    message: "職歴・経験を入力してください",
-  }),
+  experience: z.string().optional(),
 
   companyName: z.string().min(1, {
     message: "会社名を入力してください",
@@ -160,7 +158,7 @@ export function InterviewForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-base font-semibold text-[#163300]">
-                      職歴・経験 <span className="text-red-500">*</span>
+                      職歴・経験
                     </FormLabel>
                     <FormControl>
                       <Textarea
@@ -170,7 +168,7 @@ export function InterviewForm() {
                       />
                     </FormControl>
                     <FormDescription>
-                      職歴、プロジェクト経験、技術スキル、実績など具体的に記載いただくと、より個人に合わせた面接練習が可能になります
+                      職歴、プロジェクト経験、技術スキル、実績など具体的に記載いただくと、より個人に合わせた面接練習が可能になります。未記載の場合は一般的な質問で面接練習を行います。
                     </FormDescription>
                   </FormItem>
                 )}
@@ -229,7 +227,7 @@ export function InterviewForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-base font-semibold text-[#163300]">
-                      職務内容・求人詳細（推奨）
+                      職務内容・求人詳細
                     </FormLabel>
                     <FormControl>
                       <Textarea

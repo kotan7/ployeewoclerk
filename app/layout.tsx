@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import Header from "@/components/ui/Header";
+import ScrollRestoration from "@/components/ui/ScrollRestoration";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
@@ -121,6 +122,7 @@ export default function RootLayout({
           />
         </head>
         <body className="antialiased">
+          <ScrollRestoration />
           <Header />
           {children}
           <Analytics />
