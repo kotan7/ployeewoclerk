@@ -1,13 +1,10 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-// Define routes that require authentication
-const isProtectedRoute = createRouteMatcher([
-  '/interview/new(.*)', 
-  '/interview/[id](.*)',  // matches /interview/[id] and its sub-routes
-  '/feedback/(.*)',
-  '/past(.*)',
-  '/billing(.*)'
+// Define routes that require server-side authentication (routes that fetch data server-side)
+const isServerProtectedRoute = createRouteMatcher([
+  '/interview/[id](.*)',  // matches /interview/[id] and its sub-routes - fetches interview data
+  '/feedback/(.*)',       // fetches feedback data server-side
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
@@ -19,8 +16,9 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.next();
   }
 
-  // For regular users, protect authenticated routes
-  if (isProtectedRoute(req)) {
+  // For regular users, only protect routes that fetch data server-side
+  // Routes like /interview/new, /past, /interview handle authentication with modals client-side
+  if (isServerProtectedRoute(req)) {
     await auth.protect();
   }
   

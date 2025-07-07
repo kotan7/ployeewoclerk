@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { getAllInterviews } from "@/lib/actions/interview.actions";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import AutoSignIn from "@/components/ui/AutoSignIn";
 import FilterControls from "@/components/ui/FilterControls";
 
 // Helper function to translate interview focus to Japanese
@@ -75,38 +75,7 @@ const InterviewPage = async ({ searchParams }: PageProps) => {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <SignedOut>
-          <div className="text-center py-20">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg
-                className="w-8 h-8 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
-            </div>
-            <h1 className="text-3xl font-bold text-[#163300] mb-4">
-              全ての面接セッション
-            </h1>
-            <p className="text-gray-600 mb-8">
-              全ての面接セッションを確認するにはログインが必要です
-            </p>
-            <SignInButton mode="modal">
-              <button className="bg-[#9fe870] text-[#163300] px-8 py-3 rounded-full font-semibold hover:bg-[#8fd960] transition-colors">
-                ログインして確認
-              </button>
-            </SignInButton>
-          </div>
-        </SignedOut>
-
-        <SignedIn>
+        <AutoSignIn>
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-[#163300] mb-2">
               全ての面接セッション
@@ -273,7 +242,7 @@ const InterviewPage = async ({ searchParams }: PageProps) => {
               </div>
             </>
           )}
-        </SignedIn>
+        </AutoSignIn>
       </div>
     </div>
   );
