@@ -188,9 +188,10 @@ export default function Home() {
         }
       });
 
-      // Animate each box individually - just slide to final positions
+      // Animate each box individually - side boxes roll as they slide
       featuresTl.to(feature1Ref.current, {
-        ...boxPositions.box1.final,
+        x: 0,
+        rotation: -360, // One full rotation counter-clockwise
         duration: 1,
         ease: "power3.out"
       }, 0)
@@ -200,7 +201,8 @@ export default function Home() {
         ease: "power3.out"
       }, 0)
       .to(feature3Ref.current, {
-        ...boxPositions.box3.final,
+        x: 0,
+        rotation: 360, // One full rotation clockwise
         duration: 1,
         ease: "power3.out"
       }, 0);
