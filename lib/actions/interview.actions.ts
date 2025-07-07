@@ -5,39 +5,48 @@ import { CreateSupabaseClient } from "../supbase"
 
 // Type definition based on the form schema
 type CreateInterview = {
+  name: string;
+  education: string;
+  experience: string;
   companyName: string;
   role: string;
   jobDescription?: string;
   interviewFocus: "hr" | "case" | "technical" | "final";
-  resume?: FileList;
-  resumeText?: string; // Add extracted text field
 }
 
 async function generateInterviewQuestions({
+  name,
+  experience,
   companyName,
   role,
   jobDescription,
   interviewFocus,
-  resume,
 }: {
+  name: string;
+  experience: string;
   companyName: string;
   role: string;
   jobDescription?: string;
   interviewFocus: string;
-  resume?: string;
 }): Promise<string[]> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/generate-questions`, {
+    // Construct the base URL for server-side calls
+    const baseUrl = process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}` 
+      : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    
+    const response = await fetch(`${baseUrl}/api/generate-questions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        name,
+        experience,
         companyName,
         role,
         jobDescription,
         interviewFocus,
-        resume,
       }),
     });
 
@@ -62,27 +71,22 @@ export const createInterview = async (formData: CreateInterview) => {
         throw new Error("User not authenticated")
     }
     
-    // Use extracted text from client-side OCR
-    const extractedText = formData.resumeText || null;
-    
     // Generate questions using OpenAI
     const questions = await generateInterviewQuestions({
+        name: formData.name,
+        experience: formData.experience,
         companyName: formData.companyName,
         role: formData.role,
         jobDescription: formData.jobDescription,
         interviewFocus: formData.interviewFocus,
-        resume: extractedText || undefined,
     });
 
     const supabase = CreateSupabaseClient()
     
-    // Exclude resume field (FileList) and only include database columns
-    const { resume, ...dataToInsert } = formData;
-    
     const {data, error} = await supabase
         .from("interviews")
         .insert({
-            ...dataToInsert,
+            ...formData,
             author,
             questions: JSON.stringify(questions)
         })

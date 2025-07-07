@@ -37,6 +37,9 @@ const getInterviewFocusLabel = (focus: string) => {
 
 interface Interview {
   id: string;
+  name?: string;
+  education?: string;
+  experience?: string;
   company_name?: string;
   companyName?: string;
   role: string;
@@ -83,6 +86,9 @@ const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
     handleGenerateFeedback,
     questions,
   } = useInterview({
+    name: interview.name,
+    education: interview.education,
+    experience: interview.experience,
     companyName: interview.company_name || interview.companyName,
     role: interview.role,
     jobDescription: interview.job_description || interview.jobDescription,

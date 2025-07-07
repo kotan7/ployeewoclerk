@@ -12,24 +12,29 @@ const openai = new OpenAI({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { companyName, role, jobDescription, interviewFocus, resume } = body;
+    const { name, education, experience, companyName, role, jobDescription, interviewFocus } = body;
 
     const prompt = `
-あなたは経験豊富な人事担当者です。以下の情報を元に、模擬面接で使用する適切な質問を5つ生成してください。
+あなたは日本企業で20年間面接を担当してきた経験豊富な人事担当者です。以下の情報を元に、日本の面接文化に適した質問を5つ生成してください。
 
 【応募者情報】
+- 名前: ${name || "未入力"}
+- 職歴・経験: ${experience || "未入力"}
 - 志望企業: ${companyName || "未入力"}
 - 志望職種: ${role || "未入力"}  
 - 職務内容: ${jobDescription || "未入力"}
 - 面接フォーカス: ${interviewFocus || "general"}
-- 履歴書: ${resume ? "提出済み" : "未提出"}
 
-【質問生成の条件】
+【日本の面接文化を踏まえた質問生成の条件】
 - 日本語で質問を作成してください
-- 各質問は具体的で回答しやすいものにしてください
-- 志望企業・職種・職務内容に関連した質問を含めてください
+- 応募者の職歴・経験に基づく具体的なエピソードを引き出す質問にしてください
+- 志望企業・職種への理解度と本気度を確認する質問を含めてください
 - 面接フォーカスに応じて技術的/一般的な質問を調整してください
 - 自己紹介から始まり、徐々に深掘りする流れにしてください
+- チームワーク、問題解決能力、向上心を評価できる質問を心がけてください
+- 失敗経験から何を学んだかを聞く質問を含めてください
+- 応募者の人柄と企業文化との適合性を見極める質問にしてください
+- 「なぜ」「どのように」「具体的に」を使った深掘り質問にしてください
 
 質問のみを番号付きリストで出力してください（説明や追加コメントは不要）。
 `;

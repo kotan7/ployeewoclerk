@@ -28,6 +28,9 @@ export enum CallStatus {
 }
 
 interface UseInterviewProps {
+  name?: string;
+  education?: string;
+  experience?: string;
   companyName?: string;
   role?: string;
   jobDescription?: string;
@@ -37,7 +40,6 @@ interface UseInterviewProps {
     | "product"
     | "leadership"
     | "custom";
-  resume?: FileList;
   questions?: string[]; // Pre-generated questions from database
   interviewId?: string; // Add interview ID to link transcript
 }
@@ -50,11 +52,13 @@ interface TranscriptMessage {
 }
 
 export const useInterview = ({
+  name,
+  education,
+  experience,
   companyName,
   role,
   jobDescription,
   interviewFocus,
-  resume,
   questions = [], // Default to empty array if no questions provided
   interviewId,
 }: UseInterviewProps) => {
@@ -306,10 +310,11 @@ export const useInterview = ({
           messages: [
             {
               role: "system",
-              content: `あなたは面接官です。以下の情報を元に、模擬面接を日本語で行ってください。
+              content: `あなたは日本企業で20年間面接を担当してきた経験豊富な面接官です。以下の情報を元に、日本の面接文化に適した模擬面接を日本語で行ってください。
 
 【応募者情報】
-- 履歴書概要: ${resume ? "提出済み" : "未提出"}
+- 名前: ${name || "未入力"}
+- 職歴・経験: ${experience || "未入力"}
 - 志望企業: ${companyName || "未入力"}
 - 志望職種: ${role || "未入力"}
 - 職務内容: ${jobDescription || "未入力"}
@@ -318,12 +323,18 @@ export const useInterview = ({
 【準備された面接質問】
 ${questionsForPrompt}
 
-【面接の進め方ルール】
-- 上記の準備された質問を参考に面接を進めてください
-- 最初の質問は既に最初のメッセージとして設定されています
-- 必要に応じて、回答に対する深掘り質問も行ってください
+【日本の面接文化を踏まえた進行方針】
+- 長期的な視点でのキャリア形成について聞いてください
+- チームワークや協調性を重視した質問をしてください
+- STAR法（状況・課題・行動・結果）で回答を促す質問をしてください
+- 失敗経験とそこから学んだことを掘り下げてください
+- 企業文化への適合性を確認する質問を含めてください
+- 向上心や学習意欲について聞いてください
+- 応募者の人柄を見極める質問を心がけてください
+- 「なぜ」「どのように」を使った深掘り質問を活用してください
+- 応募者の回答に対して適切なフォローアップ質問をしてください
 - フィードバックは行わず、リアルな面接官のように振る舞ってください
-- 丁寧かつ自然な日本語で話してください
+- 丁寧な敬語と自然な日本語で話してください
 - 準備された質問をすべて消化した後は、面接を自然に終了してください`,
             },
           ],
@@ -410,22 +421,17 @@ ${questionsForPrompt}
         throw new Error("面接の質問が見つかりません。");
       }
 
-      // Call the generate-feedback API
-      const response = await fetch(
-        `${
-          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-        }/api/generate-feedback`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            transcript: transcriptData.transcript,
-            questions: questionsData.questions,
-          }),
-        }
-      );
+      // Call the generate-feedback API using relative URL (works in both dev and production)
+      const response = await fetch("/api/generate-feedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          transcript: transcriptData.transcript,
+          questions: questionsData.questions,
+        }),
+      });
 
       if (!response.ok) {
         const errorData = await response
