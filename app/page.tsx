@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import CardSwap, { Card } from "../components/ui/reactbits/cardSwap";
 
 // Structured Data for SEO
 const structuredData = {
@@ -47,12 +48,6 @@ export default function Home() {
   const problemSectionRef = useRef<HTMLElement>(null);
   const problemTextRef = useRef<HTMLDivElement>(null);
   const problemImageRef = useRef<HTMLDivElement>(null);
-
-  // Refs for Features Section animations
-  const featuresSectionRef = useRef<HTMLElement>(null);
-  const feature1Ref = useRef<HTMLElement>(null);
-  const feature2Ref = useRef<HTMLElement>(null);
-  const feature3Ref = useRef<HTMLElement>(null);
 
   // Refs for Transformation Section animations
   const transformationSectionRef = useRef<HTMLElement>(null);
@@ -188,91 +183,6 @@ export default function Home() {
             ease: "power2.out",
           },
           0.5
-        );
-    }
-
-    // Features section scroll-triggered animations
-    if (
-      featuresSectionRef.current &&
-      feature1Ref.current &&
-      feature2Ref.current &&
-      feature3Ref.current
-    ) {
-      // Define initial and final positions for each box
-      const boxPositions = {
-        box1: {
-          initial: {
-            x: 415,
-            y: 0,
-            scale: 1,
-            opacity: 1,
-            rotation: 0,
-            zIndex: 1,
-          },
-          final: { x: 0, y: 0, scale: 1, opacity: 1, rotation: 0, zIndex: 1 },
-        },
-        box2: {
-          initial: { x: 0, y: 0, scale: 1, opacity: 1, rotation: 0, zIndex: 3 },
-          final: { x: 0, y: 0, scale: 1, opacity: 1, rotation: 0, zIndex: 3 },
-        },
-        box3: {
-          initial: {
-            x: -415,
-            y: 0,
-            scale: 1,
-            opacity: 1,
-            rotation: 0,
-            zIndex: 2,
-          },
-          final: { x: 0, y: 0, scale: 1, opacity: 1, rotation: 0, zIndex: 1 },
-        },
-      };
-
-      // Set initial states for each box
-      gsap.set(feature1Ref.current, boxPositions.box1.initial);
-      gsap.set(feature2Ref.current, boxPositions.box2.initial);
-      gsap.set(feature3Ref.current, boxPositions.box3.initial);
-
-      // Create scroll-triggered timeline
-      const featuresTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: featuresSectionRef.current,
-          start: "top center",
-          end: "top 20%",
-          scrub: 0.5,
-        },
-      });
-
-      // Animate each box individually - side boxes roll as they slide
-      featuresTl
-        .to(
-          feature1Ref.current,
-          {
-            x: 0,
-            rotation: -360, // One full rotation counter-clockwise
-            duration: 1,
-            ease: "power3.out",
-          },
-          0
-        )
-        .to(
-          feature2Ref.current,
-          {
-            ...boxPositions.box2.final,
-            duration: 1,
-            ease: "power3.out",
-          },
-          0
-        )
-        .to(
-          feature3Ref.current,
-          {
-            x: 0,
-            rotation: 360, // One full rotation clockwise
-            duration: 1,
-            ease: "power3.out",
-          },
-          0
         );
     }
 
@@ -565,8 +475,16 @@ export default function Home() {
             className="py-20 bg-gray-200/100 backdrop-blur-sm relative z-10"
           >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+            <div ref={problemImageRef} className="flex-1 mr-20">
+                <img
+                  src="/soundwave.png"
+                  alt="AI面接練習中の音声波形イメージ - リアルタイム対話"
+                  className="w-full h-auto"
+                  loading="lazy"
+                />
+              </div>
               <div ref={problemTextRef} className="max-w-4xl text-left">
-                <h2 className="text-3xl lg:text-4xl font-bold text-[#163300] mr-10 ">
+                <h2 className="text-3xl lg:text-4xl font-bold text-[#163300]">
                   そんなあなたのために、
                   <br />
                   私たちは<strong>AI面接官</strong>を開発しました。
@@ -578,123 +496,119 @@ export default function Home() {
                   いつでも・何度でも挑戦可能。
                 </p>
               </div>
-              <div ref={problemImageRef} className="flex-1">
-                <img
-                  src="/soundwave.png"
-                  alt="AI面接練習中の音声波形イメージ - リアルタイム対話"
-                  className="w-full h-auto"
-                  loading="lazy"
-                />
-              </div>
             </div>
           </section>
 
           {/* Features Section */}
-          <section
-            ref={featuresSectionRef}
-            className="py-20 relative z-10 mt-10 -mb-10"
-          >
+          <section className="py-20 relative z-10 mt-10 -mb-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <h2 className="sr-only">AI面接練習サービスの特徴</h2>
-              <div className="grid lg:grid-cols-3 gap-8">
-                {/* Feature 1 */}
-                <article
-                  ref={feature1Ref}
-                  className="bg-white shadow-sm hover:shadow-lg transition-shadow rounded-2xl border border-gray-100 p-6"
-                >
-                  <div
-                    className="w-12 h-12 bg-[#9fe870] rounded-xl flex items-center justify-center mb-6"
-                    aria-hidden="true"
-                  >
-                    <svg
-                      className="w-6 h-6 text-[#163300]"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      aria-label="チャットアイコン"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                      />
-                    </svg>
+              <div className="flex items-center gap-16">
+                {/* Text Content - Left Side */}
+                <div className="flex-1">
+                  <h2 className="text-3xl lg:text-4xl font-bold text-[#163300] mb-8">
+                    プロイーの3つの特徴
+                  </h2>
+                  <div className="space-y-6">
+                    <p className="text-xl text-gray-600 leading-relaxed">
+                      AIとの<strong>リアルタイム対話</strong>
+                      で実践的な面接練習を行い、
+                      <strong>詳細な分析とフィードバック</strong>を通じて、
+                      あなたの面接スキルを総合的に向上させます。
+                    </p>
                   </div>
-                  <h3 className="text-xl font-bold text-[#163300] mb-4">
-                    リアルタイム面接練習
-                  </h3>
-                  <p className="text-gray-600">
-                    <strong>AIが面接官として質問</strong>
-                    し、自然な会話形式で面接の流れを体験できます。
-                  </p>
-                </article>
+                </div>
 
-                {/* Feature 2 */}
-                <article
-                  ref={feature2Ref}
-                  className="bg-white shadow-sm hover:shadow-lg transition-shadow rounded-2xl border border-gray-100 p-6"
+                {/* CardSwap Component - Right Side */}
+                <div
+                  className="flex-1 relative"
+                  style={{ marginTop: "-140px" }}
                 >
-                  <div
-                    className="w-12 h-12 bg-[#9fe870] rounded-xl flex items-center justify-center mb-6"
-                    aria-hidden="true"
-                  >
-                    <svg
-                      className="w-6 h-6 text-[#163300]"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      aria-label="評価チャートアイコン"
+                  <div style={{ height: "600px", position: "relative" }}>
+                    <CardSwap
+                      cardDistance={60}
+                      verticalDistance={70}
+                      delay={5000}
+                      pauseOnHover={false}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                      />
-                    </svg>
+                      <Card>
+                        <div className="p-6 text-white">
+                          <div className="w-12 h-12 bg-[#9fe870] rounded-xl flex items-center justify-center mb-6">
+                            <svg
+                              className="w-6 h-6 text-[#163300]"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                              />
+                            </svg>
+                          </div>
+                          <h3 className="text-xl font-bold mb-4">
+                            リアルタイム面接練習
+                          </h3>
+                          <p className="text-gray-300">
+                            AIが面接官として質問し、自然な会話形式で面接の流れを体験できます。
+                          </p>
+                        </div>
+                      </Card>
+                      <Card>
+                        <div className="p-6 text-white">
+                          <div className="w-12 h-12 bg-[#9fe870] rounded-xl flex items-center justify-center mb-6">
+                            <svg
+                              className="w-6 h-6 text-[#163300]"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                              />
+                            </svg>
+                          </div>
+                          <h3 className="text-xl font-bold mb-4">
+                            面接パフォーマンス評価
+                          </h3>
+                          <p className="text-gray-300">
+                            多角的な視点からあなたの面接パフォーマンスを分析・評価します。
+                          </p>
+                        </div>
+                      </Card>
+                      <Card>
+                        <div className="p-6 text-white">
+                          <div className="w-12 h-12 bg-[#9fe870] rounded-xl flex items-center justify-center mb-6">
+                            <svg
+                              className="w-6 h-6 text-[#163300]"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M13 10V3L4 14h7v7l9-11h-7z"
+                              />
+                            </svg>
+                          </div>
+                          <h3 className="text-xl font-bold mb-4">
+                            フィードバックと強み発見
+                          </h3>
+                          <p className="text-gray-300">
+                            弱点の改善だけでなく、あなたの長所も発見し、より魅力的にアピールできるようサポートします。
+                          </p>
+                        </div>
+                      </Card>
+                    </CardSwap>
                   </div>
-                  <h3 className="text-xl font-bold text-[#163300] mb-4">
-                    面接パフォーマンス評価
-                  </h3>
-                  <p className="text-gray-600">
-                    多角的な視点からあなたの
-                    <strong>面接パフォーマンスを分析・評価</strong>します。
-                  </p>
-                </article>
-
-                {/* Feature 3 */}
-                <article
-                  ref={feature3Ref}
-                  className="bg-white shadow-sm hover:shadow-lg transition-shadow rounded-2xl border border-gray-100 p-6"
-                >
-                  <div
-                    className="w-12 h-12 bg-[#9fe870] rounded-xl flex items-center justify-center mb-6"
-                    aria-hidden="true"
-                  >
-                    <svg
-                      className="w-6 h-6 text-[#163300]"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      aria-label="フィードバックアイコン"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 10V3L4 14h7v7l9-11h-7z"
-                      />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold text-[#163300] mb-4">
-                    フィードバックと強み発見
-                  </h3>
-                  <p className="text-gray-600">
-                    弱点の改善だけでなく、あなたの長所も発見し、より魅力的にアピールできるよう
-                    <strong>サポート</strong>します。
-                  </p>
-                </article>
+                </div>
               </div>
             </div>
           </section>
