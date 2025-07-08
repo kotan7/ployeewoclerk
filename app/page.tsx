@@ -149,7 +149,7 @@ export default function Home() {
     ) {
       // Set initial states
       gsap.set(problemTextRef.current, { opacity: 0, y: 50 });
-      gsap.set(problemImageRef.current, { opacity: 0, x: 50 });
+      gsap.set(problemImageRef.current, { opacity: 0, x: -50 });
 
       // Create scroll-triggered timeline
       const problemTl = gsap.timeline({
@@ -475,7 +475,7 @@ export default function Home() {
             className="py-20 bg-gray-200/100 backdrop-blur-sm relative z-10"
           >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
-            <div ref={problemImageRef} className="flex-1 mr-20">
+              <div ref={problemImageRef} className="flex-1 mr-20">
                 <img
                   src="/soundwave.png"
                   alt="AI面接練習中の音声波形イメージ - リアルタイム対話"
