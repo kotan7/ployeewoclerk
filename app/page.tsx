@@ -1,11 +1,12 @@
 "use client";
 
-import WaveBackground from "../components/ui/wave";
+import Orb from "../components/ui/reactbits/OrbBackground";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import CardSwap, { Card } from "../components/ui/reactbits/cardSwap";
+import LogoSlider from "../components/ui/LogoSlider";
 
 // Structured Data for SEO
 const structuredData = {
@@ -37,6 +38,42 @@ const structuredData = {
 
 export default function Home() {
   const router = useRouter();
+
+  // Refs for GSAP animations
+  const heroBoxRef = useRef<HTMLDivElement>(null);
+  const heroTitleRef = useRef<HTMLHeadingElement>(null);
+  const heroSubtitleRef = useRef<HTMLParagraphElement>(null);
+  const heroButtonsRef = useRef<HTMLDivElement>(null);
+
+  // Refs for Problem Section animations
+  const problemSectionRef = useRef<HTMLElement>(null);
+  const problemTextRef = useRef<HTMLDivElement>(null);
+  const problemImageRef = useRef<HTMLDivElement>(null);
+
+  // Refs for Transformation Section animations
+  const transformationSectionRef = useRef<HTMLElement>(null);
+  const transformationTextRef = useRef<HTMLDivElement>(null);
+  const line1Ref = useRef<HTMLParagraphElement>(null);
+  const line2Ref = useRef<HTMLParagraphElement>(null);
+  const line3Ref = useRef<HTMLParagraphElement>(null);
+
+  // Refs for Post Labs-style reveal animation
+  const mainContentRef = useRef<HTMLDivElement>(null);
+  const footerRef = useRef<HTMLElement>(null);
+
+  // Refs for transformation section animations
+  const transformationBoxRef = useRef<HTMLDivElement>(null);
+  const scrollInnerRef = useRef<HTMLDivElement>(null);
+
+  // Function to split text into individual characters
+  const splitTextIntoChars = (text: string) => {
+    return text.split("").map((char, index) => (
+      <span key={index} className="char">
+        {char}
+      </span>
+    ));
+  };
+
 
   // Refs for GSAP animations
   const heroBoxRef = useRef<HTMLDivElement>(null);
@@ -292,12 +329,230 @@ export default function Home() {
     };
   }, []);
 
+  // GSAP animations
+  useEffect(() => {
+    // Register ScrollTrigger plugin
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Hero section staggered fade-in
+    const heroTl = gsap.timeline();
+
+    // Set initial opacity to 0 for all hero elements
+    gsap.set(
+      [
+        heroBoxRef.current,
+        heroTitleRef.current,
+        heroSubtitleRef.current,
+        heroButtonsRef.current,
+      ],
+      {
+        opacity: 0,
+        y: 30,
+      }
+    );
+
+    // Staggered animation sequence for hero
+    heroTl
+      .to(heroBoxRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: "power2.out",
+      })
+      .to(
+        heroTitleRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power2.out",
+        },
+        "-=0.4"
+      )
+      .to(
+        heroSubtitleRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power2.out",
+        },
+        "-=0.4"
+      )
+      .to(
+        heroButtonsRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power2.out",
+        },
+        "-=0.4"
+      );
+
+    // Problem section scroll-triggered animations
+    if (
+      problemSectionRef.current &&
+      problemTextRef.current &&
+      problemImageRef.current
+    ) {
+      // Set initial states
+      gsap.set(problemTextRef.current, { opacity: 0, y: 50 });
+      gsap.set(problemImageRef.current, { opacity: 0, x: -50 });
+
+      // Create scroll-triggered timeline
+      const problemTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: problemSectionRef.current,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: 1,
+        },
+      });
+
+      // First: Grey background fills the section (this happens naturally with the section)
+      // Then: Text and image fade in after more scrolling
+      problemTl
+        .to(
+          problemTextRef.current,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: "power2.out",
+          },
+          0.3
+        )
+        .to(
+          problemImageRef.current,
+          {
+            opacity: 1,
+            x: 0,
+            duration: 1,
+            ease: "power2.out",
+          },
+          0.5
+        );
+    }
+
+    // Transformation section text color animation - scroll-based character reveal
+    if (line1Ref.current && line2Ref.current && line3Ref.current) {
+      // Line 1 character animation - scroll based
+      gsap.to(line1Ref.current.querySelectorAll(".char"), {
+        color: "#ffffff",
+        duration: 0.1,
+        stagger: 0.02,
+        ease: "none",
+        scrollTrigger: {
+          trigger: line1Ref.current,
+          start: "top center",
+          end: "bottom center",
+          scrub: 1,
+        },
+      });
+
+      // Line 2 character animation - scroll based
+      gsap.to(line2Ref.current.querySelectorAll(".char"), {
+        color: "#ffffff",
+        duration: 0.1,
+        stagger: 0.02,
+        ease: "none",
+        scrollTrigger: {
+          trigger: line2Ref.current,
+          start: "top center",
+          end: "bottom center",
+          scrub: 1,
+        },
+      });
+
+      // Line 3 character animation - scroll based
+      gsap.to(line3Ref.current.querySelectorAll(".char"), {
+        color: "#ffffff",
+        duration: 0.1,
+        stagger: 0.02,
+        ease: "none",
+        scrollTrigger: {
+          trigger: line3Ref.current,
+          start: "top center",
+          end: "bottom center",
+          scrub: 1,
+        },
+      });
+    }
+
+    // Post Labs-style reveal animation - main content slides up to reveal footer
+    if (mainContentRef.current && footerRef.current) {
+      gsap.to(mainContentRef.current, {
+        y: "-30vh",
+        ease: "none",
+        scrollTrigger: {
+          trigger: mainContentRef.current,
+          start: "bottom bottom",
+          end: "+=30vh",
+          scrub: 1,
+        },
+      });
+    }
+
+    // Transformation section box width animation
+    if (transformationBoxRef.current) {
+      gsap.to(transformationBoxRef.current, {
+        width: "100vw",
+        maxWidth: "100vw",
+        x: "-25vw",
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: transformationSectionRef.current,
+          start: "top center",
+          end: "center center",
+          scrub: 1,
+        },
+      });
+    }
+
+    // Scrollable content animation - like Post Labs
+    if (transformationBoxRef.current && scrollInnerRef.current) {
+      ScrollTrigger.create({
+        trigger: transformationSectionRef.current,
+        start: "top top",
+        end: "+=200%",
+        pin: transformationBoxRef.current,
+        anticipatePin: 1,
+        scrub: true,
+      });
+
+      // Animate the scroll of the inner content manually
+      gsap.to(scrollInnerRef.current, {
+        yPercent: -100,
+        ease: "none",
+        scrollTrigger: {
+          trigger: transformationSectionRef.current,
+          start: "top top",
+          end: "+=200%",
+          scrub: true,
+        },
+      });
+    }
+
+    // Cleanup function to prevent memory leaks and scroll issues
+    return () => {
+      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      ScrollTrigger.refresh();
+    };
+  }, []);
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
+      <div className="min-h-screen bg-white relative">
+        {/* Footer positioned behind main content */}
+        <footer
+          ref={footerRef}
+          className="bg-[#163300] text-white py-12 fixed bottom-0 left-0 right-0 z-0"
+        >
       <div className="min-h-screen bg-white relative">
         {/* Footer positioned behind main content */}
         <footer
@@ -410,9 +665,12 @@ export default function Home() {
         <div ref={mainContentRef} className="relative z-10 bg-white">
           {/* Hero Section */}
           <section className="relative h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden">
-            <div className="absolute inset-0 w-full h-full">
-              <WaveBackground className="" />
-            </div>
+            <Orb
+              hoverIntensity={0.5}
+              rotateOnHover={true}
+              hue={0}
+              forceHoverState={false}
+            />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
               {/* Hero content frame */}
               <div className="relative inline-block mb-15">
@@ -498,6 +756,9 @@ export default function Home() {
               </div>
             </div>
           </section>
+
+          {/* Logo Slider Section */}
+          <LogoSlider />
 
           {/* Features Section */}
           <section className="py-20 relative z-10 mt-10 -mb-10">
