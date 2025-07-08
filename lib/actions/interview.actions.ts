@@ -150,22 +150,30 @@ export const createInterview = async (formData: CreateInterview) => {
     return data[0];
 }
 
-export const getUserInterviews = async () => {
+export const getUserInterviews = async (page: number = 1, limit: number = 9) => {
     const {userId: author} = await auth()
     
     const supabase = CreateSupabaseClient()
-    const {data, error} = await supabase
+    const offset = (page - 1) * limit;
+    
+    const {data, error, count} = await supabase
         .from("interviews")
-        .select("*")
+        .select("*", { count: 'exact' })
         .eq("author", author)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .range(offset, offset + limit - 1);
 
     if (error) {
         console.error("Supabase error:", error)
         throw new Error(`Database error: ${error.message}`)
     }
 
-    return data || [];
+    return {
+        interviews: data || [],
+        totalCount: count || 0,
+        currentPage: page,
+        totalPages: Math.ceil((count || 0) / limit)
+    };
 }
 
 export const getAllInterviews = async (

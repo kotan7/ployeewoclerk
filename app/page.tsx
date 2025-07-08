@@ -505,7 +505,7 @@ export default function Home() {
               <h2 className="sr-only">AI面接練習サービスの特徴</h2>
               <div className="flex items-center gap-16">
                 {/* Text Content - Left Side */}
-                <div className="flex-1">
+                <div className="flex-1 mb-10">
                   <h2 className="text-3xl lg:text-4xl font-bold text-[#163300] mb-8">
                     プロイーの3つの特徴
                   </h2>
@@ -521,8 +521,8 @@ export default function Home() {
 
                 {/* CardSwap Component - Right Side */}
                 <div
-                  className="flex-1 relative"
-                  style={{ marginTop: "-140px" }}
+                  className="flex-1 relative mb-25"
+                  style={{ marginTop: "-180px" }}
                 >
                   <div style={{ height: "600px", position: "relative" }}>
                     <CardSwap
@@ -531,9 +531,9 @@ export default function Home() {
                       delay={5000}
                       pauseOnHover={false}
                     >
-                      <Card>
-                        <div className="p-6 text-white">
-                          <div className="w-12 h-12 bg-[#9fe870] rounded-xl flex items-center justify-center mb-6">
+                      <Card customClass="!bg-[#9fe870] !border-[#9fe870]">
+                        <div className="p-6 text-[#163300]">
+                          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-6">
                             <svg
                               className="w-6 h-6 text-[#163300]"
                               fill="none"
@@ -551,12 +551,12 @@ export default function Home() {
                           <h3 className="text-xl font-bold mb-4">
                             リアルタイム面接練習
                           </h3>
-                          <p className="text-gray-300">
+                          <p className="text-[#163300]/80">
                             AIが面接官として質問し、自然な会話形式で面接の流れを体験できます。
                           </p>
                         </div>
                       </Card>
-                      <Card>
+                      <Card customClass="!bg-[#163300] !border-[#163300]">
                         <div className="p-6 text-white">
                           <div className="w-12 h-12 bg-[#9fe870] rounded-xl flex items-center justify-center mb-6">
                             <svg
@@ -576,16 +576,16 @@ export default function Home() {
                           <h3 className="text-xl font-bold mb-4">
                             面接パフォーマンス評価
                           </h3>
-                          <p className="text-gray-300">
+                          <p className="text-gray-200">
                             多角的な視点からあなたの面接パフォーマンスを分析・評価します。
                           </p>
                         </div>
                       </Card>
-                      <Card>
+                      <Card customClass="!bg-[#ec4899] !border-[#ec4899]">
                         <div className="p-6 text-white">
-                          <div className="w-12 h-12 bg-[#9fe870] rounded-xl flex items-center justify-center mb-6">
+                          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-6">
                             <svg
-                              className="w-6 h-6 text-[#163300]"
+                              className="w-6 h-6 text-[#ec4899]"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -601,7 +601,7 @@ export default function Home() {
                           <h3 className="text-xl font-bold mb-4">
                             フィードバックと強み発見
                           </h3>
-                          <p className="text-gray-300">
+                          <p className="text-gray-200">
                             弱点の改善だけでなく、あなたの長所も発見し、より魅力的にアピールできるようサポートします。
                           </p>
                         </div>

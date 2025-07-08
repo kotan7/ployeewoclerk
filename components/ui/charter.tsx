@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { TrendingUp } from "lucide-react"
-import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from "recharts"
+import { TrendingUp } from "lucide-react";
+import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from "recharts";
 
 import {
   Card,
@@ -10,66 +10,113 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart"
+} from "@/components/ui/chart";
 
-export const description = "A radar chart"
-
-const chartData = [
-  { month: "January", desktop: 186 },
-  { month: "February", desktop: 305 },
-  { month: "March", desktop: 237 },
-  { month: "April", desktop: 273 },
-  { month: "May", desktop: 209 },
-  { month: "June", desktop: 214 },
-]
+// Default data for Japanese interview criteria (can be overridden via props)
+const defaultChartData = [
+  { criteria: "コミュニケーション", score: 80 },
+  { criteria: "論理的思考力", score: 75 },
+  { criteria: "協調性・チームワーク", score: 85 },
+  { criteria: "主体性・積極性", score: 70 },
+  { criteria: "専門知識・技術力", score: 78 },
+];
 
 const chartConfig = {
-  desktop: {
-    label: "Desktop",
-    color: "var(--chart-1)",
+  score: {
+    label: "スコア",
+    color: "#9fe870",
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
-export function ChartRadarDefault() {
-  return (
-    <Card>
-      <CardHeader className="items-center pb-4">
-        <CardTitle>Radar Chart</CardTitle>
-        <CardDescription>
-          Showing total visitors for the last 6 months
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="pb-0">
+interface InterviewRadarChartProps {
+  data?: Array<{ criteria: string; score: number }>;
+  title?: string;
+  description?: string;
+  className?: string;
+  frameless?: boolean;
+}
+
+export function InterviewRadarChart({
+  data = defaultChartData,
+  title = "評価基準",
+  description = "面接での各項目の評価",
+  className = "",
+  frameless = false,
+}: InterviewRadarChartProps) {
+  if (frameless) {
+    return (
+      <div className={`${className}`}>
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px]"
+          className="mx-auto aspect-square max-h-[400px] w-full"
         >
-          <RadarChart data={chartData}>
+          <RadarChart data={data}>
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-            <PolarAngleAxis dataKey="month" />
-            <PolarGrid />
+            <PolarAngleAxis
+              dataKey="criteria"
+              tick={{ fontSize: 12, fill: "#6B7280", fontWeight: 500 }}
+              className="text-sm"
+            />
+            <PolarGrid stroke="#E5E7EB" strokeWidth={1} />
             <Radar
-              dataKey="desktop"
-              fill="var(--color-desktop)"
-              fillOpacity={0.6}
+              dataKey="score"
+              stroke="#9fe870"
+              fill="#9fe870"
+              fillOpacity={0.25}
+              strokeWidth={3}
+              dot={{ fill: "#9fe870", strokeWidth: 3, r: 4 }}
+            />
+          </RadarChart>
+        </ChartContainer>
+      </div>
+    );
+  }
+
+  return (
+    <Card className={`border-gray-100 shadow-sm ${className}`}>
+      <CardHeader className="pb-4">
+        <CardTitle className="text-lg font-semibold text-[#163300]">
+          {title}
+        </CardTitle>
+        <CardDescription className="text-sm text-gray-600">
+          {description}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="pb-2">
+        <ChartContainer
+          config={chartConfig}
+          className="mx-auto aspect-square max-h-[200px]"
+        >
+          <RadarChart data={data}>
+            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+            <PolarAngleAxis
+              dataKey="criteria"
+              tick={{ fontSize: 11, fill: "#6B7280" }}
+              className="text-xs"
+            />
+            <PolarGrid stroke="#E5E7EB" />
+            <Radar
+              dataKey="score"
+              stroke="#9fe870"
+              fill="#9fe870"
+              fillOpacity={0.2}
+              strokeWidth={2}
+              dot={{ fill: "#9fe870", strokeWidth: 2, r: 3 }}
             />
           </RadarChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col gap-2 text-sm">
-        <div className="flex items-center gap-2 leading-none font-medium">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="text-muted-foreground flex items-center gap-2 leading-none">
-          January - June 2024
-        </div>
-      </CardFooter>
     </Card>
-  )
+  );
+}
+
+// Keep the original export for backward compatibility
+export function ChartRadarDefault() {
+  return <InterviewRadarChart />;
 }

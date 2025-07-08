@@ -99,12 +99,6 @@ const Header = () => {
               >
                 面接履歴
               </Link>
-              <Link
-                href="/interview"
-                className="text-[#163300] hover:text-[#9fe870] transition-colors font-medium"
-              >
-                コミュニティ
-              </Link>
             </nav>
           </div>
 
