@@ -532,88 +532,27 @@ export default function Home() {
           </section>
 
           {/* Transformation Section */}
-          <section
-            ref={transformationSectionRef}
-            className="py-20 relative z-10"
-          >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              {/* Transformation Content */}
-              <div className="text-center text-[#163300] mb-20">
-                <div className="w-16 h-16 bg-[#163300] rounded-full flex items-center justify-center mx-auto mb-8">
-                  <svg
-                    className="w-8 h-8 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a2 2 0 012-2h2a2 2 0 012 2v5m-6 0h6"
-                    />
-                  </svg>
-                </div>
-                <h2 className="text-4xl lg:text-5xl font-bold mb-8">
-                  面接が怖い、自信がない
-                </h2>
-                <div
-                  ref={transformationTextRef}
-                  className="text-xl mb-8 leading-relaxed opacity-80 max-w-4xl mx-auto"
-                >
-                  <p ref={line1Ref} className="line-1 mb-4">
-                    {splitTextIntoChars(
-                      "そんな不安を「準備した」という安心変えていきませんか？"
-                    )}
-                  </p>
-                  <p ref={line2Ref} className="line-2 mb-4">
-                    {splitTextIntoChars(
-                      "就活の不安を「可視化」し、「成長」に変える。"
-                    )}
-                  </p>
-                  <p ref={line3Ref} className="line-3">
-                    {splitTextIntoChars(
-                      "あなたの本気に、本気で応えるAI面接サービス。"
-                    )}
-                  </p>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <button
-                    className="cursor-pointer bg-[#163300] text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#0f2a00] transition-colors shadow-lg"
-                    onClick={handleClick}
-                  >
-                    デモを試す
-                  </button>
-                  <button
-                    className="cursor-pointer text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:underline transition-colors border-2 border-[#163300]"
-                    onClick={handleClick2}
-                  >
-                    詳細を見る
-                  </button>
-                </div>
-              </div>
-
-              {/* CTA Content */}
-              <div className="text-center text-[#163300]">
-                <div className="max-w-4xl mx-auto">
-                  <h2 className="text-3xl lg:text-4xl font-bold mb-8">
-                    まずは一度、体験してみてください。
-                    <br />
-                    あなたの可能性、きっと広がります。
-                  </h2>
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <button
-                      className="cursor-pointer bg-[#163300] text-white px-10 py-4 rounded-full font-semibold text-xl hover:bg-[#0f2a00] transition-colors shadow-lg"
-                      onClick={handleClick}
-                    >
-                      今すぐ無料で始める
-                    </button>
-                  </div>
-                  <p className="text-sm mt-4 opacity-80">
-                    ※ 無料プランでは3回まで面接練習が可能です
-                  </p>
-                </div>
-              </div>
+          <section className="w-full flex justify-center items-center py-32 bg-transparent">
+            <div className="w-full max-w-5xl rounded-[48px] bg-[#163300] flex flex-col items-center px-8 pt-28 pb-20 relative" style={{boxShadow: '0 8px 32px rgba(0,0,0,0.08)'}}>
+              <img
+                src="/interviewericon.png"
+                alt="Interviewer Icon"
+                className="w-80 h-80 object-contain absolute -top-40 left-1/2 -translate-x-1/2 drop-shadow-xl"
+                style={{ zIndex: 2 }}
+                draggable={false}
+              />
+              <h2 className="text-5xl md:text-6xl font-extrabold text-[#9fe870] text-center mb-6 leading-tight mt-2">
+              過去問で鍛えられたAI面接官が<br />あなたの自信を引き出す
+              </h2>
+              <p className="text-lg md:text-xl text-white text-center mb-10 max-w-2xl">
+              豊富な過去問データでAIが徹底指導。自信を持って本番に挑もう
+              </p>
+              <button
+                className="bg-[#9fe870] text-[#163300] px-10 py-4 rounded-full font-semibold text-xl hover:bg-[#7fd950] transition-colors shadow-lg"
+                onClick={() => router.push('/interview/new')}
+              >
+                AI面接を無料で体験する
+              </button>
             </div>
           </section>
         </div>
