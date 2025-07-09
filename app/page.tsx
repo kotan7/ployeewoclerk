@@ -40,7 +40,6 @@ export default function Home() {
   const router = useRouter();
 
   // Refs for GSAP animations
-  const heroBoxRef = useRef<HTMLDivElement>(null);
   const heroTitleRef = useRef<HTMLHeadingElement>(null);
   const heroSubtitleRef = useRef<HTMLParagraphElement>(null);
   const heroButtonsRef = useRef<HTMLDivElement>(null);
@@ -87,12 +86,7 @@ export default function Home() {
 
     // Set initial opacity to 0 for all hero elements
     gsap.set(
-      [
-        heroBoxRef.current,
-        heroTitleRef.current,
-        heroSubtitleRef.current,
-        heroButtonsRef.current,
-      ],
+      [heroTitleRef.current, heroSubtitleRef.current, heroButtonsRef.current],
       {
         opacity: 0,
         y: 30,
@@ -101,22 +95,12 @@ export default function Home() {
 
     // Staggered animation sequence for hero
     heroTl
-      .to(heroBoxRef.current, {
+      .to(heroTitleRef.current, {
         opacity: 1,
         y: 0,
         duration: 0.8,
         ease: "power2.out",
       })
-      .to(
-        heroTitleRef.current,
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          ease: "power2.out",
-        },
-        "-=0.4"
-      )
       .to(
         heroSubtitleRef.current,
         {
@@ -183,19 +167,7 @@ export default function Home() {
         );
     }
 
-    // Post Labs-style reveal animation - main content slides up to reveal footer
-    if (mainContentRef.current && footerRef.current) {
-      gsap.to(mainContentRef.current, {
-        y: "-30vh",
-        ease: "none",
-        scrollTrigger: {
-          trigger: mainContentRef.current,
-          start: "bottom bottom",
-          end: "+=30vh",
-          scrub: 1,
-        },
-      });
-    }
+    // Footer is now positioned normally after content - no special animation needed
 
     // Cleanup function to prevent memory leaks and scroll issues
     return () => {
@@ -211,11 +183,289 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       <div className="min-h-screen bg-white relative">
-        {/* Footer positioned behind main content */}
-        <footer
-          ref={footerRef}
-          className="bg-[#163300] text-white py-12 fixed bottom-0 left-0 right-0 z-0"
-        >
+        {/* Main content wrapper */}
+        <div ref={mainContentRef} className="relative bg-white">
+          {/* Hero Section */}
+          <section className="relative h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden">
+            <Orb
+              hoverIntensity={0.5}
+              rotateOnHover={true}
+              hue={0}
+              forceHoverState={false}
+            />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+              <div className="text-center mt-16 mb-8">
+                <h1
+                  ref={heroTitleRef}
+                  className="text-4xl text-center lg:text-6xl font-bold text-[#163300] mb-6 leading-tight"
+                >
+                  内定まで、何度でも叩き込む。
+                  <br />
+                  <span className="text-[#9fe870]">AI面接官</span>
+                  、24時間フル稼働。
+                </h1>
+                <p
+                  ref={heroSubtitleRef}
+                  className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto font-bold text-center"
+                >
+                  就活の「面接」って、練習の場がなかなかない。
+                  <br />
+                  でも、ぶっつけ本番で挑むには、あまりにリスクが大きい。
+                </p>
+                <div
+                  ref={heroButtonsRef}
+                  className="flex flex-col sm:flex-row gap-4 justify-center"
+                >
+                  <button
+                    className="cursor-pointer bg-[#9fe870] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#8fd960] transition-colors shadow-lg"
+                    onClick={handleClick}
+                    aria-label="AI面接練習を無料で体験する"
+                  >
+                    無料で体験する
+                  </button>
+                  <button
+                    className="cursor-pointer border-2 border-[#163300] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#163300] hover:text-white transition-colors"
+                    onClick={handleClick2}
+                    aria-label="AI面接サービスの詳細を見る"
+                  >
+                    サービス詳細
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Problem Section */}
+          <section
+            ref={problemSectionRef}
+            className="py-20 bg-gray-200/100 backdrop-blur-sm relative z-10"
+          >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+              <div ref={problemImageRef} className="flex-1 mr-20">
+                <img
+                  src="/soundwave.png"
+                  alt="AI面接練習中の音声波形イメージ - リアルタイム対話"
+                  className="w-full h-auto"
+                  loading="lazy"
+                />
+              </div>
+              <div ref={problemTextRef} className="max-w-4xl text-left">
+                <h2 className="text-3xl lg:text-4xl font-bold text-[#163300]">
+                  そんなあなたのために、
+                  <br />
+                  私たちは<strong>AI面接官</strong>を開発しました。
+                </h2>
+                <p className="text-gray-600 font-bold mt-6">
+                  <strong>AIとリアルタイムで対話</strong>
+                  しながら、実際の面接に近い形式で練習ができます。
+                  <br />
+                  いつでも・何度でも挑戦可能。
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Logo Slider Section */}
+          <LogoSlider />
+
+          {/* Features Section */}
+          <section className="py-20 relative z-10 mt-10 -mb-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <h2 className="sr-only">AI面接練習サービスの特徴</h2>
+              <div className="flex items-center gap-16">
+                {/* Text Content - Left Side */}
+                <div className="flex-1 mb-10">
+                  <h2 className="text-3xl lg:text-4xl font-bold text-[#163300] mb-8">
+                    プロイーの3つの特徴
+                  </h2>
+                  <div className="space-y-6">
+                    <p className="text-xl text-gray-600 leading-relaxed">
+                      AIとの<strong>リアルタイム対話</strong>
+                      で実践的な面接練習を行い、
+                      <strong>詳細な分析とフィードバック</strong>を通じて、
+                      あなたの面接スキルを総合的に向上させます。
+                    </p>
+                  </div>
+                </div>
+
+                {/* CardSwap Component - Right Side */}
+                <div
+                  className="flex-1 relative mb-25"
+                  style={{ marginTop: "-180px" }}
+                >
+                  <div style={{ height: "600px", position: "relative" }}>
+                    <CardSwap
+                      cardDistance={60}
+                      verticalDistance={70}
+                      delay={5000}
+                      pauseOnHover={false}
+                    >
+                      {/* Lime Card */}
+                      <Card customClass="!bg-[#9fe870] !border-[#9fe870]">
+                        <div className="p-8 text-[#2D5016] h-full flex flex-col">
+                          {/* Interview Icon */}
+                          <div className="flex-1 flex flex-col justify-center">
+                            <div className="mb-6">
+                              <div className="w-12 h-12 bg-[#2D5016]/10 rounded-xl flex items-center justify-center">
+                                <svg
+                                  className="w-6 h-6 text-[#2D5016]"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                                  />
+                                </svg>
+                              </div>
+                            </div>
+
+                            <h3 className="text-2xl font-bold mb-4 leading-tight">
+                              リアルタイム
+                              <br />
+                              面接練習
+                            </h3>
+
+                            <div className="w-12 h-0.5 bg-[#2D5016]/30 mb-4"></div>
+
+                            <p className="text-[#2D5016]/80 text-sm leading-relaxed mb-4">
+                              AIが面接官として質問し、自然な会話形式で面接の流れを体験できます。音声認識とリアルタイム応答で、実際の面接に近い環境を提供します。緊張感のある本格的な練習が可能です。
+                            </p>
+
+                            <div className="w-full h-0.5 bg-[#2D5016]/20 mb-6"></div>
+
+                            <button className="bg-[#2D5016] text-white px-4 py-3 rounded-3xl text-sm font-medium hover:bg-[#2D5016]/90 transition-colors">
+                              今すぐ試す →
+                            </button>
+                          </div>
+                        </div>
+                      </Card>
+
+                      {/* Green Card */}
+                      <Card customClass="!bg-[#163300] !border-[#163300]">
+                        <div className="p-8 text-white h-full flex flex-col">
+                          {/* Performance Icon */}
+                          <div className="flex-1 flex flex-col justify-center">
+                            <div className="mb-6">
+                              <div className="w-12 h-12 bg-[#9fe870] rounded-xl flex items-center justify-center">
+                                <svg
+                                  className="w-6 h-6 text-[#163300]"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                                  />
+                                </svg>
+                              </div>
+                            </div>
+
+                            <h3 className="text-2xl font-bold mb-4 leading-tight">
+                              面接パフォーマンス
+                              <br />
+                              評価
+                            </h3>
+
+                            <div className="w-12 h-0.5 bg-white/30 mb-4"></div>
+
+                            <p className="text-gray-200 text-sm leading-relaxed mb-4">
+                              多角的な視点からあなたの面接パフォーマンスを分析・評価します。話し方、表情、回答内容、論理性など細かい項目まで詳細に分析し、具体的な改善点を提示します。
+                            </p>
+
+                            <div className="w-full h-0.5 bg-white/20 mb-6"></div>
+
+                            <button className="bg-[#9fe870] text-[#163300] px-4 py-3 rounded-3xl text-sm font-medium hover:bg-[#9fe870]/90 transition-colors">
+                              評価を見る →
+                            </button>
+                          </div>
+                        </div>
+                      </Card>
+
+                      {/* Pink Card */}
+                      <Card customClass="!bg-[#f5b0ea] !border-[#f5b0ea]">
+                        <div className="p-8 text-[#721C24] h-full flex flex-col">
+                          {/* Feedback Icon */}
+                          <div className="flex-1 flex flex-col justify-center">
+                            <div className="mb-6">
+                              <div className="w-12 h-12 bg-[#721C24]/10 rounded-xl flex items-center justify-center">
+                                <svg
+                                  className="w-6 h-6 text-[#721C24]"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                                  />
+                                </svg>
+                              </div>
+                            </div>
+
+                            <h3 className="text-2xl font-bold mb-4 leading-tight">
+                              フィードバックと
+                              <br />
+                              強み発見
+                            </h3>
+
+                            <div className="w-12 h-0.5 bg-[#721C24]/30 mb-4"></div>
+
+                            <p className="text-[#721C24]/80 text-sm leading-relaxed mb-4">
+                              弱点の改善だけでなく、あなたの長所も発見し、より魅力的にアピールできるようサポートします。個人の特性を活かした回答パターンの提案や、自信を持って話せるポイントを明確化します。
+                            </p>
+
+                            <div className="w-full h-0.5 bg-[#721C24]/20 mb-6"></div>
+
+                            <button className="bg-[#721C24] text-white px-4 py-3 rounded-3xl text-sm font-medium hover:bg-[#721C24]/90 transition-colors">
+                              強みを発見 →
+                            </button>
+                          </div>
+                        </div>
+                      </Card>
+                    </CardSwap>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Transformation Section */}
+          <section className="w-full flex justify-center items-center py-32 bg-transparent">
+            <div className="w-full max-w-5xl rounded-[48px] bg-[#163300] flex flex-col items-center px-8 pt-28 pb-20 relative" style={{boxShadow: '0 8px 32px rgba(0,0,0,0.08)'}}>
+              <img
+                src="/interviewericon.png"
+                alt="Interviewer Icon"
+                className="w-80 h-80 object-contain absolute -top-40 left-1/2 -translate-x-1/2 drop-shadow-xl"
+                style={{ zIndex: 2 }}
+                draggable={false}
+              />
+              <h2 className="text-5xl md:text-6xl font-extrabold text-[#9fe870] text-center mb-6 leading-tight mt-2">
+              過去問で鍛えられたAI面接官が<br />あなたの自信を引き出す
+              </h2>
+              <p className="text-lg md:text-xl text-white text-center mb-10 max-w-2xl">
+              豊富な過去問データでAIが徹底指導。自信を持って本番に挑もう
+              </p>
+              <button
+                className="bg-[#9fe870] text-[#163300] px-10 py-4 rounded-full font-semibold text-xl hover:bg-[#7fd950] transition-colors shadow-lg"
+                onClick={() => router.push('/interview/new')}
+              >
+                AI面接を無料で体験する
+              </button>
+            </div>
+          </section>
+        </div>
+
+        {/* Footer - now positioned normally after all content */}
+        <footer ref={footerRef} className="bg-[#163300] text-white py-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid md:grid-cols-4 gap-8">
               <div>
@@ -317,245 +567,6 @@ export default function Home() {
             </div>
           </div>
         </footer>
-
-        {/* Main content wrapper that slides up */}
-        <div ref={mainContentRef} className="relative z-10 bg-white">
-          {/* Hero Section */}
-          <section className="relative h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden">
-            <Orb
-              hoverIntensity={0.5}
-              rotateOnHover={true}
-              hue={0}
-              forceHoverState={false}
-            />
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-              {/* Hero content frame */}
-              <div className="relative inline-block mb-15">
-                <div
-                  ref={heroBoxRef}
-                  className="rounded-3xl "
-                  style={{
-                    backgroundColor: "rgba(197, 228, 212, 0.1)",
-                    backdropFilter: "blur(3px) saturate(65%)",
-                    WebkitBackdropFilter: "blur(30px) saturate(65%)",
-                    border: "2px solid rgba(210, 211, 210, 0.2)",
-                  }}
-                >
-                  <div className="px-8 pb-12 mt-28 mb-8">
-                    <h1
-                      ref={heroTitleRef}
-                      className="text-4xl text-center lg:text-6xl font-bold text-[#163300] mb-6 leading-tight"
-                    >
-                      内定まで、何度でも叩き込む。
-                      <br />
-                      <span className="text-[#9fe870]">AI面接官</span>
-                      、24時間フル稼働。
-                    </h1>
-                    <p
-                      ref={heroSubtitleRef}
-                      className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto font-bold text-center"
-                    >
-                      就活の「面接」って、練習の場がなかなかない。
-                      <br />
-                      でも、ぶっつけ本番で挑むには、あまりにリスクが大きい。
-                    </p>
-                    <div
-                      ref={heroButtonsRef}
-                      className="flex flex-col sm:flex-row gap-4 justify-center"
-                    >
-                      <button
-                        className="cursor-pointer bg-[#9fe870] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#8fd960] transition-colors shadow-lg"
-                        onClick={handleClick}
-                        aria-label="AI面接練習を無料で体験する"
-                      >
-                        無料で体験する
-                      </button>
-                      <button
-                        className="cursor-pointer border-2 border-[#163300] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#163300] hover:text-white transition-colors"
-                        onClick={handleClick2}
-                        aria-label="AI面接サービスの詳細を見る"
-                      >
-                        サービス詳細
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Problem Section */}
-          <section
-            ref={problemSectionRef}
-            className="py-20 bg-gray-200/100 backdrop-blur-sm relative z-10"
-          >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
-              <div ref={problemImageRef} className="flex-1 mr-20">
-                <img
-                  src="/soundwave.png"
-                  alt="AI面接練習中の音声波形イメージ - リアルタイム対話"
-                  className="w-full h-auto"
-                  loading="lazy"
-                />
-              </div>
-              <div ref={problemTextRef} className="max-w-4xl text-left">
-                <h2 className="text-3xl lg:text-4xl font-bold text-[#163300]">
-                  そんなあなたのために、
-                  <br />
-                  私たちは<strong>AI面接官</strong>を開発しました。
-                </h2>
-                <p className="text-gray-600 font-bold mt-6">
-                  <strong>AIとリアルタイムで対話</strong>
-                  しながら、実際の面接に近い形式で練習ができます。
-                  <br />
-                  いつでも・何度でも挑戦可能。
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Logo Slider Section */}
-          <LogoSlider />
-
-          {/* Features Section */}
-          <section className="py-20 relative z-10 mt-10 -mb-10">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <h2 className="sr-only">AI面接練習サービスの特徴</h2>
-              <div className="flex items-center gap-16">
-                {/* Text Content - Left Side */}
-                <div className="flex-1 mb-10">
-                  <h2 className="text-3xl lg:text-4xl font-bold text-[#163300] mb-8">
-                    プロイーの3つの特徴
-                  </h2>
-                  <div className="space-y-6">
-                    <p className="text-xl text-gray-600 leading-relaxed">
-                      AIとの<strong>リアルタイム対話</strong>
-                      で実践的な面接練習を行い、
-                      <strong>詳細な分析とフィードバック</strong>を通じて、
-                      あなたの面接スキルを総合的に向上させます。
-                    </p>
-                  </div>
-                </div>
-
-                {/* CardSwap Component - Right Side */}
-                <div
-                  className="flex-1 relative mb-25"
-                  style={{ marginTop: "-180px" }}
-                >
-                  <div style={{ height: "600px", position: "relative" }}>
-                    <CardSwap
-                      cardDistance={60}
-                      verticalDistance={70}
-                      delay={5000}
-                      pauseOnHover={false}
-                    >
-                      <Card customClass="!bg-[#9fe870] !border-[#9fe870]">
-                        <div className="p-6 text-[#163300]">
-                          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-6">
-                            <svg
-                              className="w-6 h-6 text-[#163300]"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                              />
-                            </svg>
-                          </div>
-                          <h3 className="text-xl font-bold mb-4">
-                            リアルタイム面接練習
-                          </h3>
-                          <p className="text-[#163300]/80">
-                            AIが面接官として質問し、自然な会話形式で面接の流れを体験できます。
-                          </p>
-                        </div>
-                      </Card>
-                      <Card customClass="!bg-[#163300] !border-[#163300]">
-                        <div className="p-6 text-white">
-                          <div className="w-12 h-12 bg-[#9fe870] rounded-xl flex items-center justify-center mb-6">
-                            <svg
-                              className="w-6 h-6 text-[#163300]"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                              />
-                            </svg>
-                          </div>
-                          <h3 className="text-xl font-bold mb-4">
-                            面接パフォーマンス評価
-                          </h3>
-                          <p className="text-gray-200">
-                            多角的な視点からあなたの面接パフォーマンスを分析・評価します。
-                          </p>
-                        </div>
-                      </Card>
-                      <Card customClass="!bg-[#ec4899] !border-[#ec4899]">
-                        <div className="p-6 text-white">
-                          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-6">
-                            <svg
-                              className="w-6 h-6 text-[#ec4899]"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M13 10V3L4 14h7v7l9-11h-7z"
-                              />
-                            </svg>
-                          </div>
-                          <h3 className="text-xl font-bold mb-4">
-                            フィードバックと強み発見
-                          </h3>
-                          <p className="text-gray-200">
-                            弱点の改善だけでなく、あなたの長所も発見し、より魅力的にアピールできるようサポートします。
-                          </p>
-                        </div>
-                      </Card>
-                    </CardSwap>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Transformation Section */}
-          <section className="w-full flex justify-center items-center py-32 bg-transparent">
-            <div className="w-full max-w-5xl rounded-[48px] bg-[#163300] flex flex-col items-center px-8 pt-28 pb-20 relative" style={{boxShadow: '0 8px 32px rgba(0,0,0,0.08)'}}>
-              <img
-                src="/interviewericon.png"
-                alt="Interviewer Icon"
-                className="w-80 h-80 object-contain absolute -top-40 left-1/2 -translate-x-1/2 drop-shadow-xl"
-                style={{ zIndex: 2 }}
-                draggable={false}
-              />
-              <h2 className="text-5xl md:text-6xl font-extrabold text-[#9fe870] text-center mb-6 leading-tight mt-2">
-              過去問で鍛えられたAI面接官が<br />あなたの自信を引き出す
-              </h2>
-              <p className="text-lg md:text-xl text-white text-center mb-10 max-w-2xl">
-              豊富な過去問データでAIが徹底指導。自信を持って本番に挑もう
-              </p>
-              <button
-                className="bg-[#9fe870] text-[#163300] px-10 py-4 rounded-full font-semibold text-xl hover:bg-[#7fd950] transition-colors shadow-lg"
-                onClick={() => router.push('/interview/new')}
-              >
-                AI面接を無料で体験する
-              </button>
-            </div>
-          </section>
-        </div>
       </div>
     </>
   );

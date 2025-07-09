@@ -4,10 +4,14 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 const logos = [
-  "/SMBCLogo.png",
-  "/RecruitLogo.png",
+  "/M&CoLOGO.png",
+  "/Accenture-logo.jpg",
+  "/RecruitLogo.jpg",
+  "/P&GLogo.jpg",
   "/MSLogo.jpg",
   "/BDLogo.png",
+  "/SMBCLogo.png",
+
 ];
 
 export default function LogoSlider() {
@@ -35,13 +39,13 @@ export default function LogoSlider() {
     tl.to(sliderRef.current, { x: "50vw", ease: "none" }, 0)
       .to(
         barRef.current,
-        { width: "calc(50vw + 12rem)", ease: "none" },
+        { width: "50vw", ease: "none" },
         0
       )
       .to(
         circleRef.current,
         {
-          left: `calc(50vw + 12rem - 1rem - 3.5rem)`, // barWidth - margin - circleDiameter
+          left: `calc(50vw - 1rem - 3.5rem)`, // barWidth - margin - circleDiameter
           ease: "none"
         },
         0
@@ -49,10 +53,10 @@ export default function LogoSlider() {
 
     // Set initial bar width and circle position
     if (barRef.current) {
-      barRef.current.style.width = "12rem";
+      barRef.current.style.width = "0rem";
     }
     if (circleRef.current) {
-      circleRef.current.style.left = "calc(12rem - 1rem - 3.5rem)";
+      circleRef.current.style.left = "calc(0rem - 1rem - 3.5rem)";
     }
 
     return () => {
@@ -109,7 +113,7 @@ export default function LogoSlider() {
             key={i}
             src={src}
             alt={`Logo ${i + 1}`}
-            className="h-20 w-auto object-contain drop-shadow-lg"
+            className="h-20 w-auto object-contain"
             draggable={false}
           />
         ))}
