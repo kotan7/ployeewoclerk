@@ -167,19 +167,7 @@ export default function Home() {
         );
     }
 
-    // Post Labs-style reveal animation - main content slides up to reveal footer
-    if (mainContentRef.current && footerRef.current) {
-      gsap.to(mainContentRef.current, {
-        y: "-30vh",
-        ease: "none",
-        scrollTrigger: {
-          trigger: mainContentRef.current,
-          start: "bottom bottom",
-          end: "+=30vh",
-          scrub: 1,
-        },
-      });
-    }
+    // Footer is now positioned normally after content - no special animation needed
 
     // Cleanup function to prevent memory leaks and scroll issues
     return () => {
@@ -195,115 +183,8 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       <div className="min-h-screen bg-white relative">
-        {/* Footer positioned behind main content */}
-        <footer
-          ref={footerRef}
-          className="bg-[#163300] text-white py-12 fixed bottom-0 left-0 right-0 z-0"
-        >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid md:grid-cols-4 gap-8">
-              <div>
-                <h3 className="text-2xl font-bold mb-4">プロイー</h3>
-                <p className="text-gray-300">AI面接練習で内定を掴む</p>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">サービス</h4>
-                <ul className="space-y-2 text-gray-300">
-                  <li>
-                    <a
-                      href="#"
-                      className="hover:text-[#9fe870] transition-colors"
-                    >
-                      AI面接練習
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="hover:text-[#9fe870] transition-colors"
-                    >
-                      フィードバック
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="hover:text-[#9fe870] transition-colors"
-                    >
-                      料金プラン
-                    </a>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">サポート</h4>
-                <ul className="space-y-2 text-gray-300">
-                  <li>
-                    <a
-                      href="#"
-                      className="hover:text-[#9fe870] transition-colors"
-                    >
-                      ヘルプセンター
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="hover:text-[#9fe870] transition-colors"
-                    >
-                      お問い合わせ
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="hover:text-[#9fe870] transition-colors"
-                    >
-                      利用規約
-                    </a>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">会社情報</h4>
-                <ul className="space-y-2 text-gray-300">
-                  <li>
-                    <a
-                      href="#"
-                      className="hover:text-[#9fe870] transition-colors"
-                    >
-                      会社概要
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="hover:text-[#9fe870] transition-colors"
-                    >
-                      プライバシーポリシー
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="hover:text-[#9fe870] transition-colors"
-                    >
-                      採用情報
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <div className="border-t border-gray-700 mt-8 pt-8 text-center">
-              <p className="text-gray-300">
-                © 2024 プロイー. All rights reserved.
-              </p>
-            </div>
-          </div>
-        </footer>
-
-        {/* Main content wrapper that slides up */}
-        <div ref={mainContentRef} className="relative z-10 bg-white">
+        {/* Main content wrapper */}
+        <div ref={mainContentRef} className="relative bg-white">
           {/* Hero Section */}
           <section className="relative h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden">
             <Orb
@@ -420,7 +301,7 @@ export default function Home() {
                       pauseOnHover={false}
                     >
                       {/* Lime Card */}
-                      <Card customClass="!bg-[#aff2a7] !border-[#aff2a7]">
+                      <Card customClass="!bg-[#9fe870] !border-[#9fe870]">
                         <div className="p-8 text-[#2D5016] h-full flex flex-col">
                           {/* Interview Icon */}
                           <div className="flex-1 flex flex-col justify-center">
@@ -643,6 +524,110 @@ export default function Home() {
             </div>
           </section>
         </div>
+
+        {/* Footer - now positioned normally after all content */}
+        <footer ref={footerRef} className="bg-[#163300] text-white py-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid md:grid-cols-4 gap-8">
+              <div>
+                <h3 className="text-2xl font-bold mb-4">プロイー</h3>
+                <p className="text-gray-300">AI面接練習で内定を掴む</p>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-4">サービス</h4>
+                <ul className="space-y-2 text-gray-300">
+                  <li>
+                    <a
+                      href="#"
+                      className="hover:text-[#9fe870] transition-colors"
+                    >
+                      AI面接練習
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="#"
+                      className="hover:text-[#9fe870] transition-colors"
+                    >
+                      フィードバック
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="#"
+                      className="hover:text-[#9fe870] transition-colors"
+                    >
+                      料金プラン
+                    </a>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-4">サポート</h4>
+                <ul className="space-y-2 text-gray-300">
+                  <li>
+                    <a
+                      href="#"
+                      className="hover:text-[#9fe870] transition-colors"
+                    >
+                      ヘルプセンター
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="#"
+                      className="hover:text-[#9fe870] transition-colors"
+                    >
+                      お問い合わせ
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="#"
+                      className="hover:text-[#9fe870] transition-colors"
+                    >
+                      利用規約
+                    </a>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-4">会社情報</h4>
+                <ul className="space-y-2 text-gray-300">
+                  <li>
+                    <a
+                      href="#"
+                      className="hover:text-[#9fe870] transition-colors"
+                    >
+                      会社概要
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="#"
+                      className="hover:text-[#9fe870] transition-colors"
+                    >
+                      プライバシーポリシー
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="#"
+                      className="hover:text-[#9fe870] transition-colors"
+                    >
+                      採用情報
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div className="border-t border-gray-700 mt-8 pt-8 text-center">
+              <p className="text-gray-300">
+                © 2024 プロイー. All rights reserved.
+              </p>
+            </div>
+          </div>
+        </footer>
       </div>
     </>
   );
