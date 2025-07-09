@@ -439,7 +439,7 @@ export default function Home() {
           </section>
 
           {/* Transformation Section */}
-          <section className="w-full flex justify-center items-center py-32 bg-transparent">
+          <section className="w-full flex justify-center items-center py-32 bg-transparent mt-15">
             <div className="w-full max-w-5xl rounded-[48px] bg-[#163300] flex flex-col items-center px-8 pt-28 pb-20 relative" style={{boxShadow: '0 8px 32px rgba(0,0,0,0.08)'}}>
               <img
                 src="/interviewericon.png"
@@ -465,7 +465,7 @@ export default function Home() {
         </div>
 
         {/* Footer - now positioned normally after all content */}
-        <footer ref={footerRef} className="bg-[#163300] text-white py-12">
+        <footer ref={footerRef} className="bg-[#163300] text-white py-12 mt-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid md:grid-cols-4 gap-8">
               <div>
