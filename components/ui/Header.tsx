@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -16,7 +16,8 @@ import logo from "../../constants/logo.png";
 
 const Header = () => {
   const router = useRouter();
-  
+  const [isScrolled, setIsScrolled] = useState(false);
+
   // Refs for header animations
   const headerRef = useRef<HTMLElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
@@ -25,11 +26,16 @@ const Header = () => {
 
   useEffect(() => {
     // Header animations on page load
-    if (headerRef.current && logoRef.current && navRef.current && buttonsRef.current) {
+    if (
+      headerRef.current &&
+      logoRef.current &&
+      navRef.current &&
+      buttonsRef.current
+    ) {
       // Set initial states
       gsap.set([logoRef.current, navRef.current, buttonsRef.current], {
         opacity: 0,
-        y: -20
+        y: -20,
       });
 
       // Create timeline for staggered animation
@@ -40,28 +46,55 @@ const Header = () => {
         opacity: 1,
         y: 0,
         duration: 0.6,
-        ease: "power2.out"
+        ease: "power2.out",
       })
-      // Then animate navigation links
-      .to(navRef.current, {
-        opacity: 1,
-        y: 0,
-        duration: 0.6,
-        ease: "power2.out"
-      }, "-=0.3") // Start slightly before logo animation ends
-      // Finally animate buttons
-      .to(buttonsRef.current, {
-        opacity: 1,
-        y: 0,
-        duration: 0.6,
-        ease: "power2.out"
-      }, "-=0.3"); // Start slightly before nav animation ends
+        // Then animate navigation links
+        .to(
+          navRef.current,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: "power2.out",
+          },
+          "-=0.3"
+        ) // Start slightly before logo animation ends
+        // Finally animate buttons
+        .to(
+          buttonsRef.current,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: "power2.out",
+          },
+          "-=0.3"
+        ); // Start slightly before nav animation ends
     }
+
+    // Scroll detection for rounded header
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
-    <header ref={headerRef} className="border-b border-gray-100/20 sticky top-0 z-50 bg-white/80 backdrop-blur-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header
+      ref={headerRef}
+      className={`border-b border-gray-100/20 sticky z-50 bg-white/75 backdrop-blur-sm transition-all duration-300 ${
+        isScrolled
+          ? "top-5 mx-16 rounded-full shadow-lg border-gray-200/30"
+          : "top-0"
+      }`}
+    >
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center -ml-12 space-x-8">
             <div
@@ -76,7 +109,9 @@ const Header = () => {
                 height={32}
                 className="object-contain"
               />
-              <h1 className="text-2xl -ml-2 font-bold text-[#163300]">プロイー</h1>
+              <h1 className="text-2xl -ml-2 font-bold text-[#163300]">
+                プロイー
+              </h1>
             </div>
 
             {/* Navigation Links */}
