@@ -11,7 +11,6 @@ const logos = [
   "/MSLogo.jpg",
   "/BDLogo.png",
   "/SMBCLogo.png",
-
 ];
 
 export default function LogoSlider() {
@@ -37,16 +36,12 @@ export default function LogoSlider() {
     });
 
     tl.to(sliderRef.current, { x: "50vw", ease: "none" }, 0)
-      .to(
-        barRef.current,
-        { width: "50vw", ease: "none" },
-        0
-      )
+      .to(barRef.current, { width: "50vw", ease: "none" }, 0)
       .to(
         circleRef.current,
         {
           left: `calc(50vw - 1rem - 3.5rem)`, // barWidth - margin - circleDiameter
-          ease: "none"
+          ease: "none",
         },
         0
       );
@@ -72,15 +67,15 @@ export default function LogoSlider() {
         ref={barRef}
         className="absolute left-0 h-20 z-0"
         style={{
-          background: '#9fe870',
+          background: "#9fe870",
           borderTopRightRadius: 40,
           borderBottomRightRadius: 40,
           borderTopLeftRadius: 0,
           borderBottomLeftRadius: 0,
-          top: '50%',
-          transform: 'translateY(-50%)',
+          top: "50%",
+          transform: "translateY(-50%)",
           width: 0,
-          minWidth: 0
+          minWidth: 0,
         }}
       />
       {/* Circle with Arrow (fully inside the bar, equal margin) */}
@@ -88,24 +83,36 @@ export default function LogoSlider() {
         ref={circleRef}
         className="absolute z-10 flex items-center justify-center"
         style={{
-          top: '50%',
-          height: '3.5rem',
-          width: '3.5rem',
-          borderRadius: '50%',
-          background: '#163300',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-          transform: 'translateY(-50%)',
+          top: "50%",
+          height: "3.5rem",
+          width: "3.5rem",
+          borderRadius: "50%",
+          background: "#163300",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+          transform: "translateY(-50%)",
           // left is set/animated by GSAP
         }}
       >
-        <svg width="26" height="26" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7 5l6 5-6 5" stroke="#9fe870" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+        <svg
+          width="26"
+          height="26"
+          viewBox="0 0 20 20"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M7 5l6 5-6 5"
+            stroke="#9fe870"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </div>
       {/* Logos */}
       <div
         ref={sliderRef}
-        className="flex gap-12 items-center w-max mx-auto relative z-10"
+        className="flex gap-12 items-center w-max -ml-65 relative z-10"
         style={{ willChange: "transform" }}
       >
         {logos.map((src, i) => (
@@ -120,4 +127,4 @@ export default function LogoSlider() {
       </div>
     </div>
   );
-} 
+}

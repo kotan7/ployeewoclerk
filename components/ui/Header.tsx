@@ -88,7 +88,7 @@ const Header = () => {
   return (
     <header
       ref={headerRef}
-      className={`border-b border-gray-100/20 sticky z-50 bg-white/75 backdrop-blur-sm transition-all duration-300 ${
+      className={`border-b border-gray-100/20 sticky z-50 bg-white/40 backdrop-blur-sm transition-all duration-300 ${
         isScrolled
           ? "top-5 mx-16 rounded-full shadow-lg border-gray-200/30"
           : "top-0"
