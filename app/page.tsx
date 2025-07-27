@@ -1,12 +1,13 @@
 "use client";
 
-import Orb from "../components/ui/reactbits/OrbBackground";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import CardSwap, { Card } from "../components/ui/reactbits/cardSwap";
-import LogoSlider from "../components/ui/LogoSlider";
+import Cubes from "../components/ui/reactbits/cube";
+import logo from "../constants/logo.png";
+import Image from "next/image";
 
 // Structured Data for SEO
 const structuredData = {
@@ -134,9 +135,9 @@ export default function Home() {
       problemTextRef.current &&
       problemImageRef.current
     ) {
-      // Set initial states
-      gsap.set(problemTextRef.current, { opacity: 0, y: 50 });
-      gsap.set(problemImageRef.current, { opacity: 0, x: -50 });
+      // Set initial states (removed x animation for image)
+      gsap.set(problemTextRef.current, { opacity: 1, y: 10 });
+      gsap.set(problemImageRef.current, { opacity: 1 }); // Cube always visible
 
       // Create scroll-triggered timeline
       const problemTl = gsap.timeline({
@@ -247,96 +248,243 @@ export default function Home() {
         {/* Main content wrapper */}
         <div ref={mainContentRef} className="relative bg-white">
           {/* Hero Section */}
-          <section className="relative h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden">
-            <Orb
-              hoverIntensity={0.5}
-              rotateOnHover={true}
-              hue={0}
-              forceHoverState={false}
-            />
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-              <div className="text-center mt-16 mb-8">
-                <h1
-                  ref={heroTitleRef}
-                  className="text-4xl text-center lg:text-6xl font-bold text-[#163300] mb-6 leading-tight"
-                >
-                  内定まで、何度でも叩き込む。
-                  <br />
-                  <span className="text-[#9fe870]">AI面接官</span>
-                  、24時間フル稼働。
-                </h1>
+          <section className="relative h-screen flex items-center justify-center overflow-hidden bg-[#2F4F3F] -mt-16">
+            {/* Background gradient overlay */}
+            <div className="absolute inset-0 bg-[#142d25]"></div>
+
+            <div className="max-w-7xl mx-auto pl-4 sm:pl-8 lg:pl-12 pr-4 sm:pr-8 lg:pr-12 relative z-10">
+              <div className="text-left mb-8">
+                {/* Feature badges - moved down to account for navbar */}
+                <div className="flex flex-wrap gap-4 mb-8 mt-32">
+                  <div className="inline-flex items-center px-4 py-2 rounded-full border border-white/20 text-white/80 text-sm font-medium backdrop-blur-sm">
+                    <div className="w-2 h-2 bg-[#9fe870] rounded-full mr-2"></div>
+                    24時間利用可能
+                  </div>
+                  <div className="inline-flex items-center px-4 py-2 rounded-full border border-white/20 text-white/80 text-sm font-medium backdrop-blur-sm">
+                    <div className="w-2 h-2 bg-[#9fe870] rounded-full mr-2"></div>
+                    AI面接官搭載
+                  </div>
+                  <div className="inline-flex items-center px-4 py-2 rounded-full border border-white/20 text-white/80 text-sm font-medium backdrop-blur-sm">
+                    <div className="w-2 h-2 bg-[#9fe870] rounded-full mr-2"></div>
+                    リアルタイム分析
+                  </div>
+                </div>
+                {/* Main heading and button container */}
+                <div className="mb-12">
+                  <div className="flex items-end justify-between">
+                    <div className="flex-1">
+                      <div className="text-6xl lg:text-8xl font-bold text-white leading-tight text-left">
+                        面接の不安
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-end justify-between">
+                    <div className="flex-1">
+                      <h1
+                        ref={heroTitleRef}
+                        className="text-6xl lg:text-8xl font-bold text-white mb-0 leading-tight text-left"
+                      >
+                        <span className="text-[#9fe870]">AI面接官</span>
+                        で潰せ
+                      </h1>
+                    </div>
+
+                    {/* Main CTA button positioned next to second row */}
+                    <div
+                      ref={heroButtonsRef}
+                      className="flex-shrink-0 mb-2 ml-8"
+                    >
+                      <button
+                        className="group relative inline-flex items-center px-8 py-4 mb-5 bg-[#9fe870] text-[#163300] rounded-full font-semibold text-lg hover:bg-[#8fd960] transition-all duration-300 hover:scale-105 shadow-xl"
+                        onClick={handleClick}
+                        aria-label="AI面接練習を無料で体験する"
+                      >
+                        <span className="mr-3">無料で体験する</span>
+                        <div className="w-8 h-8 bg-[#ff8c5a] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                          <svg
+                            className="w-4 h-4 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
+                          </svg>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
                 <p
                   ref={heroSubtitleRef}
-                  className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto font-bold text-center"
+                  className="text-xl text-white/80 mb-12 max-w-4xl leading-relaxed text-left"
                 >
-                  面接で落ちる理由が、いつまでも分からない。
+                  プロイーはAI面接官による実践的な面接練習で、次世代の就活・転職活動をサポートします。
                   <br />
-                  そんな不安を、AI面接官が&ldquo;可視化&rdquo;します。
+                  詳細な分析、リアルタイムフィードバック、そして成長を実感できる環境—すべてを統合したプラットフォームです。
                 </p>
-                <div
-                  ref={heroButtonsRef}
-                  className="flex flex-col sm:flex-row gap-4 justify-center"
-                >
-                  <button
-                    className="cursor-pointer bg-[#9fe870] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#8fd960] transition-colors shadow-lg"
-                    onClick={handleClick}
-                    aria-label="AI面接練習を無料で体験する"
-                  >
-                    無料で体験する
-                  </button>
-                  <button
-                    className="cursor-pointer border-2 border-[#163300] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#163300] hover:text-white transition-colors"
-                    onClick={handleClick2}
-                    aria-label="AI面接サービスの詳細を見る"
-                  >
-                    サービス詳細
-                  </button>
+
+                {/* Trusted by section */}
+                <div className="text-left">
+                  <p className="text-white/60 text-sm mb-6">
+                    就活生・転職者から信頼されています
+                  </p>
+                  <div className="-ml-5">
+                    <img
+                      src="/companies.png"
+                      alt="信頼される企業のロゴ - 多くの就活生と転職者に選ばれています"
+                      className="w-full max-w-2xl opacity-60 hover:opacity-80 transition-opacity duration-300"
+                      loading="lazy"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* Problem Section */}
+          {/* Enhanced Problem Section - Campfire.ai Style */}
           <section
             ref={problemSectionRef}
-            className="py-20 bg-gray-200/100 backdrop-blur-sm relative z-10"
+            className="py-32 bg-white relative overflow-hidden -mb-18"
           >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
-              <div ref={problemImageRef} className="flex-1 mr-20">
-                <img
-                  src="/soundwave.png"
-                  alt="AI面接練習中の音声波形イメージ - リアルタイム対話"
-                  className="w-full h-auto"
-                  loading="lazy"
-                />
-              </div>
-              <div ref={problemTextRef} className="max-w-4xl text-left">
-                <h2 className="text-3xl lg:text-4xl font-bold text-[#163300]">
-                  そんなあなたのために、
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center ">
+                <div className="inline-flex items-center px-6 py-3 rounded-full bg-[#f8f9fa] border border-gray-200 text-gray-600 text-sm font-medium mb-8">
+                  <div className="w-2 h-2 bg-[#ff8c5a] rounded-full mr-3"></div>
+                  問題の解決
+                </div>
+                <h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-8 leading-tight max-w-4xl mx-auto">
+                  面接の不安を解消する
                   <br />
-                  私たちは<strong>AI面接官</strong>を開発しました。
+                  <span className="text-[#163300]">AI面接官</span>
                 </h2>
-                <p className="text-gray-600 font-bold mt-6">
-                  <strong>AIとリアルタイムで対話</strong>
-                  しながら、実際の面接に近い形式で練習ができます。
-                  <br />
-                  いつでも・何度でも挑戦可能。
+                <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                  従来の面接対策では限界がある問題を、AI技術で根本的に解決します。
                 </p>
+              </div>
+
+              <div className="grid lg:grid-cols-2 gap-20 items-center">
+                {/* Left: Modern Cube Animation */}
+                <div
+                  ref={problemImageRef}
+                  className="relative flex justify-center items-center min-h-[600px]"
+                >
+                  <img src="/sound.png" alt="sound" width={500} height={500} />
+                </div>
+
+                {/* Right: Solution Text */}
+                <div ref={problemTextRef} className="space-y-8">
+                  <div className="space-y-6">
+                    <h3 className="text-3xl font-bold text-gray-900 leading-tight">
+                      AIとのリアルタイム対話で
+                      <br />
+                      実践的な面接練習を実現
+                    </h3>
+                    <p className="text-lg text-gray-600 leading-relaxed">
+                      従来の一方向的な学習ではなく、AI面接官との双方向対話により、
+                      本番に近い環境での練習が可能。詳細な分析とフィードバックで、
+                      あなたの面接スキルを確実に向上させます。
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex items-start space-x-4 p-4 bg-[#9fe870]/10 rounded-2xl">
+                      <div className="w-8 h-8 bg-[#9fe870] rounded-xl flex items-center justify-center flex-shrink-0 mt-1">
+                        <svg
+                          className="w-4 h-4 text-[#163300]"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-1">
+                          24時間いつでも練習可能
+                        </h4>
+                        <p className="text-gray-600 text-sm">
+                          時間や場所に制約されることなく、自分のペースで面接練習
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start space-x-4 p-4 bg-[#9fe870]/10 rounded-2xl">
+                      <div className="w-8 h-8 bg-[#9fe870] rounded-xl flex items-center justify-center flex-shrink-0 mt-1">
+                        <svg
+                          className="w-4 h-4 text-[#163300]"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-1">
+                          リアルタイム分析・評価
+                        </h4>
+                        <p className="text-gray-600 text-sm">
+                          音声、表情、回答内容を総合的に分析し、具体的な改善点を提示
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start space-x-4 p-4 bg-[#9fe870]/10 rounded-2xl">
+                      <div className="w-8 h-8 bg-[#9fe870] rounded-xl flex items-center justify-center flex-shrink-0 mt-1">
+                        <svg
+                          className="w-4 h-4 text-[#163300]"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-1">
+                          個人最適化されたフィードバック
+                        </h4>
+                        <p className="text-gray-600 text-sm">
+                          あなたの特性に合わせた改善提案と強みの発見
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
 
-          {/* Logo Slider Section */}
-          <LogoSlider />
-
           {/* Features Section */}
-          <section className="py-20 relative z-10 mt-10 -mb-10">
+          <section className="py-20 relative z-10 -mb-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <h2 className="sr-only">AI面接練習サービスの特徴</h2>
               <div className="flex items-center gap-16">
                 {/* Text Content - Left Side */}
-                <div className="flex-1 mb-10">
-                  <h2 className="text-4xl lg:text-5xl font-bold text-[#163300] mb-8">
+                <div className="flex-1 mb-10 ml-15">
+                  <h2 className="text-3xl lg:text-4xl font-bold text-[#163300] mb-8">
                     プロイーの3つの特徴
                   </h2>
                   <div className="space-y-6">
@@ -349,152 +497,215 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* CardSwap Component - Right Side */}
-                <div
-                  className="flex-1 relative mb-25"
-                  style={{ marginTop: "-180px" }}
+{/* CardSwap Component - Right Side */}
+<div
+  className="flex-1 relative mb-25"
+  style={{ marginTop: "-180px" }}
+>
+  <div style={{ height: "600px", position: "relative" }}>
+    <CardSwap
+      cardDistance={60}
+      verticalDistance={70}
+      delay={5000}
+      pauseOnHover={false}
+    >
+      {/* Real-time Practice Card */}
+      <Card customClass="!bg-white !border-0 overflow-hidden shadow-xl hover:shadow-xl transition-transform duration-200 hover:-translate-y-1 rounded-3xl">
+        <div className="h-full flex flex-col">
+          {/* Image Section - Larger for better display */}
+          <div 
+            className="h-64 bg-cover bg-center bg-no-repeat relative"
+            style={{ backgroundImage: "url(/green.jpg)" }}
+          >
+            {/* Minimal overlay */}
+            <div className="absolute inset-0 bg-black/5"></div>
+            
+            {/* Modern floating icon */}
+            <div className="absolute top-8 right-8">
+              <div className="w-14 h-14 bg-white/95 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-lg border border-white/20">
+                <svg
+                  className="w-7 h-7 text-emerald-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  <div style={{ height: "600px", position: "relative" }}>
-                    <CardSwap
-                      cardDistance={60}
-                      verticalDistance={70}
-                      delay={5000}
-                      pauseOnHover={false}
-                    >
-                      {/* Lime Card */}
-                      <Card customClass="!bg-[#9fe870] !border-[#9fe870]">
-                        <div className="p-8 text-[#2D5016] h-full flex flex-col">
-                          {/* Interview Icon */}
-                          <div className="flex-1 flex flex-col justify-center">
-                            <div className="mb-6">
-                              <div className="w-12 h-12 bg-[#2D5016]/10 rounded-xl flex items-center justify-center">
-                                <svg
-                                  className="w-6 h-6 text-[#2D5016]"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                                  />
-                                </svg>
-                              </div>
-                            </div>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
 
-                            <h3 className="text-2xl font-bold mb-4 leading-tight">
-                              リアルタイム
-                              <br />
-                              面接練習
-                            </h3>
+          {/* Content Section - Compact */}
+          <div className="flex-1 px-8 py-6 bg-white">
+            <h3 className="text-xl font-bold mb-3 text-gray-900 leading-tight">
+              リアルタイム面接練習
+            </h3>
 
-                            <div className="w-12 h-0.5 bg-[#2D5016]/30 mb-4"></div>
+            <div className="w-10 h-0.5 bg-emerald-500 rounded-full mb-4"></div>
 
-                            <p className="text-[#2D5016]/80 text-sm leading-relaxed mb-4">
-                              AIが面接官として質問し、自然な会話形式で面接の流れを体験できます。音声認識とリアルタイム応答で、実際の面接に近い環境を提供します。緊張感のある本格的な練習が可能です。
-                            </p>
+            <p className="text-gray-600 text-xs leading-relaxed mb-6">
+              AIが面接官として質問し、自然な会話形式で面接の流れを体験できます。音声認識とリアルタイム応答で、実際の面接に近い環境を提供します。
+            </p>
 
-                            <div className="w-full h-0.5 bg-[#2D5016]/20 mb-6"></div>
+            <button className="group bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-300 hover:shadow-lg hover:scale-105">
+              <span className="flex items-center justify-center">
+                今すぐ試す
+                <svg
+                  className="w-3.5 h-3.5 ml-2 group-hover:translate-x-1 transition-transform"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </span>
+            </button>
+          </div>
+        </div>
+      </Card>
 
-                            <button className="bg-[#2D5016] text-white px-4 py-3 rounded-3xl text-sm font-medium hover:bg-[#2D5016]/90 transition-colors">
-                              今すぐ試す →
-                            </button>
-                          </div>
-                        </div>
-                      </Card>
+      {/* Performance Analysis Card */}
+      <Card customClass="!bg-white !border-0 overflow-hidden shadow-xl hover:shadow-xl transition-transform duration-200 hover:-translate-y-1 rounded-3xl">
+        <div className="h-full flex flex-col">
+          {/* Image Section - Larger for better display */}
+          <div 
+            className="h-64 bg-cover bg-center bg-no-repeat relative"
+            style={{ backgroundImage: "url(/deep_green.jpg)" }}
+          >
+            {/* Minimal overlay */}
+            <div className="absolute inset-0 bg-black/5"></div>
+            
+            {/* Modern floating icon */}
+            <div className="absolute top-8 right-8">
+              <div className="w-14 h-14 bg-white/95 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-lg border border-white/20">
+                <svg
+                  className="w-7 h-7 text-green-800"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
 
-                      {/* Green Card */}
-                      <Card customClass="!bg-[#163300] !border-[#163300]">
-                        <div className="p-8 text-white h-full flex flex-col">
-                          {/* Performance Icon */}
-                          <div className="flex-1 flex flex-col justify-center">
-                            <div className="mb-6">
-                              <div className="w-12 h-12 bg-[#9fe870] rounded-xl flex items-center justify-center">
-                                <svg
-                                  className="w-6 h-6 text-[#163300]"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                                  />
-                                </svg>
-                              </div>
-                            </div>
+          {/* Content Section - Compact */}
+          <div className="flex-1 px-8 py-6 bg-white">
+            <h3 className="text-xl font-bold mb-3 text-gray-900 leading-tight">
+              面接パフォーマンス評価
+            </h3>
 
-                            <h3 className="text-2xl font-bold mb-4 leading-tight">
-                              面接パフォーマンス
-                              <br />
-                              評価
-                            </h3>
+            <div className="w-10 h-0.5 bg-green-700 rounded-full mb-4"></div>
 
-                            <div className="w-12 h-0.5 bg-white/30 mb-4"></div>
+            <p className="text-gray-600 text-xs leading-relaxed mb-6">
+              多角的な視点からあなたの面接パフォーマンスを分析・評価します。話し方、表情、回答内容、論理性など細かい項目まで詳細に分析します。
+            </p>
 
-                            <p className="text-gray-200 text-sm leading-relaxed mb-4">
-                              多角的な視点からあなたの面接パフォーマンスを分析・評価します。話し方、表情、回答内容、論理性など細かい項目まで詳細に分析し、具体的な改善点を提示します。
-                            </p>
+            <button className="group bg-green-800 hover:bg-green-900 text-white px-5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-300 hover:shadow-lg hover:scale-105">
+              <span className="flex items-center justify-center">
+                評価を見る
+                <svg
+                  className="w-3.5 h-3.5 ml-2 group-hover:translate-x-1 transition-transform"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </span>
+            </button>
+          </div>
+        </div>
+      </Card>
 
-                            <div className="w-full h-0.5 bg-white/20 mb-6"></div>
+      {/* Feedback & Discovery Card */}
+      <Card customClass="!bg-white !border-0 overflow-hidden shadow-xl hover:shadow-xl transition-transform duration-200 hover:-translate-y-1 rounded-3xl">
+        <div className="h-full flex flex-col">
+          {/* Image Section - Using orange image */}
+          <div 
+            className="h-64 bg-cover bg-center bg-no-repeat relative"
+            style={{ backgroundImage: "url(/orange.jpg)" }}
+          >
+            {/* Minimal overlay */}
+            <div className="absolute inset-0 bg-black/5"></div>
+            
+            {/* Modern floating icon */}
+            <div className="absolute top-8 right-8">
+              <div className="w-14 h-14 bg-white/95 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-lg border border-white/20">
+                <svg
+                  className="w-7 h-7 text-orange-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
 
-                            <button className="bg-[#9fe870] text-[#163300] px-4 py-3 rounded-3xl text-sm font-medium hover:bg-[#9fe870]/90 transition-colors">
-                              評価を見る →
-                            </button>
-                          </div>
-                        </div>
-                      </Card>
+          {/* Content Section - Compact */}
+          <div className="flex-1 px-8 py-6 bg-white">
+            <h3 className="text-xl font-bold mb-3 text-gray-900 leading-tight">
+              フィードバックと強み発見
+            </h3>
 
-                      {/* Pink Card */}
-                      <Card customClass="!bg-[#f5b0ea] !border-[#f5b0ea]">
-                        <div className="p-8 text-[#721C24] h-full flex flex-col">
-                          {/* Feedback Icon */}
-                          <div className="flex-1 flex flex-col justify-center">
-                            <div className="mb-6">
-                              <div className="w-12 h-12 bg-[#721C24]/10 rounded-xl flex items-center justify-center">
-                                <svg
-                                  className="w-6 h-6 text-[#721C24]"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                                  />
-                                </svg>
-                              </div>
-                            </div>
+            <div className="w-10 h-0.5 bg-orange-500 rounded-full mb-4"></div>
 
-                            <h3 className="text-2xl font-bold mb-4 leading-tight">
-                              フィードバックと
-                              <br />
-                              強み発見
-                            </h3>
+            <p className="text-gray-600 text-xs leading-relaxed mb-6">
+              弱点の改善だけでなく、あなたの長所も発見し、より魅力的にアピールできるようサポートします。個人の特性を活かした回答パターンを提案します。
+            </p>
 
-                            <div className="w-12 h-0.5 bg-[#721C24]/30 mb-4"></div>
-
-                            <p className="text-[#721C24]/80 text-sm leading-relaxed mb-4">
-                              弱点の改善だけでなく、あなたの長所も発見し、より魅力的にアピールできるようサポートします。個人の特性を活かした回答パターンの提案や、自信を持って話せるポイントを明確化します。
-                            </p>
-
-                            <div className="w-full h-0.5 bg-[#721C24]/20 mb-6"></div>
-
-                            <button className="bg-[#721C24] text-white px-4 py-3 rounded-3xl text-sm font-medium hover:bg-[#721C24]/90 transition-colors">
-                              強みを発見 →
-                            </button>
-                          </div>
-                        </div>
-                      </Card>
-                    </CardSwap>
-                  </div>
-                </div>
+            <button className="group bg-orange-600 hover:bg-orange-700 text-white px-5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-300 hover:shadow-lg hover:scale-105">
+              <span className="flex items-center justify-center">
+                強みを発見
+                <svg
+                  className="w-3.5 h-3.5 ml-2 group-hover:translate-x-1 transition-transform"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </span>
+            </button>
+          </div>
+        </div>
+      </Card>
+    </CardSwap>
+  </div>
+</div>
               </div>
             </div>
           </section>
@@ -529,142 +740,46 @@ export default function Home() {
             </div>
           </section>
 
-          {/* AI Interview Speed Comparison Section */}
+          {/* Enhanced Speed Comparison Section - Campfire.ai Style */}
           <section
             ref={speedSectionRef}
-            className="py-24 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden"
+            className="py-32 bg-white relative overflow-hidden -mt-24"
           >
-            {/* Background Elements */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#9fe870]/5 to-[#163300]/5"></div>
-            <div className="absolute top-20 left-10 w-64 h-64 bg-[#9fe870]/10 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#163300]/10 rounded-full blur-3xl"></div>
-
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
               {/* Main Header */}
               <div ref={speedHeaderRef} className="text-center mb-20">
-                <div className="inline-flex items-center bg-[#9fe870]/20 px-6 py-2 rounded-full mb-6">
-                  <svg
-                    className="w-5 h-5 text-[#163300] mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 10V3L4 14h7v7l9-11h-7z"
-                    />
-                  </svg>
-                  <span className="text-[#163300] font-semibold">
-                    革新的な学習体験
-                  </span>
+                <div className="inline-flex items-center px-6 py-3 rounded-full bg-[#f8f9fa] border border-gray-200 text-gray-600 text-sm font-medium mb-8">
+                  <div className="w-2 h-2 bg-[#ff8c5a] rounded-full mr-3"></div>
+                  効率性の比較
                 </div>
-                <h2 className="text-5xl md:text-7xl font-bold text-[#163300] mb-8 leading-tight">
+                <h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-8 leading-tight max-w-4xl mx-auto">
                   従来の面接練習より
                   <br />
-                  <span className="text-[#9fe870] relative">
-                    5倍
-                    <div className="absolute -bottom-2 left-0 right-0 h-1 bg-[#9fe870]/30 rounded-full"></div>
+                  <span className="text-[#163300] relative">
+                    5倍効率的
+                    <div className="absolute -bottom-1 left-0 right-0 h-1 bg-[#9fe870] rounded-full"></div>
                   </span>
-                  効率的
                 </h2>
-                <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-                  書籍や動画での学習では限界がある。
-                  <br />
-                  AI面接官との
-                  <em className="italic font-semibold">リアルタイム対話</em>で、
+                <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                  書籍や動画での学習では限界がある。AI面接官とのリアルタイム対話で、
                   実践的なスキルを短時間で身につけることができます。
                 </p>
               </div>
 
-              {/* Speed Comparison Cards */}
-              <div className="grid lg:grid-cols-2 gap-12 max-w-7xl mx-auto mb-16 -mt-2">
-                {/* Traditional Study Card */}
+              {/* Comparison Cards */}
+              <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto mb-16">
+                {/* Traditional Method Card */}
                 <div
                   ref={keyboardCardRef}
-                  className="group bg-white/80 backdrop-blur-sm rounded-3xl p-8 border border-gray-200/50 relative overflow-hidden transition-all duration-500"
+                  className="bg-white rounded-3xl border border-gray-200 overflow-hidden hover:border-gray-300 transition-all duration-300"
                 >
                   {/* Card Header */}
-                  <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center space-x-4">
-                      <div className="p-3 bg-gray-100 rounded-2xl">
-                        <svg
-                          className="w-8 h-8 text-gray-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                          />
-                        </svg>
-                      </div>
-                      <div>
-                        <h3 className="text-2xl font-bold text-gray-800">
-                          従来の学習方法
-                        </h3>
-                        <p className="text-gray-500">参考書・動画学習</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-4xl font-bold text-red-500">
-                        週5時間
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        必要な学習時間
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Content Area - Fixed Height */}
-                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 h-80 relative overflow-hidden">
-                    {/* Progress Indicator */}
-                    <div className="absolute top-4 right-4">
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-red-300 rounded-full animate-pulse"></div>
-                        <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse animation-delay-150"></div>
-                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse animation-delay-300"></div>
-                      </div>
-                    </div>
-
-                    {/* Content with Fixed Container */}
-                    <div className="h-full flex flex-col justify-between">
-                      <div className="space-y-4 text-gray-700">
-                        <div className="flex items-start space-x-3">
-                          <div className="w-6 h-6 rounded-full bg-gray-300 flex-shrink-0 mt-1"></div>
-                          <div className="typing-text-slow min-h-[1.5rem]">
-                            自己分析をして...志望動機を考えて...
-                          </div>
-                        </div>
-                        <div className="flex items-start space-x-3">
-                          <div className="w-6 h-6 rounded-full bg-gray-300 flex-shrink-0 mt-1"></div>
-                          <div className="typing-text-slow min-h-[1.5rem] animation-delay-300">
-                            想定質問を暗記して...一人で練習して...
-                          </div>
-                        </div>
-                        <div className="flex items-start space-x-3">
-                          <div className="w-6 h-6 rounded-full bg-gray-300 flex-shrink-0 mt-1"></div>
-                          <div className="typing-text-slow min-h-[1.5rem] animation-delay-600">
-                            でも本番では緊張して上手く話せない...
-                          </div>
-                        </div>
-                        <div className="flex items-start space-x-3">
-                          <div className="w-6 h-6 rounded-full bg-gray-300 flex-shrink-0 mt-1"></div>
-                          <div className="typing-text-slow min-h-[1.5rem] animation-delay-900">
-                            改善点がよく分からない...
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Bottom Status */}
-                      <div className="bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-xl p-4">
-                        <div className="flex items-center space-x-2">
+                  <div className="p-8 border-b border-gray-100">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center">
                           <svg
-                            className="w-5 h-5 text-red-500 flex-shrink-0"
+                            className="w-6 h-6 text-gray-600"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -673,33 +788,109 @@ export default function Home() {
                               strokeLinecap="round"
                               strokeLinejoin="round"
                               strokeWidth={2}
-                              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
                             />
                           </svg>
-                          <p className="text-red-600 font-medium">
-                            フィードバックが不十分・成長が見えにくい
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold text-gray-900">
+                            従来の学習方法
+                          </h3>
+                          <p className="text-gray-500 text-sm">
+                            参考書・動画学習
                           </p>
                         </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-[#ff8c5a]">
+                          週5時間
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          必要な学習時間
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card Content */}
+                  <div className="p-8">
+                    <div className="space-y-4 mb-8">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-6 h-6 bg-[#ff8c5a]/20 rounded-full flex items-center justify-center flex-shrink-0">
+                          <div className="w-2 h-2 bg-[#ff8c5a] rounded-full"></div>
+                        </div>
+                        <span className="text-gray-700 text-sm">
+                          自己分析と志望動機の準備
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-6 h-6 bg-[#ff8c5a]/20 rounded-full flex items-center justify-center flex-shrink-0">
+                          <div className="w-2 h-2 bg-[#ff8c5a] rounded-full"></div>
+                        </div>
+                        <span className="text-gray-700 text-sm">
+                          想定質問の暗記と一人練習
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-6 h-6 bg-[#ff8c5a]/20 rounded-full flex items-center justify-center flex-shrink-0">
+                          <div className="w-2 h-2 bg-[#ff8c5a] rounded-full"></div>
+                        </div>
+                        <span className="text-gray-700 text-sm">
+                          本番で緊張して上手く話せない
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-6 h-6 bg-[#ff8c5a]/20 rounded-full flex items-center justify-center flex-shrink-0">
+                          <div className="w-2 h-2 bg-[#ff8c5a] rounded-full"></div>
+                        </div>
+                        <span className="text-gray-700 text-sm">
+                          具体的な改善点が分からない
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="bg-[#ff8c5a]/10 border border-[#ff8c5a]/30 rounded-2xl p-4">
+                      <div className="flex items-center space-x-3">
+                        <svg
+                          className="w-5 h-5 text-[#ff8c5a] flex-shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        <p className="text-[#ff8c5a] font-medium text-sm">
+                          フィードバックが不十分・成長が見えにくい
+                        </p>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* AI Interview Card */}
+                {/* AI Method Card */}
                 <div
                   ref={flowCardRef}
-                  className="group bg-[#9fe870]/10 backdrop-blur-sm rounded-3xl p-8 border border-[#9fe870]/30 relative overflow-hidden transition-all duration-500"
+                  className="bg-white rounded-3xl border-2 border-[#9fe870] overflow-hidden relative"
                 >
-                  {/* Glow Effect */}
-                  <div className="absolute -inset-1 bg-gradient-to-r from-[#9fe870]/20 to-[#163300]/20 rounded-3xl blur opacity-30 group-hover:opacity-50 transition duration-500"></div>
+                  {/* Popular Badge */}
+                  <div className="absolute top-4 right-4 z-10">
+                    <div className="bg-[#9fe870] text-[#163300] px-3 py-1 rounded-full text-xs font-semibold">
+                      推奨
+                    </div>
+                  </div>
 
-                  <div className="relative z-10">
-                    {/* Card Header */}
-                    <div className="flex items-center justify-between mb-8">
+                  {/* Card Header */}
+                  <div className="p-8 border-b border-[#9fe870]/20 bg-[#9fe870]/5">
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
-                        <div className="p-3 bg-[#9fe870]/20 rounded-2xl">
+                        <div className="w-12 h-12 bg-[#9fe870]/20 rounded-2xl flex items-center justify-center">
                           <svg
-                            className="w-8 h-8 text-[#163300]"
+                            className="w-6 h-6 text-[#163300]"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -713,116 +904,120 @@ export default function Home() {
                           </svg>
                         </div>
                         <div>
-                          <h3 className="text-2xl font-bold text-[#163300]">
+                          <h3 className="text-xl font-bold text-[#163300]">
                             AI面接練習
                           </h3>
-                          <p className="text-[#163300]/70">AI面接官との対話</p>
+                          <p className="text-[#163300]/70 text-sm">
+                            AI面接官との対話
+                          </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-4xl font-bold text-[#9fe870]">
+                        <div className="text-2xl font-bold text-[#163300]">
                           週1時間
                         </div>
-                        <div className="text-sm text-[#163300]/70">
+                        <div className="text-xs text-[#163300]/70">
                           効率的な学習時間
                         </div>
                       </div>
                     </div>
+                  </div>
 
-                    {/* Content Area - Fixed Height */}
-                    <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 h-80 relative overflow-hidden border border-[#9fe870]/20">
-                      {/* AI Voice Indicator */}
-                      <div className="absolute top-4 right-4">
-                        <div className="flex items-center space-x-2 bg-[#9fe870]/30 px-3 py-2 rounded-full">
-                          <div className="w-2 h-2 bg-[#163300] rounded-full animate-pulse"></div>
-                          <div className="w-3 h-3 bg-[#163300] rounded-full animate-pulse animation-delay-150"></div>
-                          <div className="w-2 h-2 bg-[#163300] rounded-full animate-pulse animation-delay-300"></div>
-                          <span className="text-xs text-[#163300] font-medium ml-2">
-                            AI対話中
-                          </span>
+                  {/* Card Content */}
+                  <div className="p-8">
+                    <div className="space-y-4 mb-8">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-6 h-6 bg-[#9fe870] rounded-full flex items-center justify-center flex-shrink-0">
+                          <svg
+                            className="w-3 h-3 text-[#163300]"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
                         </div>
+                        <span className="text-gray-700 text-sm">
+                          AI面接官とのリアルタイム対話
+                        </span>
                       </div>
-
-                      {/* Content with Fixed Container */}
-                      <div className="h-full flex flex-col justify-between">
-                        <div className="space-y-4 text-[#163300]">
-                          <div className="flex items-start space-x-3">
-                            <div className="w-6 h-6 rounded-full bg-[#9fe870] flex-shrink-0 mt-1 flex items-center justify-center">
-                              <div className="w-2 h-2 bg-[#163300] rounded-full"></div>
-                            </div>
-                            <div className="typing-text-fast min-h-[1.5rem]">
-                              AI面接官：&ldquo;志望動機を教えてください&rdquo;
-                            </div>
-                          </div>
-                          <div className="flex items-start space-x-3">
-                            <div className="w-6 h-6 rounded-full bg-blue-100 flex-shrink-0 mt-1 flex items-center justify-center">
-                              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                            </div>
-                            <div className="typing-text-fast min-h-[1.5rem] animation-delay-200">
-                              あなた：&ldquo;御社の革新的な技術に...&rdquo;
-                            </div>
-                          </div>
-                          <div className="flex items-start space-x-3">
-                            <div className="w-6 h-6 rounded-full bg-[#9fe870] flex-shrink-0 mt-1 flex items-center justify-center">
-                              <div className="w-2 h-2 bg-[#163300] rounded-full"></div>
-                            </div>
-                            <div className="typing-text-fast min-h-[1.5rem] animation-delay-400">
-                              AI面接官：&ldquo;具体的にはどのような...&rdquo;
-                            </div>
-                          </div>
-                          <div className="space-y-2 mt-6">
-                            <div className="flex items-center space-x-2 text-sm">
-                              <svg
-                                className="w-4 h-4 text-[#9fe870]"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                              <span>リアルタイムフィードバック</span>
-                            </div>
-                            <div className="flex items-center space-x-2 text-sm">
-                              <svg
-                                className="w-4 h-4 text-[#9fe870]"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                              <span>改善点の具体的提案</span>
-                            </div>
-                          </div>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-6 h-6 bg-[#9fe870] rounded-full flex items-center justify-center flex-shrink-0">
+                          <svg
+                            className="w-3 h-3 text-[#163300]"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
                         </div>
-
-                        {/* Bottom Status */}
-                        <div className="bg-[#9fe870]/20 backdrop-blur-sm border border-[#9fe870] rounded-xl p-4">
-                          <div className="flex items-center space-x-2">
-                            <svg
-                              className="w-5 h-5 text-[#163300] flex-shrink-0"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                            <p className="text-[#163300] font-medium">
-                              詳細な分析とパーソナライズドフィードバック
-                            </p>
-                          </div>
+                        <span className="text-gray-700 text-sm">
+                          即座のフィードバックと分析
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-6 h-6 bg-[#9fe870] rounded-full flex items-center justify-center flex-shrink-0">
+                          <svg
+                            className="w-3 h-3 text-[#163300]"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
                         </div>
+                        <span className="text-gray-700 text-sm">
+                          本番に近い緊張感での練習
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-6 h-6 bg-[#9fe870] rounded-full flex items-center justify-center flex-shrink-0">
+                          <svg
+                            className="w-3 h-3 text-[#163300]"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                        <span className="text-gray-700 text-sm">
+                          個人最適化された改善提案
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="bg-[#9fe870]/10 border border-[#9fe870] rounded-2xl p-4">
+                      <div className="flex items-center space-x-3">
+                        <svg
+                          className="w-5 h-5 text-[#163300] flex-shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        <p className="text-[#163300] font-medium text-sm">
+                          詳細な分析とパーソナライズドフィードバック
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -831,151 +1026,238 @@ export default function Home() {
 
               {/* Call to Action */}
               <div className="text-center">
-                <div className="inline-flex flex-col items-center">
-                  <button
-                    className="group relative bg-[#9fe870] text-[#163300] px-12 py-5 rounded-4xl font-bold text-xl transition-all duration-300 hover:scale-105"
-                    onClick={() => router.push("/interview/new")}
-                  >
-                    <div className="absolute -inset-1 bg-gradient-to-r rounded-4xl blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
-                    <span className="relative flex items-center space-x-3">
-                      <svg
-                        className="w-6 h-6"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13 10V3L4 14h7v7l9-11h-7z"
-                        />
-                      </svg>
-                      <span>今すぐAI面接練習を体験する</span>
-                      <svg
-                        className="w-5 h-5 group-hover:translate-x-1 transition-transform"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5l7 7-7 7"
-                        />
-                      </svg>
-                    </span>
-                  </button>
-                  <p className="text-gray-500 text-sm mt-3">
-                    無料で3回まで体験可能
-                  </p>
-                </div>
+                <button
+                  className="bg-[#163300] text-white px-12 py-4 rounded-full font-semibold text-lg hover:bg-[#163300]/90 transition-all duration-300 hover:scale-105 shadow-lg"
+                  onClick={() => router.push("/interview/new")}
+                >
+                  今すぐAI面接練習を体験する
+                </button>
+                <p className="text-gray-500 text-sm mt-4">
+                  無料で3回まで体験可能
+                </p>
               </div>
             </div>
           </section>
         </div>
 
-        {/* Footer - now positioned normally after all content */}
-        <footer ref={footerRef} className="bg-[#163300] text-white py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid md:grid-cols-4 gap-8">
-              <div>
-                <h3 className="text-2xl font-bold mb-4">プロイー</h3>
-                <p className="text-gray-300">AI面接練習で内定を掴む</p>
+        {/* Enhanced Footer - Campfire.ai Style */}
+        <footer
+          ref={footerRef}
+          className="bg-[#163300] text-white relative overflow-hidden"
+        >
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute top-0 left-0 w-full h-full">
+              <div className="grid grid-cols-12 gap-4 h-full">
+                {Array.from({ length: 48 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="bg-white rounded-full w-1 h-1 opacity-20"
+                  ></div>
+                ))}
               </div>
-              <div>
-                <h4 className="font-semibold mb-4">サービス</h4>
-                <ul className="space-y-2 text-gray-300">
-                  <li>
-                    <a
-                      href="#"
-                      className="hover:text-[#9fe870] transition-colors"
-                    >
-                      AI面接練習
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="hover:text-[#9fe870] transition-colors"
-                    >
-                      フィードバック
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="hover:text-[#9fe870] transition-colors"
-                    >
-                      料金プラン
-                    </a>
-                  </li>
-                </ul>
+            </div>
+          </div>
+
+          <div className="relative z-10">
+            {/* Main Footer Content */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mb-15 py-20">
+              <div className="grid lg:grid-cols-2 gap-16 items-start mb-16">
+                {/* Left: Call to Action */}
+                <div className="flex flex-col justify-start h-full">
+                  <div className="inline-flex items-center px-4 py-2 rounded-full bg-[#9fe870]/20 text-[#9fe870] text-sm font-medium mb-6">
+                    <div className="w-2 h-2 bg-[#9fe870] rounded-full mr-2"></div>
+                    始めましょう
+                  </div>
+                  <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+                    AI面接練習で
+                    <br />
+                    内定を掴む
+                  </h2>
+                  <p className="text-gray-300 text-lg mb-8 leading-relaxed">
+                    プロイーで面接スキルを向上させ、理想の企業への内定を実現しましょう。
+                  </p>
+                  <button
+                    className="bg-[#9fe870] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#9fe870]/90 transition-all duration-300 hover:scale-105 shadow-lg w-fit"
+                    onClick={() => router.push("/interview/new")}
+                  >
+                    無料で始める
+                  </button>
+                </div>
+
+                {/* Right: Navigation Menu */}
+                <div className="bg-[#1a4a35] rounded-3xl p-8 h-full">
+                  <div className="grid md:grid-cols-3 gap-8 mb-8">
+                    {/* Products Column */}
+                    <div>
+                      <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">
+                        サービス
+                      </h3>
+                      <ul className="space-y-3">
+                        <li>
+                          <a
+                            href="#"
+                            className="text-gray-300 hover:text-[#9fe870] transition-colors text-sm"
+                          >
+                            AI面接練習
+                          </a>
+                        </li>
+                        <li>
+                          <a
+                            href="#"
+                            className="text-gray-300 hover:text-[#9fe870] transition-colors text-sm"
+                          >
+                            フィードバック分析
+                          </a>
+                        </li>
+                        <li>
+                          <a
+                            href="#"
+                            className="text-gray-300 hover:text-[#9fe870] transition-colors text-sm"
+                          >
+                            料金プラン
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+
+                    {/* Resources Column */}
+                    <div>
+                      <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">
+                        リソース
+                      </h3>
+                      <ul className="space-y-3">
+                        <li>
+                          <a
+                            href="#"
+                            className="text-gray-300 hover:text-[#9fe870] transition-colors text-sm"
+                          >
+                            ヘルプセンター
+                          </a>
+                        </li>
+                        <li>
+                          <a
+                            href="#"
+                            className="text-gray-300 hover:text-[#9fe870] transition-colors text-sm"
+                          >
+                            面接対策ガイド
+                          </a>
+                        </li>
+                        <li>
+                          <a
+                            href="#"
+                            className="text-gray-300 hover:text-[#9fe870] transition-colors text-sm"
+                          >
+                            お問い合わせ
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+
+                    {/* Solutions Column */}
+                    <div>
+                      <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">
+                        ソリューション
+                      </h3>
+                      <ul className="space-y-3">
+                        <li>
+                          <a
+                            href="#"
+                            className="text-gray-300 hover:text-[#9fe870] transition-colors text-sm"
+                          >
+                            就活生向け
+                          </a>
+                        </li>
+                        <li>
+                          <a
+                            href="#"
+                            className="text-gray-300 hover:text-[#9fe870] transition-colors text-sm"
+                          >
+                            転職者向け
+                          </a>
+                        </li>
+                        <li>
+                          <a
+                            href="#"
+                            className="text-gray-300 hover:text-[#9fe870] transition-colors text-sm"
+                          >
+                            企業向け
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Social Links */}
+                  <div className="flex items-center justify-between pt-6 border-t border-gray-600 mt-auto">
+                    <div className="flex items-center space-x-4">
+                      <a
+                        href="#"
+                        className="w-8 h-8 bg-[#9fe870] rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                      >
+                        <svg
+                          className="w-4 h-4 text-[#163300]"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
+                        </svg>
+                      </a>
+                      <a
+                        href="#"
+                        className="w-8 h-8 bg-[#9fe870] rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                      >
+                        <svg
+                          className="w-4 h-4 text-[#163300]"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                        </svg>
+                      </a>
+                    </div>
+                    <p className="text-gray-400 text-xs">
+                      2025年 プロイー開発チーム
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <h4 className="font-semibold mb-4">サポート</h4>
-                <ul className="space-y-2 text-gray-300">
-                  <li>
+            </div>
+
+            {/* Bottom Section */}
+            <div className="border-t border-gray-600">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="flex flex-col md:flex-row items-center justify-between">
+                  {/* Logo and Brand */}
+                  <div className="flex items-center space-x-4 mb-4 md:mb-0">
+                    <div className="w-8 h-8 bg-[#9fe870] rounded-lg flex items-center justify-center">
+                      <Image src={logo} alt="logo" className="w-full h-full" />
+                    </div>
+                    <span className="text-white font-bold text-xl">
+                      プロイー
+                    </span>
+                  </div>
+
+                  {/* Legal Links */}
+                  <div className="flex items-center space-x-6 text-sm">
                     <a
                       href="#"
-                      className="hover:text-[#9fe870] transition-colors"
-                    >
-                      ヘルプセンター
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="hover:text-[#9fe870] transition-colors"
-                    >
-                      お問い合わせ
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="hover:text-[#9fe870] transition-colors"
+                      className="text-gray-400 hover:text-white transition-colors"
                     >
                       利用規約
                     </a>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">会社情報</h4>
-                <ul className="space-y-2 text-gray-300">
-                  <li>
                     <a
                       href="#"
-                      className="hover:text-[#9fe870] transition-colors"
-                    >
-                      会社概要
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="hover:text-[#9fe870] transition-colors"
+                      className="text-gray-400 hover:text-white transition-colors"
                     >
                       プライバシーポリシー
                     </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="hover:text-[#9fe870] transition-colors"
-                    >
-                      採用情報
-                    </a>
-                  </li>
-                </ul>
+                    <p className="text-gray-400">
+                      © 2025 プロイー. All rights reserved.
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="border-t border-gray-700 mt-8 pt-8 text-center">
-              <p className="text-gray-300">
-                © 2024 プロイー. All rights reserved.
-              </p>
             </div>
           </div>
         </footer>

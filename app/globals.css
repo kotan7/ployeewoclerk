@@ -126,7 +126,21 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+    margin: 0;
+    padding: 0;
   }
+  html {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+/* Full height utilities for mobile devices */
+.full-screen-hero {
+  height: 100vh; /* Fallback */
+  height: 100dvh; /* Dynamic viewport height for modern browsers */
+  min-height: 100vh; /* Fallback minimum */
+  min-height: 100dvh; /* Dynamic minimum for modern browsers */
 }
 
 /* Typing Animation Styles */
