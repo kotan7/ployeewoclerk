@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { getQuestions, getWorkflowState, saveFeedback } from "@/lib/actions/interview.actions";
 
 // Configuration constants
 const SILENCE_THRESHOLD = 0.05;
@@ -21,9 +22,17 @@ export interface CandidateInfo {
   interests?: string[];
 }
 
-export type InterviewPhase = "introduction" | "experience" | "skills" | "motivation" | "closing";
+export type InterviewPhase = string; // allow workflow-driven phase ids
 
-export function useInterviewSession() {
+interface WorkflowState {
+  currentPhaseId: string;
+  questionCounts: Record<string, number>;
+  fulfilled: Record<string, Record<string, string>>;
+  failedPhases: string[];
+  finished: boolean;
+}
+
+export function useInterviewSession(interviewId?: string) {
   const [isActive, setIsActive] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -35,8 +44,16 @@ export function useInterviewSession() {
   const [fullTranscript, setFullTranscript] = useState<string>("");
   const [currentUserTranscript, setCurrentUserTranscript] = useState<string>("");
   const [conversationHistory, setConversationHistory] = useState<ConversationMessage[]>([]);
-  const [interviewPhase, setInterviewPhase] = useState<InterviewPhase>("introduction");
+  const [interviewPhase, setInterviewPhase] = useState<InterviewPhase>("self_intro");
   const [candidateInfo, setCandidateInfo] = useState<CandidateInfo>({});
+  const [isMuted, setIsMuted] = useState(false);
+  const [workflowState, setWorkflowState] = useState<WorkflowState>({
+    currentPhaseId: "self_intro",
+    questionCounts: {},
+    fulfilled: {},
+    failedPhases: [],
+    finished: false,
+  });
 
   // Audio references
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -90,21 +107,11 @@ export function useInterviewSession() {
     return cleanup;
   }, [cleanup]);
 
-  // Helper function to update interview phase
-  const updateInterviewPhase = useCallback((history: ConversationMessage[]) => {
-    const userMessageCount = history.filter((msg) => msg.role === "user").length;
-
-    if (userMessageCount <= 2) {
-      setInterviewPhase("introduction");
-    } else if (userMessageCount <= 5) {
-      setInterviewPhase("experience");
-    } else if (userMessageCount <= 8) {
-      setInterviewPhase("skills");
-    } else if (userMessageCount <= 11) {
-      setInterviewPhase("motivation");
-    } else {
-      setInterviewPhase("closing");
-    }
+  // Helper: set phase id from workflow state
+  const applyWorkflowPhase = useCallback((state: WorkflowState | null) => {
+    if (!state) return;
+    setWorkflowState(state);
+    setInterviewPhase(state.currentPhaseId);
   }, []);
 
   // Helper function to extract candidate info
@@ -289,6 +296,7 @@ export function useInterviewSession() {
         candidateInfo: candidateInfo,
         totalExchanges: conversationHistory.filter((msg) => msg.role === "user").length,
         fullTranscript: fullTranscript,
+        workflowState,
       };
 
       // Debug: Log what we're sending to the API
@@ -300,75 +308,49 @@ export function useInterviewSession() {
         conversationHistory: conversationHistory
       });
 
-      const systemPrompt = `あなたは経験豊富な日本企業の面接官です。以下の指針に従って面接を進めてください：
+      const systemPrompt = `あなたは日本企業の面接官です。既に進行中の面接で、候補者に話してもらうことを最優先に、簡潔な質問をしてください。
 
-## 面接官の役割
-あなたは**積極的に質問を投げかける面接官**です。候補者の回答に反応するだけでなく、事前に準備した質問を順番に聞いていき、必要に応じて深掘り質問をしてください。
+## 重要：継続中の面接
+- これは既に始まっている面接の続きです
+- 会話履歴を必ず確認してください
+- 既に聞いた内容は繰り返さないでください
+- 面接の開始挨拶は不要です
 
-## 面接の流れと質問例
+## 基本原則
+- **1回1質問**：絶対に複数の質問をしない
+- **短い質問**：10-15文字程度の簡潔な質問
+- **最小限の反応**：「ありがとうございます」程度の短い受け答えのみ
+- **評価禁止**：面接中は一切の評価・感想を言わない
+- **履歴活用**：これまでの会話を踏まえた質問をする
 
-### 1. 自己紹介段階（introduction）
-**メイン質問**: 「まずは自己紹介をお願いします。お名前と簡単な経歴をお聞かせください。」
-**深掘り質問例**:
-- 「大学では何を専攻されていましたか？」
-- 「学生時代に印象に残っている経験はありますか？」
+## 質問例
+- 「お名前をお聞かせください」
+- 「学歴を教えてください」
+- 「学生時代に力を入れたことは？」
+- 「具体的には？」
+- 「その結果は？」
+- 「あなたの強みは？」
+- 「弱みはありますか？」
+- 「志望理由を教えてください」
 
-### 2. 経歴・経験段階（experience）
-**メイン質問**: 「これまでの職歴やアルバイト経験について教えてください。特に印象に残っている仕事はありますか？」
-**深掘り質問例**:
-- 「その仕事で最も困難だったことは何ですか？」
-- 「どのようにその困難を乗り越えましたか？」
-- 「チームでの役割はどのようなものでしたか？」
+## 禁止事項
+- 長い質問や説明
+- 複数の質問を一度にする
+- 候補者の回答への評価
+- 「素晴らしい」「良いですね」などの感想
+- 「面接を始めましょう」などの開始挨拶
 
-### 3. スキル確認段階（skills）
-**メイン質問**: 「当社で活かせるスキルや専門知識について教えてください。特に自信のある分野はありますか？」
-**深掘り質問例**:
-- 「そのスキルをどのように身につけましたか？」
-- 「具体的なプロジェクトでの活用例を教えてください」
-- 「今後さらに伸ばしたいスキルはありますか？」
-
-### 4. 志望動機段階（motivation）
-**メイン質問**: 「当社を志望された理由と、入社後にやりたいことを教えてください。」
-**深掘り質問例**:
-- 「当社のどのような点に魅力を感じましたか？」
-- 「3年後、5年後のキャリアビジョンはありますか？」
-- 「当社で実現したい具体的な目標はありますか？」
-
-### 5. 質疑応答段階（closing）
-**メイン質問**: 「最後に、当社や仕事について何かご質問はありますか？」
-**深掘り質問例**:
-- 「働く環境について気になることはありますか？」
-- 「研修制度について詳しく知りたいことはありますか？」
-
-## 面接官としての態度
-- 丁寧で敬語を使った話し方
-- **1回の応答で1つの質問のみ**（複数の質問は避ける）
-- 回答は簡潔に（1-2文程度）
-- 候補者の回答が浅い場合は1つの深掘り質問のみ
-- 具体的な例やエピソードを求める
-- 候補者にたくさん話してもらうよう促す
-
-## 深掘り質問の判断基準
-候補者の回答が以下の場合は深掘り質問をしてください：
-- 1-2文程度の短い回答
-- 具体的な例や数字がない回答
-- 「頑張ります」「努力します」などの抽象的な回答
-- 感情や考えが伝わってこない回答
-
-## 記憶の活用
-- **会話履歴を必ず参照して、候補者が既に答えた内容を把握する**
-- 前の回答を参考にした質問をする
-- 候補者の発言に一貫性があるかチェック
-- **候補者が既に答えた内容は絶対に繰り返し質問しない**
-- 面接の流れに沿って段階的に質問を進める
-- 会話履歴に記載されている情報を活用して適切な質問をする
-
-各回答は簡潔にまとめてください。`;
+会話履歴を確認して、次に適切な1つの質問のみをしてください。`;
 
       const formData = new FormData();
       formData.append("audio", audioBlob, "audio.webm");
       formData.append("systemPrompt", systemPrompt);
       formData.append("context", JSON.stringify(conversationContext));
+      
+      // Add interview ID if available
+      if (interviewId) {
+        formData.append("interviewId", interviewId);
+      }
 
       const response = await fetch("/api/interview-conversation", {
         method: "POST",
@@ -420,8 +402,17 @@ export function useInterviewSession() {
       const newTranscriptEntry = `【候補者】: ${userTranscript}\n【面接官】: ${data.text}\n\n`;
       setFullTranscript((prev) => prev + newTranscriptEntry);
 
-      updateInterviewPhase(newHistory);
+      if (data.workflowState) {
+        applyWorkflowPhase(data.workflowState);
+      }
       updateCandidateInfo(data.text);
+
+      // Check if interview is completed and automatically generate feedback
+      if (data.interviewCompleted && interviewId) {
+        setTimeout(async () => {
+          await generateFeedbackAndRedirect(interviewId);
+        }, 3000); // Give 3 seconds for the final message to be heard
+      }
 
       if (data.audio) {
         const audioData = `data:${data.mimeType};base64,${data.audio}`;
@@ -518,6 +509,25 @@ export function useInterviewSession() {
 
       setIsActive(true);
       setError("");
+
+      // Send initial introduction prompt when interview starts
+      if (conversationHistory.length === 0) {
+        setTimeout(() => {
+          const introMessage = "本日は面接にお越しいただきありがとうございます。まずは簡単に自己紹介をお願いします。";
+          setResponse(introMessage);
+          
+          // Add to conversation history
+          const newMessage = {
+            role: "assistant" as const,
+            content: introMessage,
+            timestamp: Date.now(),
+          };
+          setConversationHistory([newMessage]);
+          
+          // Play introduction audio using Google TTS (same as interview conversation)
+          generateAndPlayIntroAudio(introMessage);
+        }, 1000);
+      }
     } catch (err) {
       console.error("Error starting recording:", err);
       setError("マイクへのアクセスに失敗しました");
@@ -544,6 +554,142 @@ export function useInterviewSession() {
     }
   };
 
+  // Toggle mute function
+  const toggleMute = useCallback(() => {
+    if (streamRef.current) {
+      const audioTracks = streamRef.current.getAudioTracks();
+      audioTracks.forEach(track => {
+        track.enabled = isMuted; // Enable if currently muted, disable if not muted
+      });
+      setIsMuted(!isMuted);
+    }
+  }, [isMuted]);
+
+  // Function to automatically generate feedback and redirect to feedback page
+  const generateFeedbackAndRedirect = useCallback(async (interviewId: string) => {
+    try {
+      // Immediately redirect to loading page
+      window.location.href = `/feedback/${interviewId}/loading`;
+
+      // Get questions and workflow state data
+      const [questionsData, workflowStateData] = await Promise.all([
+        getQuestions(interviewId),
+        getWorkflowState(interviewId),
+      ]);
+
+      if (
+        !workflowStateData?.conversationHistory ||
+        workflowStateData.conversationHistory.length === 0
+      ) {
+        console.error("No conversation history found for feedback generation");
+        return;
+      }
+
+      // Call the generate-feedback API
+      const response = await fetch("/api/generate-feedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          conversationHistory: workflowStateData.conversationHistory,
+          questions: questionsData?.questions || [],
+          workflowState: workflowStateData,
+          interviewId: interviewId,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: "Unknown error" }));
+        throw new Error(
+          errorData.error || `API request failed with status ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+
+      // Save feedback to database - pass the entire data object which includes both feedback and overallFeedback
+      await saveFeedback(data, interviewId, workflowStateData.sessionId);
+
+      // The loading page will automatically detect when feedback is ready and redirect
+    } catch (error) {
+      console.error("Error generating feedback:", error);
+      // The loading page will handle the fallback redirect
+    }
+  }, []);
+
+  // Function to generate and play introduction audio using Google TTS
+  const generateAndPlayIntroAudio = useCallback(async (message: string) => {
+    try {
+      setIsPlayingTTS(true);
+      
+      // Call a new API endpoint that generates Google TTS for the intro message
+      const response = await fetch("/api/generate-intro-tts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: message,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`TTS API request failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.audio) {
+        const audioData = `data:${data.mimeType};base64,${data.audio}`;
+        const audio = new Audio(audioData);
+
+        if (currentAudioRef.current) {
+          currentAudioRef.current.pause();
+        }
+
+        currentAudioRef.current = audio;
+
+        audio.onended = () => {
+          console.log("Intro TTS playback ended, starting new recording session");
+          currentAudioRef.current = null;
+          setIsPlayingTTS(false);
+          startNewRecordingSession();
+        };
+
+        audio.onerror = (e) => {
+          console.error("Intro audio playback error:", e);
+          currentAudioRef.current = null;
+          setIsPlayingTTS(false);
+          startNewRecordingSession();
+        };
+
+        await audio.play();
+      } else {
+        setIsPlayingTTS(false);
+        startNewRecordingSession();
+      }
+    } catch (error) {
+      console.error("Error generating intro TTS:", error);
+      setIsPlayingTTS(false);
+      // Fallback to browser speech synthesis if Google TTS fails
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(message);
+        utterance.lang = 'ja-JP';
+        utterance.rate = 0.9;
+        utterance.onend = () => {
+          setIsPlayingTTS(false);
+          startNewRecordingSession();
+        };
+        speechSynthesis.speak(utterance);
+      } else {
+        startNewRecordingSession();
+      }
+    }
+  }, []);
+
   return {
     // State
     isActive,
@@ -559,10 +705,13 @@ export function useInterviewSession() {
     conversationHistory,
     interviewPhase,
     candidateInfo,
+    isMuted,
     
     // Functions
     toggleRecording,
+    toggleMute,
     downloadTranscript,
+    generateFeedbackAndRedirect,
     
     // Constants
     SILENCE_DURATION,

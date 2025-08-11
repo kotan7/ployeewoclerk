@@ -3,10 +3,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { vapi } from "@/lib/vapi.sdk";
 import {
-  saveTranscript,
-  getTranscript,
   getQuestions,
   saveFeedback,
+  getWorkflowState,
 } from "@/lib/actions/interview.actions";
 import {
   addSessionUsage,
@@ -83,43 +82,6 @@ export const useInterview = ({
           "5年後のキャリアビジョンを聞かせてください。",
         ];
 
-  const saveTranscriptToDatabase = useCallback(
-    async (transcript: TranscriptMessage[]) => {
-      if (!interviewId) return;
-
-      try {
-        // Group consecutive messages from the same speaker
-        const groupedMessages: { role: string; content: string[] }[] = [];
-
-        transcript.forEach((msg) => {
-          const speakerLabel = msg.role === "user" ? "応募者" : "面接官";
-          const lastGroup = groupedMessages[groupedMessages.length - 1];
-
-          // If the last group has the same speaker, add to existing group
-          if (lastGroup && lastGroup.role === speakerLabel) {
-            lastGroup.content.push(msg.content);
-          } else {
-            // Create a new group for this speaker
-            groupedMessages.push({
-              role: speakerLabel,
-              content: [msg.content],
-            });
-          }
-        });
-
-        // Format the grouped messages
-        const formattedTranscript = groupedMessages
-          .map((group) => `${group.role}: ${group.content.join(" ")}`)
-          .join("\n\n");
-
-        await saveTranscript(formattedTranscript, interviewId);
-      } catch (error) {
-        console.error("Failed to save transcript:", error);
-      }
-    },
-    [interviewId]
-  );
-
   useEffect(() => {
     const onCallStart = () => {
       setCallStatus(CallStatus.ACTIVE);
@@ -186,10 +148,7 @@ export const useInterview = ({
         setSessionStartTime(null);
       }
 
-      // Save the full transcript when call ends
-      if (fullTranscript.length > 0) {
-        await saveTranscriptToDatabase(fullTranscript);
-      }
+      // Note: Transcript saving removed - using conversation history instead
     };
 
     const onMessage = (message: any) => {
@@ -264,7 +223,6 @@ export const useInterview = ({
   }, [
     fullTranscript,
     interviewId,
-    saveTranscriptToDatabase,
     sessionStartTime,
     callStatus,
     usageMonitorInterval,
@@ -415,20 +373,19 @@ ${questionsForPrompt}
     setError(null);
 
     try {
-      // Get transcript and questions data
-      const [transcriptData, questionsData] = await Promise.all([
-        getTranscript(interviewId),
+      // Get questions and workflow state data
+      const [questionsData, workflowStateData] = await Promise.all([
         getQuestions(interviewId),
+        getWorkflowState(interviewId),
       ]);
 
-      if (!transcriptData?.transcript) {
+      if (
+        !workflowStateData?.conversationHistory ||
+        workflowStateData.conversationHistory.length === 0
+      ) {
         throw new Error(
           "面接の記録が見つかりません。面接を完了してから再試行してください。"
         );
-      }
-
-      if (!questionsData?.questions?.length) {
-        throw new Error("面接の質問が見つかりません。");
       }
 
       // Call the generate-feedback API using relative URL (works in both dev and production)
@@ -438,8 +395,10 @@ ${questionsForPrompt}
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          transcript: transcriptData.transcript,
-          questions: questionsData.questions,
+          conversationHistory: workflowStateData.conversationHistory,
+          questions: questionsData?.questions || [],
+          workflowState: workflowStateData,
+          interviewId: interviewId,
         }),
       });
 
@@ -455,7 +414,7 @@ ${questionsForPrompt}
       const data = await response.json();
 
       // Save feedback to database - pass the entire data object which includes both feedback and overallFeedback
-      await saveFeedback(data, interviewId, transcriptData.sessionId);
+      await saveFeedback(data, interviewId, workflowStateData.sessionId);
 
       // Redirect to feedback page
       if (typeof window !== "undefined") {

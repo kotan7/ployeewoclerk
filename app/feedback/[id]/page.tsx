@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import {
-  getTranscript,
   getFeedback,
   getQuestions,
+  getWorkflowState,
 } from "@/lib/actions/interview.actions";
 import { InterviewRadarChart } from "@/components/ui/charter";
 
@@ -24,23 +24,37 @@ interface OverallFeedback {
   feedback: string;
 }
 
+// New enhanced feedback interfaces
+interface PhaseAnalysis {
+  phase: string;
+  completed: boolean;
+  score: number;
+  feedback: string;
+}
+
+interface DetailedFeedback {
+  strengths: string[];
+  improvements: string[];
+  recommendations: string[];
+}
+
 const FeedbackPage = async ({ params }: FeedbackPageProps) => {
   const { id } = await params;
 
   // Fetch the saved feedback for this interview
-  let transcriptData = null;
+  let workflowStateData = null;
   let feedbackData = null;
   let questionsData = null;
 
   try {
-    // Get transcript, feedback, and questions data
-    const [transcript, feedback, questions] = await Promise.all([
-      getTranscript(id),
+    // Get workflow state, feedback, and questions data
+    const [workflowState, feedback, questions] = await Promise.all([
+      getWorkflowState(id),
       getFeedback(id),
       getQuestions(id),
     ]);
 
-    transcriptData = transcript;
+    workflowStateData = workflowState;
     feedbackData = feedback;
     questionsData = questions;
   } catch (error) {
@@ -169,6 +183,207 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
               </div>
             </div>
           );
+        })()}
+
+        {/* Phase Analysis Section */}
+        {(() => {
+          // Parse phase analysis data
+          let phaseAnalysis: PhaseAnalysis[] = [];
+
+          if (feedbackData?.feedback) {
+            try {
+              let parsedData = feedbackData.feedback;
+              if (typeof feedbackData.feedback === "string") {
+                parsedData = JSON.parse(feedbackData.feedback);
+              }
+
+              if (
+                parsedData?.phaseAnalysis &&
+                Array.isArray(parsedData.phaseAnalysis)
+              ) {
+                phaseAnalysis = parsedData.phaseAnalysis;
+              }
+            } catch (error) {
+              console.error("Error parsing phase analysis:", error);
+            }
+          }
+
+          return phaseAnalysis.length > 0 ? (
+            <div className="bg-white rounded-3xl p-10 shadow-lg border border-gray-100 mb-10">
+              <h2 className="text-2xl font-semibold text-[#163300] mb-8">
+                フェーズ別分析
+              </h2>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {phaseAnalysis.map((phase, index) => {
+                  const phaseNames: Record<string, string> = {
+                    self_intro: "自己紹介",
+                    gakuchika: "学生時代の取り組み",
+                    strength: "強み",
+                    weakness: "弱み",
+                    industry_motivation: "志望動機",
+                  };
+
+                  return (
+                    <div
+                      key={index}
+                      className={`rounded-2xl p-6 border-2 transition-all duration-300 ${
+                        phase.completed
+                          ? "bg-gradient-to-br from-[#9fe870]/20 to-[#9fe870]/10 border-[#9fe870]"
+                          : "bg-gradient-to-br from-gray-100 to-gray-50 border-gray-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-semibold text-[#163300] text-lg">
+                          {phaseNames[phase.phase] || phase.phase}
+                        </h3>
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                            phase.completed
+                              ? "bg-[#9fe870] text-[#163300]"
+                              : "bg-gray-400 text-white"
+                          }`}
+                        >
+                          {phase.score}
+                        </div>
+                      </div>
+
+                      <div
+                        className={`mb-3 px-3 py-1 rounded-full text-xs font-medium ${
+                          phase.completed
+                            ? "bg-[#9fe870] text-[#163300]"
+                            : "bg-gray-400 text-white"
+                        }`}
+                      >
+                        {phase.completed ? "完了" : "未完了"}
+                      </div>
+
+                      <p className="text-gray-700 text-sm leading-relaxed">
+                        {phase.feedback}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null;
+        })()}
+
+        {/* Detailed Feedback Section */}
+        {(() => {
+          // Parse detailed feedback data
+          let detailedFeedback: DetailedFeedback | null = null;
+
+          if (feedbackData?.feedback) {
+            try {
+              let parsedData = feedbackData.feedback;
+              if (typeof feedbackData.feedback === "string") {
+                parsedData = JSON.parse(feedbackData.feedback);
+              }
+
+              if (parsedData?.detailedFeedback) {
+                detailedFeedback = parsedData.detailedFeedback;
+              }
+            } catch (error) {
+              console.error("Error parsing detailed feedback:", error);
+            }
+          }
+
+          return detailedFeedback ? (
+            <div className="bg-white rounded-3xl p-10 shadow-lg border border-gray-100 mb-10">
+              <h2 className="text-2xl font-semibold text-[#163300] mb-8">
+                詳細フィードバック
+              </h2>
+
+              <div className="grid md:grid-cols-3 gap-8">
+                {/* Strengths */}
+                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200">
+                  <div className="flex items-center mb-4">
+                    <svg
+                      className="w-6 h-6 mr-3 text-green-600"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <h3 className="font-semibold text-green-800">強み</h3>
+                  </div>
+                  <ul className="space-y-3">
+                    {detailedFeedback.strengths.map((strength, index) => (
+                      <li key={index} className="flex items-start">
+                        <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                        <span className="text-green-700 text-sm">
+                          {strength}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Improvements */}
+                <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl p-6 border border-yellow-200">
+                  <div className="flex items-center mb-4">
+                    <svg
+                      className="w-6 h-6 mr-3 text-yellow-600"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <h3 className="font-semibold text-yellow-800">改善点</h3>
+                  </div>
+                  <ul className="space-y-3">
+                    {detailedFeedback.improvements.map((improvement, index) => (
+                      <li key={index} className="flex items-start">
+                        <span className="w-2 h-2 bg-yellow-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                        <span className="text-yellow-700 text-sm">
+                          {improvement}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Recommendations */}
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200">
+                  <div className="flex items-center mb-4">
+                    <svg
+                      className="w-6 h-6 mr-3 text-blue-600"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <h3 className="font-semibold text-blue-800">アドバイス</h3>
+                  </div>
+                  <ul className="space-y-3">
+                    {detailedFeedback.recommendations.map(
+                      (recommendation, index) => (
+                        <li key={index} className="flex items-start">
+                          <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                          <span className="text-blue-700 text-sm">
+                            {recommendation}
+                          </span>
+                        </li>
+                      )
+                    )}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          ) : null;
         })()}
 
         {/* AI Feedback Section */}
@@ -313,24 +528,27 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
         })()}
 
         {/* Show message if no feedback yet */}
-        {transcriptData && transcriptData.transcript && !feedbackData && (
-          <div className="bg-white rounded-3xl p-10 shadow-lg border border-gray-100 mb-10">
-            <h2 className="text-2xl font-semibold text-[#163300] mb-8">
-              AI評価結果
-            </h2>
-            <div className="text-center py-16">
-              <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl p-8 border border-yellow-200">
-                <ExclamationTriangleIcon className="w-16 h-16 text-yellow-500 mx-auto mb-6" />
-                <h3 className="text-lg font-semibold text-yellow-800 mb-3">
-                  フィードバックが生成されていません
-                </h3>
-                <p className="text-yellow-700">
-                  面接完了後に「フィードバックを生成」ボタンを押してください。
-                </p>
+        {workflowStateData &&
+          workflowStateData.conversationHistory &&
+          workflowStateData.conversationHistory.length > 0 &&
+          !feedbackData && (
+            <div className="bg-white rounded-3xl p-10 shadow-lg border border-gray-100 mb-10">
+              <h2 className="text-2xl font-semibold text-[#163300] mb-8">
+                AI評価結果
+              </h2>
+              <div className="text-center py-16">
+                <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl p-8 border border-yellow-200">
+                  <ExclamationTriangleIcon className="w-16 h-16 text-yellow-500 mx-auto mb-6" />
+                  <h3 className="text-lg font-semibold text-yellow-800 mb-3">
+                    フィードバックが生成されていません
+                  </h3>
+                  <p className="text-yellow-700">
+                    面接完了後に「フィードバックを生成」ボタンを押してください。
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-6 mt-16 justify-center">

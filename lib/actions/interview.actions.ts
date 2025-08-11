@@ -229,72 +229,7 @@ export const getAllInterviews = async (
     };
 }
 
-export const saveTranscript = async (transcript: string, interviewId?: string) => {
-    const { userId } = await auth();
-    
-    if (!userId) {
-        throw new Error("User not authenticated");
-    }
 
-    if (!transcript) {
-        throw new Error("Transcript is required");
-    }
-
-    const supabase = CreateSupabaseClient();
-    const { data, error } = await supabase
-        .from('session_history')
-        .insert({
-            transcript: transcript,
-            user_id: userId,
-            interview_id: interviewId,
-            created_at: new Date().toISOString()
-        })
-        .select();
-
-    if (error) {
-        console.error("Database error:", error);
-        throw new Error(`Failed to save transcript: ${error.message}`);
-    }
-
-    return {
-        success: true,
-        sessionId: data[0].id,
-        message: "Transcript saved successfully"
-    };
-}
-
-export const getTranscript = async (interviewId: string) => {
-    const { userId } = await auth();
-    
-    if (!userId) {
-        throw new Error("User not authenticated");
-    }
-
-    const supabase = CreateSupabaseClient();
-    const { data, error } = await supabase
-        .from('session_history')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('interview_id', interviewId)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-
-    if (error) {
-        if (error.code === 'PGRST116') {
-            // No transcript found
-            return null;
-        }
-        console.error("Database error:", error);
-        throw new Error(`Failed to fetch transcript: ${error.message}`);
-    }
-
-    return {
-        transcript: data.transcript,
-        sessionId: data.id,
-        createdAt: data.created_at
-    };
-}
 
 export const getQuestions = async (interviewId: string) => {
   const { userId } = await auth();
@@ -436,4 +371,134 @@ export const saveFeedback = async (feedbackData: any, interviewId?: string, sess
             message: "Feedback saved successfully"
         };
     }
+}
+
+// Workflow state management functions
+export const getWorkflowState = async (interviewId: string) => {
+    const { userId } = await auth();
+    
+    if (!userId) {
+        throw new Error("User not authenticated");
+    }
+
+    const supabase = CreateSupabaseClient();
+    const { data, error } = await supabase
+        .from('session_history')
+        .select('id, workflow_state, current_phase_id, question_counts, failed_phases, interview_finished, conversation_history')
+        .eq('user_id', userId)
+        .eq('interview_id', interviewId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+    if (error) {
+        if (error.code === 'PGRST116') {
+            // No workflow state found - return initial state
+            return {
+                currentPhaseId: 'self_intro',
+                questionCounts: {},
+                fulfilled: {},
+                failedPhases: [],
+                finished: false,
+                conversationHistory: [],
+                sessionId: null
+            };
+        }
+        console.error("Database error:", error);
+        throw new Error(`Failed to fetch workflow state: ${error.message}`);
+    }
+
+    return {
+        currentPhaseId: data.current_phase_id || 'self_intro',
+        questionCounts: data.question_counts || {},
+        fulfilled: data.workflow_state?.fulfilled || {},
+        failedPhases: Array.isArray(data.failed_phases) ? data.failed_phases : [],
+        finished: data.interview_finished || false,
+        conversationHistory: Array.isArray(data.conversation_history) ? data.conversation_history : [],
+        sessionId: data.id
+    };
+}
+
+export const saveWorkflowState = async (
+    interviewId: string,
+    workflowState: {
+        currentPhaseId: string;
+        questionCounts: Record<string, number>;
+        fulfilled: Record<string, Record<string, string>>;
+        failedPhases: string[];
+        finished: boolean;
+    },
+    conversationHistory: any[],
+
+) => {
+    const { userId } = await auth();
+    
+    if (!userId) {
+        throw new Error("User not authenticated");
+    }
+
+    const supabase = CreateSupabaseClient();
+    
+    // Prepare the data to upsert
+    const upsertData = {
+        user_id: userId,
+        interview_id: interviewId,
+        workflow_state: workflowState,
+        current_phase_id: workflowState.currentPhaseId,
+        question_counts: workflowState.questionCounts,
+
+        failed_phases: workflowState.failedPhases,
+        interview_finished: workflowState.finished,
+        conversation_history: conversationHistory,
+        created_at: new Date().toISOString(),
+
+    };
+
+    // First try to update existing record, then insert if not exists
+    const { data: existingData } = await supabase
+        .from('session_history')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('interview_id', interviewId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+    let result;
+    if (existingData) {
+        // Update existing record
+        result = await supabase
+            .from('session_history')
+            .update({
+                workflow_state: workflowState,
+                current_phase_id: workflowState.currentPhaseId,
+                question_counts: workflowState.questionCounts,
+        
+                failed_phases: workflowState.failedPhases,
+                interview_finished: workflowState.finished,
+                conversation_history: conversationHistory,
+        
+            })
+            .eq('id', existingData.id)
+            .select();
+    } else {
+        // Insert new record
+        result = await supabase
+            .from('session_history')
+            .insert(upsertData)
+            .select();
+    }
+
+    const { data, error } = result;
+
+    if (error) {
+        console.error("Database error:", error);
+        throw new Error(`Failed to save workflow state: ${error.message}`);
+    }
+
+    return {
+        success: true,
+        sessionId: data[0].id,
+        message: "Workflow state saved successfully"
+    };
 }

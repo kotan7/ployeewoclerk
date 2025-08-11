@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
   SignInButton,
   SignUpButton,
@@ -16,7 +16,11 @@ import logo from "../../constants/logo.png";
 
 const Header = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
+
+  // Check if current page is home page
+  const isHomePage = pathname === "/";
 
   // Refs for header animations
   const headerRef = useRef<HTMLElement>(null);
@@ -88,17 +92,24 @@ const Header = () => {
   return (
     <header
       ref={headerRef}
-      className="sticky top-5 z-50 mx-4 sm:mx-8 lg:mx-16 transition-all duration-300"
+      className={`z-50 transition-all duration-300 ${
+        isHomePage
+          ? "sticky top-5 mx-4 sm:mx-8 lg:mx-16"
+          : "sticky top-0 w-full"
+      }`}
     >
-      {/* Simple Glassmorphism Container */}
+      {/* Conditional Container Styling */}
       <div
         className={`
-          backdrop-blur-lg bg-white/30 border border-white/30 rounded-[32px] shadow-lg
           transition-all duration-300 ease-out h-16
           ${
-            isScrolled
-              ? "bg-white/30 shadow-xl border-white/40"
-              : "bg-white/30 shadow-lg"
+            isHomePage
+              ? `backdrop-blur-lg bg-white/30 border border-white/30 rounded-[32px] shadow-lg ${
+                  isScrolled
+                    ? "bg-white/30 shadow-xl border-white/40"
+                    : "bg-white/30 shadow-lg"
+                }`
+              : "bg-white border-b border-gray-200"
           }
         `}
       >

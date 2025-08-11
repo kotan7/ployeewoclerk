@@ -375,7 +375,21 @@ export default function Home() {
                   ref={problemImageRef}
                   className="relative flex justify-center items-center min-h-[600px]"
                 >
-                  <img src="/sound.png" alt="sound" width={500} height={500} />
+                                    <div className="relative">
+                    {/* Background decorative elements */}
+                    <div className="absolute -bottom-10 -left-10 w-16 h-16 bg-[#9fe870]/40 rounded-full blur-lg"></div>
+
+                    {/* Main image with enhanced styling */}
+                    <div className="relative z-10">
+                      <img
+                        src="/sound.png"
+                        alt="AI面接練習システム"
+                        width={500}
+                        height={500}
+                        className="drop-shadow-lg"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 {/* Right: Solution Text */}
@@ -497,215 +511,15 @@ export default function Home() {
                   </div>
                 </div>
 
-{/* CardSwap Component - Right Side */}
-<div
-  className="flex-1 relative mb-25"
-  style={{ marginTop: "-180px" }}
->
-  <div style={{ height: "600px", position: "relative" }}>
-    <CardSwap
-      cardDistance={60}
-      verticalDistance={70}
-      delay={5000}
-      pauseOnHover={false}
-    >
-      {/* Real-time Practice Card */}
-      <Card customClass="!bg-white !border-0 overflow-hidden shadow-xl hover:shadow-xl transition-transform duration-200 hover:-translate-y-1 rounded-3xl">
-        <div className="h-full flex flex-col">
-          {/* Image Section - Larger for better display */}
-          <div 
-            className="h-64 bg-cover bg-center bg-no-repeat relative"
-            style={{ backgroundImage: "url(/green.jpg)" }}
-          >
-            {/* Minimal overlay */}
-            <div className="absolute inset-0 bg-black/5"></div>
-            
-            {/* Modern floating icon */}
-            <div className="absolute top-8 right-8">
-              <div className="w-14 h-14 bg-white/95 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-lg border border-white/20">
-                <svg
-                  className="w-7 h-7 text-emerald-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                {/* Image - Right Side */}
+                <div className="flex-1 relative mb-15">
+                  <img
+                    src="/interview.png"
+                    alt="interview"
+                    width={1000}
+                    height={1000}
                   />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          {/* Content Section - Compact */}
-          <div className="flex-1 px-8 py-6 bg-white">
-            <h3 className="text-xl font-bold mb-3 text-gray-900 leading-tight">
-              リアルタイム面接練習
-            </h3>
-
-            <div className="w-10 h-0.5 bg-emerald-500 rounded-full mb-4"></div>
-
-            <p className="text-gray-600 text-xs leading-relaxed mb-6">
-              AIが面接官として質問し、自然な会話形式で面接の流れを体験できます。音声認識とリアルタイム応答で、実際の面接に近い環境を提供します。
-            </p>
-
-            <button className="group bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-300 hover:shadow-lg hover:scale-105">
-              <span className="flex items-center justify-center">
-                今すぐ試す
-                <svg
-                  className="w-3.5 h-3.5 ml-2 group-hover:translate-x-1 transition-transform"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </span>
-            </button>
-          </div>
-        </div>
-      </Card>
-
-      {/* Performance Analysis Card */}
-      <Card customClass="!bg-white !border-0 overflow-hidden shadow-xl hover:shadow-xl transition-transform duration-200 hover:-translate-y-1 rounded-3xl">
-        <div className="h-full flex flex-col">
-          {/* Image Section - Larger for better display */}
-          <div 
-            className="h-64 bg-cover bg-center bg-no-repeat relative"
-            style={{ backgroundImage: "url(/deep_green.jpg)" }}
-          >
-            {/* Minimal overlay */}
-            <div className="absolute inset-0 bg-black/5"></div>
-            
-            {/* Modern floating icon */}
-            <div className="absolute top-8 right-8">
-              <div className="w-14 h-14 bg-white/95 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-lg border border-white/20">
-                <svg
-                  className="w-7 h-7 text-green-800"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          {/* Content Section - Compact */}
-          <div className="flex-1 px-8 py-6 bg-white">
-            <h3 className="text-xl font-bold mb-3 text-gray-900 leading-tight">
-              面接パフォーマンス評価
-            </h3>
-
-            <div className="w-10 h-0.5 bg-green-700 rounded-full mb-4"></div>
-
-            <p className="text-gray-600 text-xs leading-relaxed mb-6">
-              多角的な視点からあなたの面接パフォーマンスを分析・評価します。話し方、表情、回答内容、論理性など細かい項目まで詳細に分析します。
-            </p>
-
-            <button className="group bg-green-800 hover:bg-green-900 text-white px-5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-300 hover:shadow-lg hover:scale-105">
-              <span className="flex items-center justify-center">
-                評価を見る
-                <svg
-                  className="w-3.5 h-3.5 ml-2 group-hover:translate-x-1 transition-transform"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </span>
-            </button>
-          </div>
-        </div>
-      </Card>
-
-      {/* Feedback & Discovery Card */}
-      <Card customClass="!bg-white !border-0 overflow-hidden shadow-xl hover:shadow-xl transition-transform duration-200 hover:-translate-y-1 rounded-3xl">
-        <div className="h-full flex flex-col">
-          {/* Image Section - Using orange image */}
-          <div 
-            className="h-64 bg-cover bg-center bg-no-repeat relative"
-            style={{ backgroundImage: "url(/orange.jpg)" }}
-          >
-            {/* Minimal overlay */}
-            <div className="absolute inset-0 bg-black/5"></div>
-            
-            {/* Modern floating icon */}
-            <div className="absolute top-8 right-8">
-              <div className="w-14 h-14 bg-white/95 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-lg border border-white/20">
-                <svg
-                  className="w-7 h-7 text-orange-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          {/* Content Section - Compact */}
-          <div className="flex-1 px-8 py-6 bg-white">
-            <h3 className="text-xl font-bold mb-3 text-gray-900 leading-tight">
-              フィードバックと強み発見
-            </h3>
-
-            <div className="w-10 h-0.5 bg-orange-500 rounded-full mb-4"></div>
-
-            <p className="text-gray-600 text-xs leading-relaxed mb-6">
-              弱点の改善だけでなく、あなたの長所も発見し、より魅力的にアピールできるようサポートします。個人の特性を活かした回答パターンを提案します。
-            </p>
-
-            <button className="group bg-orange-600 hover:bg-orange-700 text-white px-5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-300 hover:shadow-lg hover:scale-105">
-              <span className="flex items-center justify-center">
-                強みを発見
-                <svg
-                  className="w-3.5 h-3.5 ml-2 group-hover:translate-x-1 transition-transform"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </span>
-            </button>
-          </div>
-        </div>
-      </Card>
-    </CardSwap>
-  </div>
-</div>
+                </div>
               </div>
             </div>
           </section>

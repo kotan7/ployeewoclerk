@@ -2,21 +2,43 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useInterview, CallStatus } from "@/components/ui/interviewComponent";
-import soundwavesAnimation from "@/constants/soundwaves.json";
-import { vapi } from "@/lib/vapi.sdk";
+import { useInterviewSession } from "../../../hooks/useInterviewSession";
+import soundwavesAnimation from "../../../constants/soundwaves.json";
 
-// Type definitions for messages
-interface Message {
-  type: string;
-  transcriptType?: string;
-  role: "user" | "assistant";
-  transcript?: string;
+// Type definitions to match the legacy interview structure
+interface Interview {
+  id: string;
+  name?: string;
+  education?: string;
+  experience?: string;
+  company_name?: string;
+  companyName?: string;
+  role: string;
+  job_description?: string;
+  jobDescription?: string;
+  interview_focus?:
+    | "hr"
+    | "case"
+    | "technical"
+    | "final"
+    | "general"
+    | "product"
+    | "leadership"
+    | "custom";
+  interviewFocus?:
+    | "hr"
+    | "case"
+    | "technical"
+    | "final"
+    | "general"
+    | "product"
+    | "leadership"
+    | "custom";
+  questions?: string[];
 }
 
-interface SavedMessage {
-  role: "user" | "assistant";
-  content: string;
+interface InterviewSessionClientProps {
+  interview: Interview;
 }
 
 // Helper function to translate interview focus to Japanese
@@ -35,77 +57,69 @@ const getInterviewFocusLabel = (focus: string) => {
   return focusMap[focus] || focus;
 };
 
-interface Interview {
-  id: string;
-  name?: string;
-  education?: string;
-  experience?: string;
-  company_name?: string;
-  companyName?: string;
-  role: string;
-  job_description?: string;
-  jobDescription?: string;
-  interview_focus?:
-    | "general"
-    | "technical"
-    | "product"
-    | "leadership"
-    | "custom";
-  interviewFocus?:
-    | "general"
-    | "technical"
-    | "product"
-    | "leadership"
-    | "custom";
-  questions?: string[];
-}
-
-interface InterviewSessionClientProps {
-  interview: Interview;
+// Define interview status enum for consistency
+enum InterviewStatus {
+  INACTIVE = "INACTIVE",
+  ACTIVE = "ACTIVE",
+  PROCESSING = "PROCESSING",
 }
 
 const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
   const router = useRouter();
   const lottieRef = useRef<HTMLDivElement>(null);
-  const [messages, setMessages] = useState<SavedMessage[]>([]);
-
-  // Get company name for subtitle display
-  const name = interview.company_name || interview.companyName || "面接官";
-  const userName = "あなた"; // User name for subtitles
 
   const {
-    callStatus,
+    isActive,
+    isProcessing,
     isSpeaking,
-    isMuted,
+    response,
     error,
-    startCall,
-    endCall,
+    isPlayingTTS,
+    currentUserTranscript,
+    conversationHistory,
+    isMuted,
+    toggleRecording,
     toggleMute,
-    getStatusText,
-    isGeneratingFeedback,
-    handleGenerateFeedback,
-    questions,
-  } = useInterview({
-    name: interview.name,
-    education: interview.education,
-    experience: interview.experience,
-    companyName: interview.company_name || interview.companyName,
-    role: interview.role,
-    jobDescription: interview.job_description || interview.jobDescription,
-    interviewFocus: interview.interview_focus || interview.interviewFocus,
-    questions: interview.questions,
-    interviewId: interview.id,
-  });
+    generateFeedbackAndRedirect,
+  } = useInterviewSession(interview.id);
 
-  // Redirect to feedback page when interview is finished
-  useEffect(() => {
-    if (callStatus === CallStatus.FINISHED) {
-      // router.push(`/feedback/${interview.id}`);
+  // Get status for UI display
+  const getInterviewStatus = (): InterviewStatus => {
+    if (isProcessing) return InterviewStatus.PROCESSING;
+    if (isActive) return InterviewStatus.ACTIVE;
+    return InterviewStatus.INACTIVE;
+  };
+
+  const getStatusText = () => {
+    const status = getInterviewStatus();
+    switch (status) {
+      case InterviewStatus.INACTIVE:
+        return "面接を開始してください";
+      case InterviewStatus.PROCESSING:
+        return "AI面接官が回答を準備中...";
+      case InterviewStatus.ACTIVE:
+        if (isPlayingTTS) return "AI面接官が話しています";
+        if (isSpeaking) return "あなたの発言を聞いています";
+        return "回答をお待ちしています";
+      default:
+        return "準備中...";
     }
-  }, [callStatus, router, interview.id]);
+  };
 
+  // Get latest interviewer question for subtitles
+  const getLatestInterviewerQuestion = () => {
+    if (conversationHistory.length === 0) return null;
+    // Find the most recent assistant (interviewer) message
+    for (let i = conversationHistory.length - 1; i >= 0; i--) {
+      if (conversationHistory[i].role === "assistant") {
+        return conversationHistory[i];
+      }
+    }
+    return null;
+  };
+
+  // Handle Lottie animation
   useEffect(() => {
-    // Load and control Lottie animation based on speaking state
     const loadLottie = async () => {
       if (typeof window !== "undefined") {
         const lottie = await import("lottie-web");
@@ -120,8 +134,8 @@ const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
             animationData: soundwavesAnimation,
           });
 
-          // Only play animation when user is speaking during active call
-          if (callStatus === CallStatus.ACTIVE && isSpeaking) {
+          // Only play animation when user is speaking during active interview
+          if (isActive && (isSpeaking || isPlayingTTS)) {
             animation.play();
           } else {
             animation.pause();
@@ -133,41 +147,24 @@ const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
     };
 
     loadLottie();
-  }, [isSpeaking, callStatus]);
+  }, [isSpeaking, isPlayingTTS, isActive]);
 
-  // Handle incoming messages for subtitles
-  useEffect(() => {
-    const OnMessage = (message: Message) => {
-      if (message.type === "transcript" && message.transcriptType === "final") {
-        const newMessage = {
-          role: message.role,
-          content: message.transcript || "",
-        };
-        setMessages((prev) => [newMessage, ...prev]);
-      }
-    };
-
-    // Add the message listener
-    vapi.on("message", OnMessage);
-
-    // Cleanup
-    return () => {
-      vapi.off("message", OnMessage);
-    };
-  });
+  const companyName =
+    interview.company_name || interview.companyName || "AI面接官";
+  const userName = interview.name || "候補者";
 
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="bg-white py-8">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <h1 className="text-3xl font-bold text-[#163300] mb-3">
-            {interview.company_name || interview.companyName}
+          <h1 className="text-3xl font-bold text-[#163300] mb-3 mt-5">
+            {companyName}
           </h1>
           <p className="text-lg text-gray-600 mb-2">{interview.role}</p>
           <span className="inline-block px-3 py-1 bg-[#9fe870]/20 text-[#163300] rounded-full text-sm font-medium">
             {getInterviewFocusLabel(
-              interview.interview_focus || interview.interviewFocus || ""
+              interview.interview_focus || interview.interviewFocus || "hr"
             )}
           </span>
         </div>
@@ -176,12 +173,12 @@ const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col items-center justify-center py-4 px-6">
         <div className="w-full max-w-2xl text-center space-y-6">
-          {/* Single Soundwave Animation */}
+          {/* Soundwave Animation */}
           <div className="flex justify-center -mt-12">
             <div
               ref={lottieRef}
               className={`w-96 h-96 transition-opacity duration-300 ${
-                callStatus === CallStatus.ACTIVE && isSpeaking
+                isActive && (isSpeaking || isPlayingTTS)
                   ? "opacity-100"
                   : "opacity-30"
               }`}
@@ -194,16 +191,22 @@ const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
               {getStatusText()}
             </p>
 
-            {/* Speaking Indicator - Only show during active call */}
-            {callStatus === CallStatus.ACTIVE && (
+            {/* Speaking Indicator - Only show during active interview */}
+            {isActive && (
               <div className="flex items-center justify-center gap-2">
                 <div
                   className={`w-2 h-2 rounded-full transition-colors duration-200 ${
-                    isSpeaking ? "bg-[#9fe870] animate-pulse" : "bg-gray-400"
+                    isSpeaking || isPlayingTTS
+                      ? "bg-[#9fe870] animate-pulse"
+                      : "bg-gray-400"
                   }`}
                 />
                 <p className="text-sm text-gray-600">
-                  {isSpeaking ? "話しています..." : "聞いています..."}
+                  {isPlayingTTS
+                    ? "AI面接官が話しています..."
+                    : isSpeaking
+                    ? "あなたが話しています..."
+                    : "聞いています..."}
                 </p>
               </div>
             )}
@@ -215,53 +218,39 @@ const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
             )}
           </div>
 
-          {/* Subtitles - Only show during active call when there are messages */}
-          {callStatus === CallStatus.ACTIVE && messages.length > 0 && (
+          {/* Subtitles - Show only latest interviewer question */}
+          {isActive && getLatestInterviewerQuestion() && (
             <div className="mt-4 p-4 bg-gray-50 rounded-lg w-full max-w-4xl mx-auto">
               <div className="text-base leading-relaxed">
-                {(() => {
-                  const latestMessage = messages[0];
-                  if (latestMessage.role === "assistant") {
-                    return (
-                      <p className="text-gray-700">
-                        {name.split(" ")[0].replace(/[.,]/g, "")}:{" "}
-                        {latestMessage.content}
-                      </p>
-                    );
-                  } else {
-                    return (
-                      <p className="text-[#163300] font-medium">
-                        {userName}: {latestMessage.content}
-                      </p>
-                    );
-                  }
-                })()}
+                <p className="text-gray-700">
+                  面接官: {getLatestInterviewerQuestion()?.content}
+                </p>
               </div>
             </div>
           )}
 
           {/* Controls */}
           <div className="flex justify-center gap-4 flex-wrap min-h-[60px] items-center">
-            {callStatus === CallStatus.INACTIVE && (
+            {getInterviewStatus() === InterviewStatus.INACTIVE && (
               <button
-                onClick={startCall}
+                onClick={toggleRecording}
                 className="cursor-pointer bg-[#9fe870] text-[#163300] px-10 py-4 rounded-full font-semibold text-lg hover:bg-[#8fd960] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 面接を開始
               </button>
             )}
 
-            {callStatus === CallStatus.CONNECTING && (
+            {getInterviewStatus() === InterviewStatus.PROCESSING && (
               <button
                 disabled
                 className="cursor-pointer bg-gray-300 text-gray-600 px-10 py-4 rounded-full font-semibold text-lg cursor-not-allowed flex items-center gap-2"
               >
                 <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
-                接続中...
+                処理中...
               </button>
             )}
 
-            {callStatus === CallStatus.ACTIVE && (
+            {getInterviewStatus() === InterviewStatus.ACTIVE && (
               <div className="flex gap-3">
                 <button
                   onClick={toggleMute}
@@ -305,24 +294,18 @@ const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
                 </button>
 
                 <button
-                  onClick={endCall}
+                  onClick={async () => {
+                    toggleRecording();
+                    // Generate feedback and redirect after stopping recording
+                    setTimeout(async () => {
+                      await generateFeedbackAndRedirect(interview.id);
+                    }, 1000);
+                  }}
                   className="cursor-pointer bg-red-500 text-white px-8 py-3 rounded-full font-semibold hover:bg-red-600 transition-all duration-200"
                 >
                   面接を終了
                 </button>
               </div>
-            )}
-
-            {callStatus === CallStatus.FINISHED && (
-              <button
-                onClick={handleGenerateFeedback}
-                disabled={isGeneratingFeedback}
-                className="cursor-pointer bg-[#9fe870] text-[#163300] px-10 py-4 rounded-full font-semibold text-lg hover:bg-[#8fd960] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:bg-gray-300 disabled:cursor-not-allowed"
-              >
-                {isGeneratingFeedback
-                  ? "フィードバックを生成中..."
-                  : "フィードバックを生成"}
-              </button>
             )}
           </div>
         </div>
