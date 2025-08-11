@@ -39,11 +39,20 @@ export async function POST(request: NextRequest) {
     // Convert audio file to buffer
     const audioBuffer = await audioFile.arrayBuffer();
     
-    // Initialize Gemini model
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    // Initialize Gemini model - Use the more capable model for better Japanese
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-pro-latest",
+      generationConfig: {
+        temperature: 0.7,
+        topP: 0.8,
+        maxOutputTokens: 1024,
+      }
+    });
     
-    // Step 1: First, get the transcript of the audio
-    const transcriptionPrompt = `Please transcribe the following audio in Japanese. Only return the transcription text, nothing else.`;
+    // Step 1: First, get the transcript of the audio with improved Japanese prompt
+    const transcriptionPrompt = `以下の音声ファイルを日本語で正確に文字起こししてください。
+話者の発言内容のみを記載し、余計なコメントや説明は一切含めないでください。
+自然な日本語として聞こえるように、適切な句読点も含めてください。`;
     
     const transcriptionResult = await model.generateContent([
       {
@@ -66,39 +75,35 @@ export async function POST(request: NextRequest) {
       ? dbWorkflowState.conversationHistory 
       : (contextObj.history || []);
 
-    // Workflow definition (normalized from workflow.MD)
+    // Improved workflow definition with more natural Japanese prompts
     const workflow = [
       {
         id: 'self_intro',
-        prompt: 'まずは自己紹介をお願いします。',
+        prompt: 'まずは簡単に自己紹介をお願いいたします。',
         expected_data: ['name', 'education'],
         next_state: 'gakuchika',
       },
       {
         id: 'gakuchika',
-        prompt:
-          '学生時代に力を入れたこと（ガクチカ）について教えてください。何をしたのか、結果どうだったのかも含めて話してください。',
+        prompt: '学生時代に最も力を入れて取り組まれたことについて、具体的にお聞かせください。',
         expected_data: ['topic', 'actions', 'outcome'],
         next_state: 'strength',
       },
       {
         id: 'strength',
-        prompt:
-          'あなたの強みについて教えてください。どのような経験を通してその強みを発揮したか、結果どうだったかも教えてください。',
+        prompt: 'ご自身の強みについて、具体的なエピソードと併せて教えていただけますでしょうか。',
         expected_data: ['strength', 'example', 'outcome'],
         next_state: 'weakness',
       },
       {
         id: 'weakness',
-        prompt:
-          'あなたの弱みは何だと思いますか？また、その弱みにどう対応しているかも教えてください。',
+        prompt: 'ご自身の課題となる部分や改善点について、どのような対策を講じていらっしゃるか教えてください。',
         expected_data: ['weakness', 'coping_strategy'],
         next_state: 'industry_motivation',
       },
       {
         id: 'industry_motivation',
-        prompt:
-          'なぜこの業界を志望しているのか教えてください。ご自身の経験やスキルとどう関係しているかも含めて教えてください。',
+        prompt: '弊社の業界を志望される理由と、これまでのご経験との関連性についてお聞かせください。',
         expected_data: ['motivation', 'connection_to_experience', 'future_goal'],
         next_state: 'end',
       },
@@ -121,8 +126,8 @@ export async function POST(request: NextRequest) {
     if (recentHistory.length > 0) {
       readableHistory = recentHistory.map((msg: { role: string; content: string }) =>
         msg.role === "user"
-          ? `【候補者】: ${msg.content}`
-          : `【面接官】: ${msg.content}`
+          ? `応募者：${msg.content}`
+          : `面接官：${msg.content}`
       ).join('\n');
     }
     
@@ -144,27 +149,34 @@ export async function POST(request: NextRequest) {
     if (!fulfilled[currentPhaseId]) fulfilled[currentPhaseId] = {};
     if (questionCounts[currentPhaseId] == null) questionCounts[currentPhaseId] = 0;
 
-    // 1) Assessor: check which expected fields are answered in transcript/history
-    const assessorPrompt = `以下の会話履歴と候補者の最新の発言から、指定されたキーに対応する情報が含まれるか抽出してください。JSONのみを返し、余計な文章は一切書かないでください。
+    // 1) Improved Assessor prompt with better Japanese context understanding
+    const assessorPrompt = `あなたは面接評価の専門家です。以下の面接の会話履歴と応募者の最新発言から、指定された評価項目に対応する情報が適切に回答されているかを分析してください。
 
-【会話履歴（最新から最大4往復分）】
-${readableHistory || '(履歴なし)'}
+【面接の会話履歴】
+${readableHistory || '（面接開始前）'}
 
-【抽出するキー】
+【応募者の最新発言】
+${transcript}
+
+【評価すべき項目】
 ${(workflow.find(p => p.id === currentPhaseId)!.expected_data).map(k => `- ${k}`).join('\n')}
 
-【出力JSONスキーマ】
+【出力形式】
+以下のJSON形式でのみ回答してください。他の文章は一切含めないでください。
+
 {
-  "values": { "<key>": "テキスト(見つかった場合)" | null },
-  "isComplete": true | false,
-  "missing": ["<key>", ...]
+  "values": {
+    "項目名": "回答内容（該当する情報が見つかった場合）" または null
+  },
+  "isComplete": true または false,
+  "missing": ["不足している項目名のリスト"]
 }
 
-ルール:
-- 厳密にJSONのみを返す
-- キーが見つからない場合はnull
-- 完了判定は全キーに非null値がある場合のみtrue
-`;
+【評価基準】
+- 応募者が実際に述べた内容のみを抽出する
+- 推測や補完は行わない
+- 全項目に具体的な回答がある場合のみisComplete: trueとする
+- 日本語の敬語表現や口語表現も適切に理解する`;
 
     let assessorJson = { values: {} as Record<string, string | null>, isComplete: false, missing: [] as string[] };
     try {
@@ -174,7 +186,8 @@ ${(workflow.find(p => p.id === currentPhaseId)!.expected_data).map(k => `- ${k}`
       const match = assessorText.match(/\{[\s\S]*\}/);
       const jsonText = match ? match[0] : assessorText;
       assessorJson = JSON.parse(jsonText);
-    } catch (_e) {
+    } catch (error) {
+      console.error('Assessor JSON parsing failed:', error);
       // If assessor fails, proceed without updating fulfillment
     }
 
@@ -183,20 +196,31 @@ ${(workflow.find(p => p.id === currentPhaseId)!.expected_data).map(k => `- ${k}`
       ...(workflow.find(p => p.id === currentPhaseId)!.expected_data as readonly string[]),
     ];
 
-    // Heuristic extraction for 'name' in Japanese to avoid repeated asking when LLM misses it
+    // Improved Japanese name extraction with better patterns
     const extractJapaneseName = (text: string): string | null => {
       if (!text) return null;
-      const cleaned = text.replace(/\s+/g, ' ').trim();
-      // Pattern 1: 「名前は◯◯です/と申します」
-      const p1 = /(?:私(?:の)?名前は|名前は)\s*([A-Za-z\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF\uFF66-\uFF9D・々ー\s]{1,30}?)(?:です|と申します)?[。,.？?！!]?/u;
-      const m1 = cleaned.match(p1);
-      if (m1 && m1[1]) return m1[1].replace(/\s+/g, '').trim();
-      // Pattern 2: 「◯◯と申します」
-      const p2 = /([A-Za-z\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF\uFF66-\uFF9D・々ー\s]{1,30})と申します/u;
-      const m2 = cleaned.match(p2);
-      if (m2 && m2[1]) return m2[1].replace(/\s+/g, '').trim();
+      const cleaned = text.replace(/\s+/g, '').trim();
+      
+      // Pattern 1: 私の名前は〜です/私は〜と申します
+      const patterns = [
+        /(?:私(?:の)?名前は|名前は)\s*([あ-んア-ン一-龯々ー・\s]{2,10})(?:です|と申します|といいます)/,
+        /私は\s*([あ-んア-ン一-龯々ー・\s]{2,10})(?:と申します|といいます|です)/,
+        /([あ-んア-ン一-龯々ー・\s]{2,10})(?:と申します|といいます)(?:よろしく|。|$)/,
+        /([あ-んア-ン一-龯々ー・]{2,10})(?:です|と申します)(?:よろしく|。|$)/
+      ];
+      
+      for (const pattern of patterns) {
+        const match = cleaned.match(pattern);
+        if (match && match[1]) {
+          const name = match[1].replace(/\s+/g, '').trim();
+          if (name.length >= 2 && name.length <= 10) {
+            return name;
+          }
+        }
+      }
       return null;
     };
+
     for (const key of expectedKeys) {
       const val = (assessorJson.values as any)?.[key];
       if (val && typeof val === 'string' && val.trim().length > 0) {
@@ -231,26 +255,27 @@ ${(workflow.find(p => p.id === currentPhaseId)!.expected_data).map(k => `- ${k}`
       nextPhaseId = (workflow.find(p => p.id === currentPhaseId)!.next_state as WorkflowPhaseId);
     }
 
-    // Compose the interviewer message objective
+    // Improved key labels in more natural Japanese
     const keyLabels: Record<string, string> = {
       name: 'お名前',
-      education: '学歴',
-      topic: '取り組んだテーマ',
-      actions: '具体的な行動',
-      outcome: '結果',
-      strength: '強み',
-      example: '具体例',
-      weakness: '弱み',
-      coping_strategy: '対応方法',
-      motivation: '志望動機',
-      connection_to_experience: 'ご経験との関係',
-      future_goal: '将来の目標',
+      education: 'ご出身校や学歴',
+      topic: '取り組まれた内容',
+      actions: '具体的な行動や取り組み',
+      outcome: '成果や結果',
+      strength: 'ご自身の強み',
+      example: '具体的なエピソード',
+      weakness: '課題や改善点',
+      coping_strategy: '改善に向けた取り組み',
+      motivation: '志望理由',
+      connection_to_experience: 'これまでのご経験との関連',
+      future_goal: '今後の目標',
     };
+
     let interviewerObjective = '';
     if (advancePhase) {
       if (nextPhaseId === 'end') {
         finished = true;
-        interviewerObjective = '以上で面接を終了いたします。お時間をいただきありがとうございました。最後に何かご質問はありますか？';
+        interviewerObjective = 'お忙しい中、貴重なお時間をいただき、ありがとうございました。以上で面接を終了させていただきます。';
       } else {
         const nextPhase = workflow.find(p => p.id === nextPhaseId)!;
         interviewerObjective = nextPhase.prompt;
@@ -263,43 +288,67 @@ ${(workflow.find(p => p.id === currentPhaseId)!.expected_data).map(k => `- ${k}`
       const missing = expectedKeys.filter(k => !fulfilled[currentPhaseId][k]);
       const targetKey = missing[0];
       const jpKey = keyLabels[targetKey] || targetKey;
-      interviewerObjective = `先ほどのお話について、${jpKey} について、もう少し具体的に教えていただけますか？`;
+      
+      // More natural follow-up questions based on context
+      const followUpPhrases = [
+        `${jpKey}について、もう少し詳しくお聞かせいただけますでしょうか。`,
+        `${jpKey}の部分をもう少し具体的に教えていただけますか。`,
+        `${jpKey}について、詳しく伺えますでしょうか。`
+      ];
+      
+      interviewerObjective = followUpPhrases[Math.floor(Math.random() * followUpPhrases.length)];
       // increment question count because we will ask again for this phase
       questionCounts[currentPhaseId] = (questionCounts[currentPhaseId] || 0) + 1;
     }
 
-    // 2) Generate the interviewer response text concisely and naturally
-    const responsePrompt = `あなたは日本企業のプロフェッショナルな面接官です。以下の会話履歴と目的を考慮して、自然で丁寧な日本語の質問を1文で作成してください。
+    // 2) Dramatically improved interviewer response prompt with proper 敬語 context
+    const responsePrompt = `あなたは日本の大手企業の人事部で働く、経験豊富で丁寧な面接官です。
 
-【会話履歴】
-${readableHistory || '(面接開始)'}
+【重要な人物設定】
+- 10年以上の面接経験を持つプロフェッショナル
+- 応募者に対して常に敬意を払い、適切な敬語を使用
+- 威圧的ではなく、応募者がリラックスして話せる雰囲気作りを心がける
+- 簡潔で自然な日本語を話す
 
-【重要な指示】
-- これは継続中の面接です
-- 会話履歴を必ず確認して、既に聞いた内容は繰り返さない
-- 「面接を始めましょう」などの開始挨拶は絶対にしない
-- 1つの質問のみを簡潔に（10-15文字程度）
-- です/ます調で自然な口語表現を使う
-- 相手に圧をかけず、配慮のある言い回しにする
+【現在の面接状況】
+${readableHistory || '面接が始まったばかりです。'}
 
-【目的】
+【応募者の最新発言】
+「${transcript}」
+
+【あなたの次の発言目的】
 ${interviewerObjective}
-`;
+
+【発言作成の重要なルール】
+1. **敬語の使用**: 丁寧語（です・ます）と尊敬語を適切に使い分ける
+2. **自然性**: 実際の面接官が話すような、自然で流暢な日本語
+3. **簡潔性**: 1つの質問を20-30文字程度で簡潔に
+4. **配慮**: 応募者にプレッシャーを与えない優しい言い回し
+5. **継続性**: 過去の会話を踏まえ、重複を避ける
+6. **専門性**: 面接官として適切な質問の仕方
+
+【出力】
+面接官としての次の発言を1文だけ作成してください。挨拶や前置きは不要です。質問内容のみを自然な敬語で述べてください。`;
+
     const responseResult = await model.generateContent([responsePrompt]);
-    const responseText = responseResult.response.text().trim();
+    let responseText = responseResult.response.text().trim();
     
-    // Generate TTS audio
+    // Clean up response text - remove quotes, extra formatting
+    responseText = responseText.replace(/^["「『]|["」』]$/g, '').trim();
+    
+    // Generate TTS audio with improved voice settings for Japanese business context
     const ttsRequest = {
       input: { text: responseText },
       voice: { 
         languageCode: 'ja-JP',
-        name: 'ja-JP-Neural2-C', // Professional male voice
+        name: 'ja-JP-Neural2-C', // Professional male voice - good for business context
         ssmlGender: 'MALE' as const
       },
       audioConfig: { 
         audioEncoding: 'MP3' as const,
-        speakingRate: 1.0,
-        pitch: 0.0
+        speakingRate: 0.95, // Slightly slower for clarity and professionalism
+        pitch: -1.0, // Slightly lower pitch for authority
+        volumeGainDb: 2.0 // Slight volume boost for clarity
       },
     };
 

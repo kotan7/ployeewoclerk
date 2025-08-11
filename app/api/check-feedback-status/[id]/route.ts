@@ -14,7 +14,15 @@ export async function GET(
 
     // Check if feedback exists for this interview
     try {
+      console.log("Checking feedback status for interview:", id);
       const feedbackData = await getFeedback(id);
+      
+      console.log("Feedback check result:", {
+        feedbackData,
+        hasFeedback: !!feedbackData,
+        hasMainFeedback: !!(feedbackData?.feedback),
+        hasOverallFeedback: !!(feedbackData?.overallFeedback)
+      });
       
       // If feedback exists and has content, it's ready
       const feedbackReady = !!(feedbackData?.feedback || feedbackData?.overallFeedback);
@@ -24,6 +32,7 @@ export async function GET(
         hasFeedback: !!feedbackData
       });
     } catch (error) {
+      console.error("Error in feedback status check:", error);
       // If getFeedback throws an error, it likely means no feedback exists yet
       return NextResponse.json({ 
         feedbackReady: false,

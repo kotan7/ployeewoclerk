@@ -565,58 +565,30 @@ export function useInterviewSession(interviewId?: string) {
     }
   }, [isMuted]);
 
-  // Function to automatically generate feedback and redirect to feedback page
+  // Function to redirect to loading page (feedback generation happens on loading page)
   const generateFeedbackAndRedirect = useCallback(async (interviewId: string) => {
     try {
-      // Immediately redirect to loading page
-      window.location.href = `/feedback/${interviewId}/loading`;
-
-      // Get questions and workflow state data
-      const [questionsData, workflowStateData] = await Promise.all([
-        getQuestions(interviewId),
-        getWorkflowState(interviewId),
-      ]);
-
+      console.log("Redirecting to feedback loading page for interview:", interviewId);
+      
+      // Quick check to ensure we have basic data before redirecting
+      const workflowStateData = await getWorkflowState(interviewId);
+      
       if (
         !workflowStateData?.conversationHistory ||
         workflowStateData.conversationHistory.length === 0
       ) {
-        console.error("No conversation history found for feedback generation");
+        console.error("No conversation history found, redirecting to feedback page");
+        window.location.href = `/feedback/${interviewId}`;
         return;
       }
 
-      // Call the generate-feedback API
-      const response = await fetch("/api/generate-feedback", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          conversationHistory: workflowStateData.conversationHistory,
-          questions: questionsData?.questions || [],
-          workflowState: workflowStateData,
-          interviewId: interviewId,
-        }),
-      });
+      // Redirect to loading page where the actual feedback generation will happen
+      window.location.href = `/feedback/${interviewId}/loading`;
 
-      if (!response.ok) {
-        const errorData = await response
-          .json()
-          .catch(() => ({ error: "Unknown error" }));
-        throw new Error(
-          errorData.error || `API request failed with status ${response.status}`
-        );
-      }
-
-      const data = await response.json();
-
-      // Save feedback to database - pass the entire data object which includes both feedback and overallFeedback
-      await saveFeedback(data, interviewId, workflowStateData.sessionId);
-
-      // The loading page will automatically detect when feedback is ready and redirect
     } catch (error) {
-      console.error("Error generating feedback:", error);
-      // The loading page will handle the fallback redirect
+      console.error("Error checking interview data:", error);
+      // Still redirect to loading page which will handle the error
+      window.location.href = `/feedback/${interviewId}/loading`;
     }
   }, []);
 

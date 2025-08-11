@@ -32,30 +32,119 @@ const FeedbackLoadingPage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Check if feedback is ready every 3 seconds
+  // Generate feedback and check if it's ready
   useEffect(() => {
-    const checkFeedback = async () => {
+    let feedbackGenerated = false;
+
+    const generateFeedback = async () => {
+      if (feedbackGenerated) return;
+      feedbackGenerated = true;
+
       try {
-        const response = await fetch(
+        console.log("Starting feedback generation on loading page...");
+
+        // First check if feedback already exists
+        const statusResponse = await fetch(
           `/api/check-feedback-status/${interviewId}`
         );
-        if (response.ok) {
-          const data = await response.json();
-          if (data.feedbackReady) {
+        if (statusResponse.ok) {
+          const statusData = await statusResponse.json();
+          if (statusData.feedbackReady) {
+            console.log("Feedback already exists, redirecting...");
             setProgress(100);
             setTimeout(() => {
               router.push(`/feedback/${interviewId}`);
             }, 500);
+            return;
           }
         }
+
+        // Get interview data for feedback generation
+        const [questionsResponse, workflowResponse] = await Promise.all([
+          fetch(`/api/get-questions/${interviewId}`),
+          fetch(`/api/get-workflow-state/${interviewId}`),
+        ]);
+
+        if (!questionsResponse.ok || !workflowResponse.ok) {
+          throw new Error("Failed to fetch interview data");
+        }
+
+        const questionsData = await questionsResponse.json();
+        const workflowStateData = await workflowResponse.json();
+
+        if (
+          !workflowStateData?.conversationHistory ||
+          workflowStateData.conversationHistory.length === 0
+        ) {
+          console.error("No conversation history found");
+          router.push(`/feedback/${interviewId}`);
+          return;
+        }
+
+        console.log("Calling generate-feedback API...");
+
+        // Generate feedback
+        const feedbackResponse = await fetch("/api/generate-feedback", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            conversationHistory: workflowStateData.conversationHistory,
+            questions: questionsData?.questions || [],
+            workflowState: workflowStateData,
+            interviewId: interviewId,
+          }),
+        });
+
+        if (!feedbackResponse.ok) {
+          const errorData = await feedbackResponse
+            .json()
+            .catch(() => ({ error: "Unknown error" }));
+          throw new Error(
+            errorData.error ||
+              `API request failed with status ${feedbackResponse.status}`
+          );
+        }
+
+        const feedbackData = await feedbackResponse.json();
+        console.log("Feedback generated successfully:", feedbackData);
+
+        // Save feedback to database
+        const saveResponse = await fetch("/api/save-feedback", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            feedbackData,
+            interviewId,
+            sessionId: workflowStateData.sessionId,
+          }),
+        });
+
+        if (!saveResponse.ok) {
+          throw new Error("Failed to save feedback");
+        }
+
+        console.log("Feedback saved successfully");
+
+        // Complete and redirect
+        setProgress(100);
+        setTimeout(() => {
+          router.push(`/feedback/${interviewId}`);
+        }, 1000);
       } catch (error) {
-        console.error("Error checking feedback status:", error);
+        console.error("Error generating feedback:", error);
+        // Redirect to feedback page anyway after delay
+        setTimeout(() => {
+          router.push(`/feedback/${interviewId}`);
+        }, 3000);
       }
     };
 
-    // Check immediately, then every 3 seconds
-    checkFeedback();
-    const interval = setInterval(checkFeedback, 3000);
+    // Start generation immediately
+    generateFeedback();
 
     // Fallback: redirect after 30 seconds regardless
     const fallbackTimeout = setTimeout(() => {
@@ -63,7 +152,6 @@ const FeedbackLoadingPage = () => {
     }, 30000);
 
     return () => {
-      clearInterval(interval);
       clearTimeout(fallbackTimeout);
     };
   }, [interviewId, router]);

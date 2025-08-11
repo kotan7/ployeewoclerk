@@ -281,7 +281,20 @@ export const getFeedback = async (interviewId: string) => {
         throw new Error("User not authenticated");
     }
 
+    console.log("GetFeedback called for:", { interviewId, userId });
+
     const supabase = CreateSupabaseClient();
+    
+    // First, let's see all records for this interview (for debugging)
+    const { data: allRecords } = await supabase
+        .from('session_history')
+        .select('id, feedback, overall_feedback, created_at')
+        .eq('user_id', userId)
+        .eq('interview_id', interviewId)
+        .order('created_at', { ascending: false });
+    
+    console.log("All session_history records for this interview:", allRecords);
+    
     const { data, error } = await supabase
         .from('session_history')
         .select('feedback, overall_feedback, id, created_at')
@@ -293,13 +306,17 @@ export const getFeedback = async (interviewId: string) => {
         .single();
 
     if (error) {
+        console.log("GetFeedback error:", error);
         if (error.code === 'PGRST116') {
             // No feedback found
+            console.log("No feedback found (PGRST116)");
             return null;
         }
         console.error("Database error:", error);
         throw new Error(`Failed to fetch feedback: ${error.message}`);
     }
+
+    console.log("GetFeedback found data:", data);
 
     return {
         feedback: data.feedback,
@@ -320,13 +337,25 @@ export const saveFeedback = async (feedbackData: any, interviewId?: string, sess
         throw new Error("Feedback is required");
     }
 
+    console.log("SaveFeedback called with:", {
+        feedbackDataKeys: Object.keys(feedbackData),
+        feedbackData: feedbackData,
+        interviewId,
+        sessionId,
+        userId
+    });
+
     const supabase = CreateSupabaseClient();
     
     // Extract overall feedback to save in separate column
     const overallFeedback = feedbackData.overallFeedback || null;
     
+    console.log("Extracted overallFeedback:", overallFeedback);
+    
     // If sessionId is provided, update existing session_history record
     if (sessionId) {
+        console.log("Updating existing session with ID:", sessionId);
+        
         const { data, error } = await supabase
             .from('session_history')
             .update({
@@ -338,9 +367,11 @@ export const saveFeedback = async (feedbackData: any, interviewId?: string, sess
             .select();
 
         if (error) {
-            console.error("Database error:", error);
+            console.error("Database error updating feedback:", error);
             throw new Error(`Failed to update feedback: ${error.message}`);
         }
+
+        console.log("Feedback update result:", data);
 
         return {
             success: true,
@@ -348,6 +379,8 @@ export const saveFeedback = async (feedbackData: any, interviewId?: string, sess
             message: "Feedback updated successfully"
         };
     } else {
+        console.log("Creating new session_history record with feedback");
+        
         // Create new session_history record with feedback
         const { data, error } = await supabase
             .from('session_history')
@@ -361,9 +394,11 @@ export const saveFeedback = async (feedbackData: any, interviewId?: string, sess
             .select();
 
         if (error) {
-            console.error("Database error:", error);
+            console.error("Database error inserting feedback:", error);
             throw new Error(`Failed to save feedback: ${error.message}`);
         }
+
+        console.log("Feedback insert result:", data);
 
         return {
             success: true,
