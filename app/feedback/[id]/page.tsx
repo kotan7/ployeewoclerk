@@ -2,11 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import {
-  getFeedback,
-  getQuestions,
-  getWorkflowState,
-} from "@/lib/actions/interview.actions";
+import { getFeedback, getWorkflowState } from "@/lib/actions/interview.actions";
 import { InterviewRadarChart } from "@/components/ui/charter";
 
 interface FeedbackPageProps {
@@ -20,11 +16,10 @@ interface FeedbackItem {
 }
 
 interface OverallFeedback {
-  score: string;
+  score: number;
   feedback: string;
 }
 
-// New enhanced feedback interfaces
 interface PhaseAnalysis {
   phase: string;
   completed: boolean;
@@ -44,40 +39,41 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
   // Fetch the saved feedback for this interview
   let workflowStateData = null;
   let feedbackData = null;
-  let questionsData = null;
 
   try {
-    // Get workflow state, feedback, and questions data
-    const [workflowState, feedback, questions] = await Promise.all([
+    // Get workflow state and feedback data
+    const [workflowState, feedback] = await Promise.all([
       getWorkflowState(id),
       getFeedback(id),
-      getQuestions(id),
     ]);
 
     workflowStateData = workflowState;
     feedbackData = feedback;
-    questionsData = questions;
   } catch (error) {
     console.error("Error fetching feedback data:", error);
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-6 py-16">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-[#163300] mb-3">面接結果</h1>
-          <p className="text-lg text-gray-600">
-            面接の詳細な記録を確認できます
+        <div className="text-center mb-16">
+          <h1 className="text-4xl lg:text-5xl font-bold text-[#163300] mb-6">
+            面接フィードバック
+          </h1>
+          <p className="text-xl text-gray-600 font-semibold max-w-3xl mx-auto">
+            あなたの面接パフォーマンスを詳しく分析し、
+            <strong>具体的な改善点</strong>をお伝えします
           </p>
         </div>
 
         {/* Overall Feedback Section */}
         {(() => {
-          // Parse overall feedback data
+          // Check for the modern overallFeedback format first
           let overallFeedback: OverallFeedback | null = null;
+          let phaseAnalysis: PhaseAnalysis[] = [];
+          let detailedFeedback: DetailedFeedback | null = null;
 
-          // First check if overall feedback is in the dedicated column
           if (feedbackData?.overallFeedback) {
             try {
               if (typeof feedbackData.overallFeedback === "string") {
@@ -85,11 +81,24 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
               } else if (typeof feedbackData.overallFeedback === "object") {
                 overallFeedback = feedbackData.overallFeedback;
               }
+
+              // Also get phase analysis and detailed feedback if available
+              if ((feedbackData as any).phaseAnalysis) {
+                phaseAnalysis = Array.isArray(
+                  (feedbackData as any).phaseAnalysis
+                )
+                  ? (feedbackData as any).phaseAnalysis
+                  : JSON.parse((feedbackData as any).phaseAnalysis);
+              }
+
+              if ((feedbackData as any).detailedFeedback) {
+                detailedFeedback =
+                  typeof (feedbackData as any).detailedFeedback === "string"
+                    ? JSON.parse((feedbackData as any).detailedFeedback)
+                    : (feedbackData as any).detailedFeedback;
+              }
             } catch (error) {
-              console.error(
-                "Error parsing overall feedback from column:",
-                error
-              );
+              console.error("Error parsing overallFeedback:", error);
             }
           }
 
@@ -104,6 +113,12 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
 
               if (parsedData?.overallFeedback) {
                 overallFeedback = parsedData.overallFeedback;
+              }
+              if (parsedData?.phaseAnalysis) {
+                phaseAnalysis = parsedData.phaseAnalysis;
+              }
+              if (parsedData?.detailedFeedback) {
+                detailedFeedback = parsedData.detailedFeedback;
               }
             } catch (error) {
               console.error(
@@ -122,89 +137,98 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
                   <h2 className="text-2xl font-semibold text-[#163300] mb-8">
                     総合評価
                   </h2>
-                  {/* Clean Score Display */}
-                  <div className="mb-8">
-                    <div className="flex items-baseline space-x-1">
-                      <span className="text-7xl font-bold text-[#163300] tracking-tight">
-                        {overallFeedback.score}
-                      </span>
-                      <span className="text-3xl font-medium text-gray-400">
-                        /100
-                      </span>
+
+                  {/* Score Display */}
+                  <div className="flex items-center justify-center lg:justify-start">
+                    <div className="relative">
+                      <svg
+                        className="w-32 h-32 transform -rotate-90"
+                        viewBox="0 0 120 120"
+                      >
+                        <circle
+                          cx="60"
+                          cy="60"
+                          r="50"
+                          fill="none"
+                          stroke="#e5e7eb"
+                          strokeWidth="8"
+                        />
+                        <circle
+                          cx="60"
+                          cy="60"
+                          r="50"
+                          fill="none"
+                          stroke="#9fe870"
+                          strokeWidth="8"
+                          strokeDasharray={`${
+                            (overallFeedback.score / 100) * 314
+                          } 314`}
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-3xl font-bold text-[#163300]">
+                          {overallFeedback.score}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Overall Feedback Text */}
+                  {/* Feedback Text */}
                   <div className="bg-gray-50 rounded-xl p-6">
-                    <h3 className="text-lg font-semibold text-[#163300] mb-3 flex items-center">
-                      <svg
-                        className="w-5 h-5 mr-2 text-[#9fe870]"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      面接官からの総評
+                    <h3 className="text-lg font-semibold text-[#163300] mb-4">
+                      総合フィードバック
                     </h3>
-                    <p className="text-gray-700 leading-relaxed">
+                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">
                       {overallFeedback.feedback}
                     </p>
                   </div>
                 </div>
 
-                {/* Right Column: Radar Chart */}
-                <div className="flex justify-center lg:justify-end mt-8">
+                {/* Right Column: Chart */}
+                <div className="flex justify-center">
                   <InterviewRadarChart
+                    data={phaseAnalysis.map((phase) => ({
+                      criteria: phase.phase,
+                      score: phase.score,
+                    }))}
                     frameless={true}
-                    className="w-full max-w-md"
                   />
                 </div>
               </div>
             </div>
-          ) : (
-            <div className="bg-white rounded-3xl p-10 shadow-lg border border-gray-100 mb-10">
-              <h2 className="text-2xl font-semibold text-[#163300] mb-8">
-                面接結果
-              </h2>
-              <div className="text-center py-16">
-                <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl p-8 border border-yellow-200">
-                  <ExclamationTriangleIcon className="w-16 h-16 text-yellow-500 mx-auto mb-6" />
-                  <h3 className="text-lg font-semibold text-yellow-800 mb-3">
-                    評価結果が見つかりません
-                  </h3>
-                  <p className="text-yellow-700">
-                    面接が完了していないか、フィードバックが生成されていない可能性があります。
-                  </p>
-                </div>
-              </div>
-            </div>
-          );
+          ) : null;
         })()}
 
         {/* Phase Analysis Section */}
         {(() => {
-          // Parse phase analysis data
           let phaseAnalysis: PhaseAnalysis[] = [];
 
-          if (feedbackData?.feedback) {
+          // Try to get phase analysis data
+          if ((feedbackData as any)?.phaseAnalysis) {
             try {
-              let parsedData = feedbackData.feedback;
-              if (typeof feedbackData.feedback === "string") {
-                parsedData = JSON.parse(feedbackData.feedback);
-              }
+              phaseAnalysis = Array.isArray((feedbackData as any).phaseAnalysis)
+                ? (feedbackData as any).phaseAnalysis
+                : JSON.parse((feedbackData as any).phaseAnalysis);
+            } catch (error) {
+              console.error("Error parsing phase analysis:", error);
+            }
+          } else if (feedbackData?.feedback) {
+            // Fallback to parsing from main feedback
+            try {
+              const parsedData =
+                typeof feedbackData.feedback === "string"
+                  ? JSON.parse(feedbackData.feedback)
+                  : feedbackData.feedback;
 
-              if (
-                parsedData?.phaseAnalysis &&
-                Array.isArray(parsedData.phaseAnalysis)
-              ) {
+              if (parsedData?.phaseAnalysis) {
                 phaseAnalysis = parsedData.phaseAnalysis;
               }
             } catch (error) {
-              console.error("Error parsing phase analysis:", error);
+              console.error(
+                "Error parsing phase analysis from feedback:",
+                error
+              );
             }
           }
 
@@ -213,57 +237,47 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
               <h2 className="text-2xl font-semibold text-[#163300] mb-8">
                 フェーズ別分析
               </h2>
-
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {phaseAnalysis.map((phase, index) => {
-                  const phaseNames: Record<string, string> = {
-                    self_intro: "自己紹介",
-                    gakuchika: "学生時代の取り組み",
-                    strength: "強み",
-                    weakness: "弱み",
-                    industry_motivation: "志望動機",
-                  };
-
-                  return (
-                    <div
-                      key={index}
-                      className={`rounded-2xl p-6 border-2 transition-all duration-300 ${
-                        phase.completed
-                          ? "bg-gradient-to-br from-[#9fe870]/20 to-[#9fe870]/10 border-[#9fe870]"
-                          : "bg-gradient-to-br from-gray-100 to-gray-50 border-gray-300"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-semibold text-[#163300] text-lg">
-                          {phaseNames[phase.phase] || phase.phase}
-                        </h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                {phaseAnalysis.map((phase, index) => (
+                  <div
+                    key={index}
+                    className={`p-6 rounded-xl border-2 transition-all duration-300 ${
+                      phase.completed
+                        ? "border-[#9fe870] bg-[#9fe870]/5"
+                        : "border-gray-200 bg-gray-50"
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="text-lg font-semibold text-[#163300]">
+                        {phase.phase}
+                      </h3>
+                      <div className="text-right">
                         <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                            phase.completed
-                              ? "bg-[#9fe870] text-[#163300]"
-                              : "bg-gray-400 text-white"
+                          className={`text-2xl font-bold ${
+                            phase.completed ? "text-[#163300]" : "text-gray-400"
                           }`}
                         >
                           {phase.score}
                         </div>
+                        <span className="text-sm text-gray-500">/10</span>
                       </div>
-
-                      <div
-                        className={`mb-3 px-3 py-1 rounded-full text-xs font-medium ${
-                          phase.completed
-                            ? "bg-[#9fe870] text-[#163300]"
-                            : "bg-gray-400 text-white"
-                        }`}
-                      >
-                        {phase.completed ? "完了" : "未完了"}
-                      </div>
-
-                      <p className="text-gray-700 text-sm leading-relaxed">
-                        {phase.feedback}
-                      </p>
                     </div>
-                  );
-                })}
+
+                    <div
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mb-4 ${
+                        phase.completed
+                          ? "bg-[#9fe870] text-[#163300]"
+                          : "bg-gray-200 text-gray-600"
+                      }`}
+                    >
+                      {phase.completed ? "完了" : "未完了"}
+                    </div>
+
+                    <p className="text-gray-700 text-sm leading-relaxed">
+                      {phase.feedback}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
           ) : null;
@@ -271,21 +285,34 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
 
         {/* Detailed Feedback Section */}
         {(() => {
-          // Parse detailed feedback data
           let detailedFeedback: DetailedFeedback | null = null;
 
-          if (feedbackData?.feedback) {
+          // Try to get detailed feedback data
+          if ((feedbackData as any)?.detailedFeedback) {
             try {
-              let parsedData = feedbackData.feedback;
-              if (typeof feedbackData.feedback === "string") {
-                parsedData = JSON.parse(feedbackData.feedback);
-              }
+              detailedFeedback =
+                typeof (feedbackData as any).detailedFeedback === "string"
+                  ? JSON.parse((feedbackData as any).detailedFeedback)
+                  : (feedbackData as any).detailedFeedback;
+            } catch (error) {
+              console.error("Error parsing detailed feedback:", error);
+            }
+          } else if (feedbackData?.feedback) {
+            // Fallback to parsing from main feedback
+            try {
+              const parsedData =
+                typeof feedbackData.feedback === "string"
+                  ? JSON.parse(feedbackData.feedback)
+                  : feedbackData.feedback;
 
               if (parsedData?.detailedFeedback) {
                 detailedFeedback = parsedData.detailedFeedback;
               }
             } catch (error) {
-              console.error("Error parsing detailed feedback:", error);
+              console.error(
+                "Error parsing detailed feedback from feedback:",
+                error
+              );
             }
           }
 
@@ -297,10 +324,10 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
 
               <div className="grid md:grid-cols-3 gap-8">
                 {/* Strengths */}
-                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200">
-                  <div className="flex items-center mb-4">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-[#163300] flex items-center gap-2">
                     <svg
-                      className="w-6 h-6 mr-3 text-green-600"
+                      className="w-5 h-5 text-green-500"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -310,25 +337,25 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
                         clipRule="evenodd"
                       />
                     </svg>
-                    <h3 className="font-semibold text-green-800">強み</h3>
-                  </div>
+                    強み
+                  </h3>
                   <ul className="space-y-3">
-                    {detailedFeedback.strengths.map((strength, index) => (
-                      <li key={index} className="flex items-start">
-                        <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                        <span className="text-green-700 text-sm">
-                          {strength}
-                        </span>
+                    {detailedFeedback.strengths?.map((strength, index) => (
+                      <li
+                        key={index}
+                        className="text-gray-700 text-sm bg-green-50 p-3 rounded-lg border-l-4 border-green-400"
+                      >
+                        {strength}
                       </li>
-                    ))}
+                    )) || []}
                   </ul>
                 </div>
 
                 {/* Improvements */}
-                <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl p-6 border border-yellow-200">
-                  <div className="flex items-center mb-4">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-[#163300] flex items-center gap-2">
                     <svg
-                      className="w-6 h-6 mr-3 text-yellow-600"
+                      className="w-5 h-5 text-amber-500"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -338,25 +365,27 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
                         clipRule="evenodd"
                       />
                     </svg>
-                    <h3 className="font-semibold text-yellow-800">改善点</h3>
-                  </div>
+                    改善点
+                  </h3>
                   <ul className="space-y-3">
-                    {detailedFeedback.improvements.map((improvement, index) => (
-                      <li key={index} className="flex items-start">
-                        <span className="w-2 h-2 bg-yellow-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                        <span className="text-yellow-700 text-sm">
+                    {detailedFeedback.improvements?.map(
+                      (improvement, index) => (
+                        <li
+                          key={index}
+                          className="text-gray-700 text-sm bg-amber-50 p-3 rounded-lg border-l-4 border-amber-400"
+                        >
                           {improvement}
-                        </span>
-                      </li>
-                    ))}
+                        </li>
+                      )
+                    ) || []}
                   </ul>
                 </div>
 
                 {/* Recommendations */}
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200">
-                  <div className="flex items-center mb-4">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-[#163300] flex items-center gap-2">
                     <svg
-                      className="w-6 h-6 mr-3 text-blue-600"
+                      className="w-5 h-5 text-blue-500"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -366,162 +395,21 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
                         clipRule="evenodd"
                       />
                     </svg>
-                    <h3 className="font-semibold text-blue-800">アドバイス</h3>
-                  </div>
+                    アドバイス
+                  </h3>
                   <ul className="space-y-3">
-                    {detailedFeedback.recommendations.map(
+                    {detailedFeedback.recommendations?.map(
                       (recommendation, index) => (
-                        <li key={index} className="flex items-start">
-                          <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                          <span className="text-blue-700 text-sm">
-                            {recommendation}
-                          </span>
+                        <li
+                          key={index}
+                          className="text-gray-700 text-sm bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400"
+                        >
+                          {recommendation}
                         </li>
                       )
-                    )}
+                    ) || []}
                   </ul>
                 </div>
-              </div>
-            </div>
-          ) : null;
-        })()}
-
-        {/* AI Feedback Section */}
-        {(() => {
-          // Parse and validate feedback data
-          let parsedFeedback: FeedbackItem[] = [];
-
-          if (feedbackData?.feedback) {
-            try {
-              let parsedData = feedbackData.feedback;
-
-              // Handle different possible formats of feedback data
-              if (typeof feedbackData.feedback === "string") {
-                parsedData = JSON.parse(feedbackData.feedback);
-              }
-
-              // Extract feedback array from the parsed data
-              if (Array.isArray(parsedData)) {
-                parsedFeedback = parsedData;
-              } else if (
-                parsedData?.feedback &&
-                Array.isArray(parsedData.feedback)
-              ) {
-                parsedFeedback = parsedData.feedback;
-              } else if (Array.isArray(feedbackData.feedback)) {
-                parsedFeedback = feedbackData.feedback;
-              }
-            } catch (error) {
-              console.error("Error parsing feedback data:", error);
-              parsedFeedback = [];
-            }
-          }
-
-          return parsedFeedback.length > 0 && questionsData ? (
-            <div className="bg-white rounded-3xl p-10 shadow-lg border border-gray-100 mb-10">
-              <h2 className="text-2xl font-semibold text-[#163300] mb-8">
-                AI評価結果
-              </h2>
-
-              {/* Individual Question Evaluations */}
-              <div className="space-y-8">
-                {parsedFeedback.map((item: FeedbackItem, index: number) => {
-                  const score = parseInt(item.score) || 0;
-                  const hasAnswer =
-                    score > 0 && item.feedback && item.feedback.trim() !== "";
-
-                  return (
-                    <div
-                      key={index}
-                      className={`bg-gradient-to-r ${
-                        hasAnswer
-                          ? "from-[#9fe870]/10 to-[#9fe870]/5"
-                          : "from-gray-100 to-gray-50"
-                      } rounded-2xl p-6 border-l-4 ${
-                        hasAnswer ? "border-[#9fe870]" : "border-gray-300"
-                      } hover:shadow-md transition-all duration-300`}
-                    >
-                      <div className="flex justify-between items-start mb-6">
-                        <div className="flex items-center space-x-4">
-                          <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                              hasAnswer
-                                ? "bg-[#9fe870] text-[#163300]"
-                                : "bg-gray-400 text-white"
-                            }`}
-                          >
-                            {index + 1}
-                          </div>
-                          <h3 className="font-semibold text-[#163300] text-lg">
-                            質問 {index + 1}
-                          </h3>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-xl font-bold text-[#163300]">
-                            {score}
-                          </span>
-                          <span className="text-base font-medium text-gray-400">
-                            /10
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="mb-6">
-                        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-                          <p className="text-gray-800 font-medium leading-relaxed">
-                            {questionsData.questions[index]}
-                          </p>
-                        </div>
-                      </div>
-
-                      {hasAnswer ? (
-                        <div className="bg-white rounded-xl p-6 shadow-sm border border-[#9fe870]/20">
-                          <div className="flex items-center mb-4">
-                            <svg
-                              className="w-5 h-5 mr-2 text-[#9fe870]"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                            <h4 className="font-semibold text-[#163300]">
-                              フィードバック
-                            </h4>
-                          </div>
-                          <p className="text-gray-700 text-sm leading-relaxed">
-                            {item.feedback}
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-                          <div className="flex items-center mb-3">
-                            <svg
-                              className="w-5 h-5 mr-2 text-gray-400"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                            <h4 className="font-semibold text-gray-600">
-                              フィードバック
-                            </h4>
-                          </div>
-                          <p className="text-gray-500 text-sm italic">
-                            この質問に対する回答が見つかりませんでした。
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
               </div>
             </div>
           ) : null;
@@ -534,21 +422,61 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
           !feedbackData && (
             <div className="bg-white rounded-3xl p-10 shadow-lg border border-gray-100 mb-10">
               <h2 className="text-2xl font-semibold text-[#163300] mb-8">
-                AI評価結果
+                フィードバック準備中
               </h2>
-              <div className="text-center py-16">
-                <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl p-8 border border-yellow-200">
-                  <ExclamationTriangleIcon className="w-16 h-16 text-yellow-500 mx-auto mb-6" />
-                  <h3 className="text-lg font-semibold text-yellow-800 mb-3">
-                    フィードバックが生成されていません
-                  </h3>
-                  <p className="text-yellow-700">
-                    面接完了後に「フィードバックを生成」ボタンを押してください。
-                  </p>
+              <div className="text-center py-12">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-[#9fe870]/20 rounded-full mb-6">
+                  <svg
+                    className="w-8 h-8 text-[#163300] animate-spin"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
                 </div>
+                <p className="text-lg text-gray-600 mb-4">
+                  面接の分析が完了し次第、詳細なフィードバックをお届けします
+                </p>
+                <p className="text-sm text-gray-500">
+                  通常1-2分程度でフィードバックが生成されます
+                </p>
               </div>
             </div>
           )}
+
+        {/* Show message if no interview data */}
+        {(!workflowStateData ||
+          !workflowStateData.conversationHistory ||
+          workflowStateData.conversationHistory.length === 0) && (
+          <div className="bg-white rounded-3xl p-10 shadow-lg border border-gray-100 mb-10">
+            <div className="text-center py-12">
+              <ExclamationTriangleIcon className="w-16 h-16 text-gray-400 mx-auto mb-6" />
+              <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+                面接記録が見つかりません
+              </h2>
+              <p className="text-gray-600 mb-8">
+                この面接のデータが見つからないか、まだ面接が完了していない可能性があります。
+              </p>
+              <Link href="/interview/new">
+                <Button className="bg-[#9fe870] text-[#163300] hover:bg-[#8fd960] px-8 py-3 text-lg font-semibold rounded-2xl">
+                  新しい面接を開始
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-6 mt-16 justify-center">

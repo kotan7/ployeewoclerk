@@ -300,7 +300,7 @@ export function InterviewForm() {
                 {isSubmitting ? (
                   <div className="flex items-center gap-2">
                     <div className="w-5 h-5 border-2 border-[#163300] border-t-transparent rounded-full animate-spin" />
-                    質問を生成して面接を開始中...
+                    面接を準備中...
                   </div>
                 ) : (
                   "面接セッションを開始する"

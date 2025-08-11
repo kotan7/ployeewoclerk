@@ -12,7 +12,7 @@ const openai = new OpenAI({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { conversationHistory, questions, workflowState, interviewId } = body;
+    const { conversationHistory, workflowState, interviewId } = body;
 
     if (!conversationHistory || !Array.isArray(conversationHistory) || conversationHistory.length === 0) {
       return NextResponse.json({ error: "Conversation history is required" }, { status: 400 });
@@ -77,8 +77,8 @@ ${conversationHistory.map((msg: { role: string; content: string }) =>
     : `【面接官】: ${msg.content}`
 ).join('\n')}
 
-**質問リスト (参考):**
-${questions?.map((q: string, i: number) => `${i + 1}. ${q}`).join('\n') || '構造化ワークフローによる面接'}
+**面接内容:**
+AI面接官が応募者の情報に基づいて動的に生成した質問による面接
 `;
 
     const completion = await openai.chat.completions.create({

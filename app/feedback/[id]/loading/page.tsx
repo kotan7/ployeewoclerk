@@ -60,16 +60,14 @@ const FeedbackLoadingPage = () => {
         }
 
         // Get interview data for feedback generation
-        const [questionsResponse, workflowResponse] = await Promise.all([
-          fetch(`/api/get-questions/${interviewId}`),
-          fetch(`/api/get-workflow-state/${interviewId}`),
-        ]);
+        const workflowResponse = await fetch(
+          `/api/get-workflow-state/${interviewId}`
+        );
 
-        if (!questionsResponse.ok || !workflowResponse.ok) {
+        if (!workflowResponse.ok) {
           throw new Error("Failed to fetch interview data");
         }
 
-        const questionsData = await questionsResponse.json();
         const workflowStateData = await workflowResponse.json();
 
         if (
@@ -91,7 +89,6 @@ const FeedbackLoadingPage = () => {
           },
           body: JSON.stringify({
             conversationHistory: workflowStateData.conversationHistory,
-            questions: questionsData?.questions || [],
             workflowState: workflowStateData,
             interviewId: interviewId,
           }),

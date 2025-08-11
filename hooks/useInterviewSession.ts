@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { getQuestions, getWorkflowState, saveFeedback } from "@/lib/actions/interview.actions";
+import { getWorkflowState, saveFeedback } from "@/lib/actions/interview.actions";
 
 // Configuration constants
 const SILENCE_THRESHOLD = 0.05;

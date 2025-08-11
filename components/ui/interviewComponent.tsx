@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { vapi } from "@/lib/vapi.sdk";
 import {
-  getQuestions,
   saveFeedback,
   getWorkflowState,
 } from "@/lib/actions/interview.actions";
@@ -71,16 +70,7 @@ export const useInterview = ({
   const [usageMonitorInterval, setUsageMonitorInterval] =
     useState<NodeJS.Timeout | null>(null);
 
-  const interviewQuestions =
-    Array.isArray(questions) && questions.length > 0
-      ? questions
-      : [
-          "まずは簡単に自己紹介をお願いします。",
-          "なぜ弊社を志望されたのですか？",
-          "この職種を選んだ理由を教えてください。",
-          "あなたの強みと弱みを教えてください。",
-          "5年後のキャリアビジョンを聞かせてください。",
-        ];
+  // Remove predefined questions - system prompt will generate questions dynamically
 
   useEffect(() => {
     const onCallStart = () => {
@@ -253,14 +243,9 @@ export const useInterview = ({
         return;
       }
 
-      const questionsForPrompt = interviewQuestions
-        .map((q: string, i: number) => `${i + 1}. ${q}`)
-        .join("\n");
-
       await vapi.start({
         name: "AI Interview Assistant",
         firstMessage:
-          interviewQuestions[0] ||
           "こんにちは。本日はもぎ面接にご参加いただきありがとうございます。まずは簡単に自己紹介をお願いします。",
         model: {
           provider: "openai",
@@ -268,13 +253,22 @@ export const useInterview = ({
           messages: [
             {
               role: "system",
-              content: `あなたはプロの面接官です。あなたの任務は以下の5つの質問に基づいて面接を行い、各質問に対して応募者の詳細な情報を引き出すことです。
+              content: `あなたは経験豊富なプロの面接官です。応募者の情報に基づいて、適切な面接質問を動的に生成し、深掘りしながら面接を進行してください。
 
 【面接の進行ルール】
-1. 「面接質問リスト」にある質問を **一つずつ順番に出す**
+1. **自己紹介から開始**し、応募者の回答に基づいて自然な流れで質問を展開する
 2. 応募者の回答が不十分な場合は、**最大2回までフォローアップ質問**を行い、十分な詳細を引き出す
-3. 回答が十分であれば、次の質問に進む
-4. すべての質問が完了したら「以上で面接を終了いたします」とだけ述べて終了する
+3. 約5-7つの質問で面接を構成し、応募者の能力・適性・志望動機を総合的に評価する
+4. 十分な情報が得られたら「以上で面接を終了いたします」とだけ述べて終了する
+
+【質問生成の指針】
+応募者の情報に基づいて以下の観点から質問を作成してください：
+- **志望動機**: なぜこの企業・職種を選んだのか
+- **経験・スキル**: 職歴や経験に基づく具体的なエピソード
+- **問題解決能力**: 困難な状況への対処方法
+- **成長意欲**: 学習姿勢やキャリア目標
+- **企業適合性**: 企業文化との適合度
+- **面接フォーカス**: 選択された面接種類（HR/ケース/技術/最終）に応じた専門的質問
 
 【回答が不十分な判断基準】
 - 話が20秒以内で終わる  
@@ -291,19 +285,18 @@ export const useInterview = ({
 2. 応募者の回答が不十分な場合は必ず深掘りする
 3. 一度に一つの質問のみ行う
 4. 応募者が十分に話すまで次の質問に進まない
+5. 応募者の経験や志望企業・職種に関連した具体的な質問をする
 
 【面接対象の応募者情報】
 - 名前: ${name || "未入力"}
+- 学歴: ${education || "未入力"}
 - 職歴・経験: ${experience || "未入力"}
 - 志望企業: ${companyName || "未入力"}
 - 志望職種: ${role || "未入力"}
 - 職務内容: ${jobDescription || "未入力"}
 - 面接フォーカス: ${interviewFocus || "general"}
 
-【面接質問リスト】
-${questionsForPrompt}
-
-上記5つの質問に基づき、順番に1つずつ丁寧にヒアリングしてください。`,
+この情報を踏まえて、応募者に適した質問を動的に生成し、自然な面接の流れを作ってください。`,
             },
           ],
         },
@@ -373,11 +366,8 @@ ${questionsForPrompt}
     setError(null);
 
     try {
-      // Get questions and workflow state data
-      const [questionsData, workflowStateData] = await Promise.all([
-        getQuestions(interviewId),
-        getWorkflowState(interviewId),
-      ]);
+      // Get workflow state data
+      const workflowStateData = await getWorkflowState(interviewId);
 
       if (
         !workflowStateData?.conversationHistory ||
@@ -396,7 +386,6 @@ ${questionsForPrompt}
         },
         body: JSON.stringify({
           conversationHistory: workflowStateData.conversationHistory,
-          questions: questionsData?.questions || [],
           workflowState: workflowStateData,
           interviewId: interviewId,
         }),
@@ -461,7 +450,6 @@ ${questionsForPrompt}
     toggleMute,
     getStatusText,
     setCallStatus,
-    questions: interviewQuestions,
     fullTranscript,
     isGeneratingFeedback,
     handleGenerateFeedback,
