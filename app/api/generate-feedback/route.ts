@@ -39,35 +39,42 @@ export async function POST(request: NextRequest) {
 
 ${workflowAnalysis}
 
-**詳細評価基準:**
-1. **内容の充実度** - 各フェーズで期待される情報が含まれているか
-2. **具体性** - 抽象的でなく、具体的な経験や例が示されているか
-3. **論理性** - 回答が筋道立てて話されているか
-4. **自己分析力** - 自分の強み・弱みを客観視できているか
-5. **志望動機の明確さ** - なぜその企業・職種を選んだかが明確か
-6. **成長意欲** - 向上心や学習意欲が感じられるか
-7. **コミュニケーション力** - 相手に分かりやすく伝えられているか
+**評価体系:**
+1. **総合評価** - 面接全体のパフォーマンス (100点満点)
+2. **チャート用5項目評価** - レーダーチャート表示用の5つの側面 (各10点満点)
+3. **フェーズ別評価** - 面接の各段階での具体的評価 (各10点満点)
+4. **改善・強み分析** - 具体的な改善点と強みのハイライト
 
 **出力形式:**
-以下の形式の単一のJSONオブジェクトを返してください。各フェーズの評価も含めてください。
+以下の形式の単一のJSONオブジェクトを返してください。
 {
   "overallFeedback": {
     "score": "総合点数 (1-100)",
     "feedback": "面接全体に対する包括的なフィードバック (日本語で7〜10文、具体的な強み、改善点、アドバイスを含む)"
   },
-  "phaseAnalysis": [
-    {
-      "phase": "フェーズ名",
-      "completed": "完了状況 (true/false)",
-      "score": "点数 (1-10、未回答は0)",
-      "feedback": "そのフェーズに対する具体的フィードバック (日本語で3〜4文)"
-    }
+  "chartData": [
+    { "criteria": "コミュニケーション力", "score": 0 },
+    { "criteria": "論理的思考力", "score": 0 },
+    { "criteria": "志望動機の明確さ", "score": 0 },
+    { "criteria": "自己分析力", "score": 0 },
+    { "criteria": "成長意欲", "score": 0 }
   ],
-  "detailedFeedback": {
-    "strengths": ["強みとして評価できるポイント1", "強み2", "強み3"],
-    "improvements": ["改善すべきポイント1", "改善点2", "改善点3"],
-    "recommendations": ["今後の面接でのアドバイス1", "アドバイス2", "アドバイス3"]
-  }
+  "phaseAnalysis": [
+    { "phase": "自己紹介", "score": 0, "feedback": "日本語3〜4文" },
+    { "phase": "学生時代の取り組み", "score": 0, "feedback": "日本語3〜4文" },
+    { "phase": "志望動機", "score": 0, "feedback": "日本語3〜4文" },
+    { "phase": "強み・弱み", "score": 0, "feedback": "日本語3〜4文" }
+  ],
+  "improvements": [
+    "改善すべき具体的なポイント1 (詳細な説明)",
+    "改善すべき具体的なポイント2 (詳細な説明)",
+    "改善すべき具体的なポイント3 (詳細な説明)"
+  ],
+  "strengths": [
+    "評価できる強み1 (具体的な根拠)",
+    "評価できる強み2 (具体的な根拠)",
+    "評価できる強み3 (具体的な根拠)"
+  ]
 }
 
 **面接記録:**
@@ -104,9 +111,12 @@ AI面接官が応募者の情報に基づいて動的に生成した質問によ
     
     return NextResponse.json({ 
       overallFeedback: result.overallFeedback || {},
+      chartData: result.chartData || [],
       phaseAnalysis: result.phaseAnalysis || [],
-      detailedFeedback: result.detailedFeedback || {},
+      improvements: result.improvements || [],
+      strengths: result.strengths || [],
       // Keep legacy format for backward compatibility
+      detailedFeedback: result.detailedFeedback || {},
       feedback: result.feedback || []
     });
 

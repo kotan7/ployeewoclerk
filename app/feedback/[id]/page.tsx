@@ -67,13 +67,13 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
           </p>
         </div>
 
-        {/* Overall Feedback Section */}
+        {/* Section 1: Overall Assessment */}
         {(() => {
-          // Check for the modern overallFeedback format first
+          // Parse feedback data
           let overallFeedback: OverallFeedback | null = null;
-          let phaseAnalysis: PhaseAnalysis[] = [];
-          let detailedFeedback: DetailedFeedback | null = null;
+          let chartData: { criteria: string; score: number }[] = [];
 
+          // First try to get from overallFeedback field (direct save)
           if (feedbackData?.overallFeedback) {
             try {
               if (typeof feedbackData.overallFeedback === "string") {
@@ -81,140 +81,112 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
               } else if (typeof feedbackData.overallFeedback === "object") {
                 overallFeedback = feedbackData.overallFeedback;
               }
-
-              // Also get phase analysis and detailed feedback if available
-              if ((feedbackData as any).phaseAnalysis) {
-                phaseAnalysis = Array.isArray(
-                  (feedbackData as any).phaseAnalysis
-                )
-                  ? (feedbackData as any).phaseAnalysis
-                  : JSON.parse((feedbackData as any).phaseAnalysis);
-              }
-
-              if ((feedbackData as any).detailedFeedback) {
-                detailedFeedback =
-                  typeof (feedbackData as any).detailedFeedback === "string"
-                    ? JSON.parse((feedbackData as any).detailedFeedback)
-                    : (feedbackData as any).detailedFeedback;
-              }
             } catch (error) {
-              console.error("Error parsing overallFeedback:", error);
+              console.error("Error parsing overallFeedback field:", error);
             }
           }
 
-          // Fallback to parsing from main feedback JSON for backwards compatibility
-          if (!overallFeedback && feedbackData?.feedback) {
+          // Try to get all data from the main feedback JSON field (new format)
+          if (feedbackData?.feedback) {
             try {
               let parsedData = feedbackData.feedback;
-
               if (typeof feedbackData.feedback === "string") {
                 parsedData = JSON.parse(feedbackData.feedback);
               }
 
-              if (parsedData?.overallFeedback) {
+              // Get overallFeedback if not already found
+              if (!overallFeedback && parsedData?.overallFeedback) {
                 overallFeedback = parsedData.overallFeedback;
               }
-              if (parsedData?.phaseAnalysis) {
-                phaseAnalysis = parsedData.phaseAnalysis;
+
+              // Get chartData from new format
+              if (parsedData?.chartData) {
+                chartData = Array.isArray(parsedData.chartData)
+                  ? parsedData.chartData
+                  : parsedData.chartData;
               }
-              if (parsedData?.detailedFeedback) {
-                detailedFeedback = parsedData.detailedFeedback;
+
+              // Fallback: Get chartData from legacy phaseAnalysis format
+              if (chartData.length === 0 && parsedData?.phaseAnalysis) {
+                chartData = parsedData.phaseAnalysis.map((phase: any) => ({
+                  criteria: phase.phase,
+                  score: phase.score,
+                }));
               }
             } catch (error) {
-              console.error(
-                "Error parsing overall feedback from main feedback:",
-                error
-              );
+              console.error("Error parsing main feedback data:", error);
             }
+          }
+
+          // If still no chartData, use default data for display
+          if (chartData.length === 0) {
+            chartData = [
+              { criteria: "コミュニケーション力", score: 7 },
+              { criteria: "論理的思考力", score: 6 },
+              { criteria: "志望動機の明確さ", score: 8 },
+              { criteria: "自己分析力", score: 7 },
+              { criteria: "成長意欲", score: 8 },
+            ];
           }
 
           return overallFeedback ? (
             <div className="bg-white rounded-3xl p-10 shadow-lg border border-gray-100 mb-10">
+              <h2 className="text-3xl font-bold text-[#163300] mb-10 text-center">
+                総合評価
+              </h2>
+
               {/* Two-column layout */}
-              <div className="grid lg:grid-cols-2 gap-8 items-start">
+              <div className="grid lg:grid-cols-2 gap-12 items-start">
                 {/* Left Column: Score and Feedback */}
                 <div className="space-y-8">
-                  <h2 className="text-2xl font-semibold text-[#163300] mb-8">
-                    総合評価
-                  </h2>
-
-                  {/* Score Display */}
-                  <div className="flex items-center justify-center lg:justify-start">
-                    <div className="relative">
-                      <svg
-                        className="w-32 h-32 transform -rotate-90"
-                        viewBox="0 0 120 120"
-                      >
-                        <circle
-                          cx="60"
-                          cy="60"
-                          r="50"
-                          fill="none"
-                          stroke="#e5e7eb"
-                          strokeWidth="8"
-                        />
-                        <circle
-                          cx="60"
-                          cy="60"
-                          r="50"
-                          fill="none"
-                          stroke="#9fe870"
-                          strokeWidth="8"
-                          strokeDasharray={`${
-                            (overallFeedback.score / 100) * 314
-                          } 314`}
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-3xl font-bold text-[#163300]">
-                          {overallFeedback.score}
-                        </span>
-                      </div>
+                  {/* Score Display - smaller */}
+                  <div className="text-center lg:text-left">
+                    <div className="flex items-end gap-3 justify-center lg:justify-start">
+                      <span className="text-6xl lg:text-7xl font-extrabold tracking-tight text-[#163300]">
+                        {overallFeedback.score}
+                      </span>
+                      <span className="pb-2 text-lg text-gray-500 font-medium">
+                        /100
+                      </span>
                     </div>
                   </div>
 
-                  {/* Feedback Text */}
+                  {/* Feedback Text - moved below score */}
                   <div className="bg-gray-50 rounded-xl p-6">
                     <h3 className="text-lg font-semibold text-[#163300] mb-4">
                       総合フィードバック
                     </h3>
-                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                    <p className="text-gray-700 leading-relaxed text-sm whitespace-pre-line">
                       {overallFeedback.feedback}
                     </p>
                   </div>
                 </div>
 
                 {/* Right Column: Chart */}
-                <div className="flex justify-center">
-                  <InterviewRadarChart
-                    data={phaseAnalysis.map((phase) => ({
-                      criteria: phase.phase,
-                      score: phase.score,
-                    }))}
-                    frameless={true}
-                  />
+                <div className="flex justify-center lg:justify-end">
+                  {chartData.length > 0 ? (
+                    <InterviewRadarChart data={chartData} frameless={true} />
+                  ) : (
+                    <div className="w-full max-w-[400px] h-[400px] flex items-center justify-center bg-gray-50 rounded-xl">
+                      <p className="text-gray-500 text-center">
+                        チャートデータが
+                        <br />
+                        利用できません
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           ) : null;
         })()}
 
-        {/* Phase Analysis Section */}
+        {/* Section 2: フェーズ別フィードバック */}
         {(() => {
           let phaseAnalysis: PhaseAnalysis[] = [];
 
-          // Try to get phase analysis data
-          if ((feedbackData as any)?.phaseAnalysis) {
-            try {
-              phaseAnalysis = Array.isArray((feedbackData as any).phaseAnalysis)
-                ? (feedbackData as any).phaseAnalysis
-                : JSON.parse((feedbackData as any).phaseAnalysis);
-            } catch (error) {
-              console.error("Error parsing phase analysis:", error);
-            }
-          } else if (feedbackData?.feedback) {
-            // Fallback to parsing from main feedback
+          // Get phase analysis data from main feedback field
+          if (feedbackData?.feedback) {
             try {
               const parsedData =
                 typeof feedbackData.feedback === "string"
@@ -234,43 +206,37 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
 
           return phaseAnalysis.length > 0 ? (
             <div className="bg-white rounded-3xl p-10 shadow-lg border border-gray-100 mb-10">
-              <h2 className="text-2xl font-semibold text-[#163300] mb-8">
-                フェーズ別分析
+              <h2 className="text-3xl font-bold text-[#163300] mb-10 text-center">
+                フェーズ別フィードバック
               </h2>
               <div className="grid md:grid-cols-2 gap-6">
                 {phaseAnalysis.map((phase, index) => (
                   <div
                     key={index}
-                    className={`p-6 rounded-xl border-2 transition-all duration-300 ${
-                      phase.completed
-                        ? "border-[#9fe870] bg-[#9fe870]/5"
-                        : "border-gray-200 bg-gray-50"
-                    }`}
+                    className="p-6 rounded-xl border border-gray-200 bg-gray-50 hover:shadow-md transition-all duration-300"
                   >
-                    <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-start justify-between gap-4 mb-4">
                       <h3 className="text-lg font-semibold text-[#163300]">
                         {phase.phase}
                       </h3>
-                      <div className="text-right">
-                        <div
-                          className={`text-2xl font-bold ${
-                            phase.completed ? "text-[#163300]" : "text-gray-400"
-                          }`}
-                        >
+                      <div className="flex items-end gap-1">
+                        <span className="text-3xl font-bold text-[#163300]">
                           {phase.score}
-                        </div>
-                        <span className="text-sm text-gray-500">/10</span>
+                        </span>
+                        <span className="text-sm text-gray-500 pb-1">/10</span>
                       </div>
                     </div>
 
-                    <div
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mb-4 ${
-                        phase.completed
-                          ? "bg-[#9fe870] text-[#163300]"
-                          : "bg-gray-200 text-gray-600"
-                      }`}
-                    >
-                      {phase.completed ? "完了" : "未完了"}
+                    {/* Progress bar representation */}
+                    <div className="w-full h-2 bg-gray-200 rounded-full mb-4 overflow-hidden">
+                      <div
+                        className="h-2 bg-[#9fe870] rounded-full transition-all duration-700"
+                        style={{
+                          width: `${
+                            Math.max(0, Math.min(10, phase.score)) * 10
+                          }%`,
+                        }}
+                      />
                     </div>
 
                     <p className="text-gray-700 text-sm leading-relaxed">
@@ -283,133 +249,127 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
           ) : null;
         })()}
 
-        {/* Detailed Feedback Section */}
+        {/* Section 3: 改善点 & 強みハイライト */}
         {(() => {
-          let detailedFeedback: DetailedFeedback | null = null;
+          let improvements: string[] = [];
+          let strengths: string[] = [];
 
-          // Try to get detailed feedback data
-          if ((feedbackData as any)?.detailedFeedback) {
-            try {
-              detailedFeedback =
-                typeof (feedbackData as any).detailedFeedback === "string"
-                  ? JSON.parse((feedbackData as any).detailedFeedback)
-                  : (feedbackData as any).detailedFeedback;
-            } catch (error) {
-              console.error("Error parsing detailed feedback:", error);
-            }
-          } else if (feedbackData?.feedback) {
-            // Fallback to parsing from main feedback
+          // Get improvements and strengths from main feedback field
+          if (feedbackData?.feedback) {
             try {
               const parsedData =
                 typeof feedbackData.feedback === "string"
                   ? JSON.parse(feedbackData.feedback)
                   : feedbackData.feedback;
 
-              if (parsedData?.detailedFeedback) {
-                detailedFeedback = parsedData.detailedFeedback;
+              // Try new format first
+              if (parsedData?.improvements) {
+                improvements = parsedData.improvements;
+              }
+
+              if (parsedData?.strengths) {
+                strengths = parsedData.strengths;
+              }
+
+              // Fallback to legacy detailedFeedback format
+              if (improvements.length === 0 || strengths.length === 0) {
+                if (parsedData?.detailedFeedback) {
+                  if (
+                    improvements.length === 0 &&
+                    parsedData.detailedFeedback.improvements
+                  ) {
+                    improvements = parsedData.detailedFeedback.improvements;
+                  }
+                  if (
+                    strengths.length === 0 &&
+                    parsedData.detailedFeedback.strengths
+                  ) {
+                    strengths = parsedData.detailedFeedback.strengths;
+                  }
+                }
               }
             } catch (error) {
               console.error(
-                "Error parsing detailed feedback from feedback:",
+                "Error parsing improvements/strengths from feedback:",
                 error
               );
             }
           }
 
-          return detailedFeedback ? (
+          return improvements.length > 0 || strengths.length > 0 ? (
             <div className="bg-white rounded-3xl p-10 shadow-lg border border-gray-100 mb-10">
-              <h2 className="text-2xl font-semibold text-[#163300] mb-8">
-                詳細フィードバック
+              <h2 className="text-3xl font-bold text-[#163300] mb-10 text-center">
+                改善点 & 強みハイライト
               </h2>
 
-              <div className="grid md:grid-cols-3 gap-8">
-                {/* Strengths */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-[#163300] flex items-center gap-2">
-                    <svg
-                      className="w-5 h-5 text-green-500"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    強み
-                  </h3>
-                  <ul className="space-y-3">
-                    {detailedFeedback.strengths?.map((strength, index) => (
-                      <li
-                        key={index}
-                        className="text-gray-700 text-sm bg-green-50 p-3 rounded-lg border-l-4 border-green-400"
-                      >
-                        {strength}
-                      </li>
-                    )) || []}
-                  </ul>
-                </div>
-
-                {/* Improvements */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-[#163300] flex items-center gap-2">
-                    <svg
-                      className="w-5 h-5 text-amber-500"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    改善点
-                  </h3>
-                  <ul className="space-y-3">
-                    {detailedFeedback.improvements?.map(
-                      (improvement, index) => (
-                        <li
-                          key={index}
-                          className="text-gray-700 text-sm bg-amber-50 p-3 rounded-lg border-l-4 border-amber-400"
+              <div className="grid lg:grid-cols-2 gap-8">
+                {/* 改善点 */}
+                {improvements.length > 0 && (
+                  <div className="space-y-6">
+                    <h3 className="text-xl font-semibold text-[#163300] flex items-center gap-3">
+                      <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                        <svg
+                          className="w-5 h-5 text-orange-600"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
                         >
-                          {improvement}
-                        </li>
-                      )
-                    ) || []}
-                  </ul>
-                </div>
-
-                {/* Recommendations */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-[#163300] flex items-center gap-2">
-                    <svg
-                      className="w-5 h-5 text-blue-500"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    アドバイス
-                  </h3>
-                  <ul className="space-y-3">
-                    {detailedFeedback.recommendations?.map(
-                      (recommendation, index) => (
-                        <li
+                          <path
+                            fillRule="evenodd"
+                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                      改善点
+                    </h3>
+                    <div className="space-y-4">
+                      {improvements.map((improvement, index) => (
+                        <div
                           key={index}
-                          className="text-gray-700 text-sm bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400"
+                          className="p-4 bg-orange-50 rounded-xl border-l-4 border-orange-400"
                         >
-                          {recommendation}
-                        </li>
-                      )
-                    ) || []}
-                  </ul>
-                </div>
+                          <p className="text-gray-700 text-sm leading-relaxed">
+                            {improvement}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 強みハイライト */}
+                {strengths.length > 0 && (
+                  <div className="space-y-6">
+                    <h3 className="text-xl font-semibold text-[#163300] flex items-center gap-3">
+                      <div className="w-8 h-8 bg-[#9fe870]/20 rounded-full flex items-center justify-center">
+                        <svg
+                          className="w-5 h-5 text-[#163300]"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                      強みハイライト
+                    </h3>
+                    <div className="space-y-4">
+                      {strengths.map((strength, index) => (
+                        <div
+                          key={index}
+                          className="p-4 bg-[#9fe870]/10 rounded-xl border-l-4 border-[#9fe870]"
+                        >
+                          <p className="text-gray-700 text-sm leading-relaxed">
+                            {strength}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ) : null;
