@@ -19,12 +19,13 @@ import {
 } from "@/components/ui/chart";
 
 // Default data for Japanese interview criteria (can be overridden via props)
+// Updated to match the API response format
 const defaultChartData = [
-  { criteria: "コミュニケーション", score: 80 },
+  { criteria: "コミュニケーション力", score: 80 },
   { criteria: "論理的思考力", score: 75 },
-  { criteria: "協調性・チームワーク", score: 85 },
-  { criteria: "主体性・積極性", score: 70 },
-  { criteria: "専門知識・技術力", score: 78 },
+  { criteria: "志望動機の明確さ", score: 85 },
+  { criteria: "自己分析力", score: 70 },
+  { criteria: "成長意欲", score: 78 },
 ];
 
 const chartConfig = {

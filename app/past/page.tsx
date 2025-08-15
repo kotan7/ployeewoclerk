@@ -4,22 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { getUserInterviews } from "@/lib/actions/interview.actions";
 import AutoSignIn from "@/components/ui/AutoSignIn";
-
-// Helper function to translate interview focus to Japanese
-const getInterviewFocusLabel = (focus: string) => {
-  const focusMap: { [key: string]: string } = {
-    hr: "人事面接",
-    case: "ケース面接",
-    technical: "テクニカル面接",
-    final: "最終面接",
-    // Legacy mappings for backwards compatibility
-    general: "一般的な行動面接",
-    product: "プロダクト・ケース面接",
-    leadership: "リーダーシップ面接",
-    custom: "カスタム",
-  };
-  return focusMap[focus] || focus;
-};
+import Folder from "@/components/ui/reactbits/folder";
 
 const InterviewHistoryPage = () => {
   const [interviews, setInterviews] = useState<any[]>([]);
@@ -61,8 +46,8 @@ const InterviewHistoryPage = () => {
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <AutoSignIn>
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-[#163300] mb-2">面接履歴</h1>
+          <div className="mb-8 text-center">
+            <h1 className="text-4xl font-bold text-[#163300] mb-4">面接履歴</h1>
             <p className="text-gray-600">
               これまでの面接練習履歴を確認できます
             </p>
@@ -119,7 +104,7 @@ const InterviewHistoryPage = () => {
             </div>
           ) : (
             <>
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-x-4 gap-y-32 md:grid-cols-2 lg:grid-cols-3 mt-35">
                 {interviews.map(
                   (interview: {
                     id: string;
@@ -130,45 +115,30 @@ const InterviewHistoryPage = () => {
                     interview_focus?: string;
                     created_at: string;
                   }) => (
-                    <Link
+                    <div
                       key={interview.id}
-                      href={`/feedback/${interview.id}`}
-                      className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer block"
+                      className="flex flex-col items-center"
                     >
-                      {/* Placeholder Image */}
-                      <div className="w-full h-40 bg-gray-100 rounded-lg mb-4 flex items-center justify-center">
-                        <svg
-                          className="w-12 h-12 text-gray-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a2 2 0 012-2h2a2 2 0 012 2v5m-6 0h6"
-                          />
-                        </svg>
+                      {/* Folder Component - increased height and added padding for expansion space */}
+                      <div style={{ height: "220px", position: "relative", paddingTop: "15px" }}>
+                        <Folder
+                          size={1.5}
+                          color="#9fe870"
+                          className="mx-auto"
+                          interview={interview}
+                        />
                       </div>
 
-                      {/* Interview Details */}
-                      <div className="space-y-3">
-                        <h3 className="text-lg font-semibold text-[#163300] line-clamp-1">
+                      {/* Interview Details Below Folder */}
+                      <div className="text-center space-y-1 -mt-20">
+                        <h3 className="text-xl font-semibold text-[#163300]">
                           {interview.companyName || interview.company_name}
                         </h3>
-                        <p className="text-gray-600 font-medium">
+                        <p className="text-sm text-gray-600 font-medium">
                           {interview.role}
                         </p>
-                        <div className="flex items-center justify-between text-sm text-gray-500">
-                          <span className="inline-block px-2 py-1 bg-[#9fe870]/20 text-[#163300] rounded-full text-xs font-medium">
-                            {getInterviewFocusLabel(
-                              interview.interviewFocus ||
-                                interview.interview_focus ||
-                                ""
-                            )}
-                          </span>
-                          <time>
+                        <div className="flex flex-col items-center space-y-1 text-sm text-gray-500">
+                          <time className="text-xs">
                             {new Date(interview.created_at).toLocaleDateString(
                               "ja-JP",
                               {
@@ -180,7 +150,7 @@ const InterviewHistoryPage = () => {
                           </time>
                         </div>
                       </div>
-                    </Link>
+                    </div>
                   )
                 )}
               </div>

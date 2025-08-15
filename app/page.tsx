@@ -4,8 +4,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import CardSwap, { Card } from "../components/ui/reactbits/cardSwap";
-import Cubes from "../components/ui/reactbits/cube";
 import logo from "../constants/logo.png";
 import Image from "next/image";
 
