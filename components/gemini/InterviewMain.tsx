@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Bars } from "react-loader-spinner";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 interface InterviewMainProps {
   isActive: boolean;
@@ -128,14 +128,9 @@ export default function InterviewMain({
           {/* Processing Indicator */}
           {isProcessing && (
             <div className="flex items-center justify-center gap-2">
-              <Bars
-                height="16"
-                width="16"
+              <LoadingSpinner
+                size="sm"
                 color="#3b82f6"
-                ariaLabel="bars-loading"
-                wrapperStyle={{}}
-                wrapperClass=""
-                visible={true}
               />
               <span className="text-blue-500 font-medium">AI処理中...</span>
             </div>

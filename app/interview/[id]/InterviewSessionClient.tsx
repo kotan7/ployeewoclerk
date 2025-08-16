@@ -4,7 +4,7 @@ import React, { useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useInterviewSession } from "../../../hooks/useInterviewSession";
 import soundwavesAnimation from "../../../constants/soundwaves.json";
-import { Bars } from "react-loader-spinner";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 interface Interview {
   id: string;
@@ -136,12 +136,9 @@ const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
                   disabled
                   className="cursor-pointer bg-gray-300 text-gray-600 px-12 py-4 rounded-full font-bold text-xl cursor-not-allowed flex items-center gap-3"
                 >
-                  <Bars
-                    height="20"
-                    width="20"
+                  <LoadingSpinner
+                    size="sm"
                     color="#6b7280"
-                    ariaLabel="bars-loading"
-                    visible={true}
                   />
                   処理中...
                 </button>

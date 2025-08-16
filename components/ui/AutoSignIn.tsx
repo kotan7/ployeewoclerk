@@ -2,7 +2,7 @@
 
 import { useAuth, SignInButton } from "@clerk/nextjs";
 import { useEffect, useRef, useState } from "react";
-import { Bars } from "react-loader-spinner";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 interface AutoSignInProps {
   children: React.ReactNode;
@@ -30,14 +30,9 @@ const AutoSignIn = ({ children }: AutoSignInProps) => {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <Bars
-            height="32"
-            width="32"
+          <LoadingSpinner
+            size="md"
             color="#9fe870"
-            ariaLabel="bars-loading"
-            wrapperStyle={{}}
-            wrapperClass="mx-auto mb-4"
-            visible={true}
           />
           <p className="text-gray-600">読み込み中...</p>
         </div>
@@ -54,14 +49,9 @@ const AutoSignIn = ({ children }: AutoSignInProps) => {
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="text-center">
-        <Bars
-          height="32"
-          width="32"
+        <LoadingSpinner
+          size="md"
           color="#9fe870"
-          ariaLabel="bars-loading"
-          wrapperStyle={{}}
-          wrapperClass="mx-auto mb-4"
-          visible={true}
         />
         <p className="text-gray-600">認証中...</p>
 
