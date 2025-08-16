@@ -23,7 +23,7 @@ import {
 const defaultChartData = [
   { criteria: "コミュニケーション力", score: 80 },
   { criteria: "論理的思考力", score: 75 },
-  { criteria: "志望動機の明確さ", score: 85 },
+  { criteria: "志望動機", score: 85 },
   { criteria: "自己分析力", score: 70 },
   { criteria: "成長意欲", score: 78 },
 ];
@@ -55,14 +55,23 @@ export function InterviewRadarChart({
       <div className={`${className}`}>
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[400px] w-full"
+          className="mx-auto aspect-square max-h-[450px] w-full"
         >
-          <RadarChart data={data}>
+          <RadarChart data={data} margin={{ top: 20, right: 80, bottom: 20, left: 80 }}>
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
             <PolarAngleAxis
               dataKey="criteria"
-              tick={{ fontSize: 12, fill: "#6B7280", fontWeight: 500 }}
+              tick={{ fontSize: 13, fill: "#6B7280", fontWeight: 500 }}
               className="text-sm"
+              tickFormatter={(value) => {
+                // Split long text into multiple lines if needed
+                if (value.length > 8) {
+                  const words = value.split('');
+                  const mid = Math.ceil(words.length / 2);
+                  return words.slice(0, mid).join('') + '\n' + words.slice(mid).join('');
+                }
+                return value;
+              }}
             />
             <PolarGrid stroke="#E5E7EB" strokeWidth={1} />
             <Radar
@@ -92,14 +101,23 @@ export function InterviewRadarChart({
       <CardContent className="pb-2">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[200px]"
+          className="mx-auto aspect-square max-h-[220px]"
         >
-          <RadarChart data={data}>
+          <RadarChart data={data} margin={{ top: 20, right: 60, bottom: 20, left: 60 }}>
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
             <PolarAngleAxis
               dataKey="criteria"
-              tick={{ fontSize: 11, fill: "#6B7280" }}
+              tick={{ fontSize: 12, fill: "#6B7280" }}
               className="text-xs"
+              tickFormatter={(value) => {
+                // Split long text into multiple lines if needed
+                if (value.length > 8) {
+                  const words = value.split('');
+                  const mid = Math.ceil(words.length / 2);
+                  return words.slice(0, mid).join('') + '\n' + words.slice(mid).join('');
+                }
+                return value;
+              }}
             />
             <PolarGrid stroke="#E5E7EB" />
             <Radar

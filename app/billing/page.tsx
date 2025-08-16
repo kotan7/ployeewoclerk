@@ -3,13 +3,13 @@
 import React, { useEffect } from "react";
 import { PricingTable } from "@clerk/nextjs";
 import Head from "next/head";
+import { jaJP } from "@clerk/localizations";
+import { ClerkProvider } from "@clerk/nextjs";
 
 export default function BillingPage() {
   useEffect(() => {
-    // Set document title and meta tags dynamically for client component
     document.title = "料金プラン | プロイー - AI面接練習プラットフォーム";
 
-    // Update meta description
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
       metaDescription.setAttribute(
@@ -29,26 +29,20 @@ export default function BillingPage() {
         />
       </Head>
 
-      <div className="min-h-screen bg-white">
-
-        {/* Pricing Table Section */}
-        <div className="py-16">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+        <ClerkProvider localization={jaJP}>
+          <div className="max-w-7xl mx-auto px-6 py-16">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-[#163300] mb-4">
-                プランを選択してください
-              </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
+              <h1 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-4 tracking-tight">
+                料金プラン
+              </h1>
+              <p className="text-lg text-slate-600 max-w-2xl mx-auto font-light">
                 あなたの面接練習ニーズに合わせて最適なプランをお選びください
               </p>
             </div>
-
-            {/* Clerk Pricing Table */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
               <PricingTable />
-            </div>
           </div>
-        </div>
+        </ClerkProvider>
       </div>
     </>
   );

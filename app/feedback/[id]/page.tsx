@@ -4,6 +4,7 @@ import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { getFeedback, getWorkflowState } from "@/lib/actions/interview.actions";
 import { InterviewRadarChart } from "@/components/ui/charter";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 interface FeedbackPageProps {
   params: Promise<{ id: string }>;
@@ -103,43 +104,65 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
               if (parsedData?.chartData) {
                 chartData = Array.isArray(parsedData.chartData)
                   ? parsedData.chartData
-                  : parsedData.chartData;
+                  : [parsedData.chartData];
+
+                // Ensure scores are numbers and properly formatted
+                chartData = chartData
+                  .map((item) => ({
+                    criteria: String(item.criteria || ""),
+                    score: Math.max(
+                      0,
+                      Math.min(100, Math.round(Number(item.score) || 0))
+                    ),
+                  }))
+                  .filter((item) => item.criteria); // Remove items with empty criteria
               }
 
               // Fallback: Get chartData from legacy phaseAnalysis format
-              if (chartData.length === 0 && parsedData?.phaseAnalysis) {
-                chartData = parsedData.phaseAnalysis.map((phase: any) => ({
-                  criteria: phase.phase,
-                  score: phase.score,
-                }));
+              if (
+                chartData.length === 0 &&
+                parsedData?.phaseAnalysis &&
+                Array.isArray(parsedData.phaseAnalysis)
+              ) {
+                chartData = parsedData.phaseAnalysis
+                  .map((phase: any) => ({
+                    criteria: String(phase.phase || ""),
+                    score: Math.max(
+                      0,
+                      Math.min(100, Math.round(Number(phase.score) * 10))
+                    ), // Convert 0-10 to 0-100 scale
+                  }))
+                  .filter(
+                    (item: { criteria: string; score: number }) => item.criteria
+                  );
               }
             } catch (error) {
               console.error("Error parsing main feedback data:", error);
             }
           }
 
-          // If still no chartData, use default data for display
-          if (chartData.length === 0) {
-            chartData = [
-              { criteria: "コミュニケーション力", score: 7 },
-              { criteria: "論理的思考力", score: 6 },
-              { criteria: "志望動機の明確さ", score: 8 },
-              { criteria: "自己分析力", score: 7 },
-              { criteria: "成長意欲", score: 8 },
-            ];
-          }
+          // Remove the fallback default data since the component has its own defaults
+          // if (chartData.length === 0) {
+          //   chartData = [
+          //     { criteria: "コミュニケーション力", score: 70 },
+          //     { criteria: "論理的思考力", score: 60 },
+          //     { criteria: "志望動機の明確さ", score: 80 },
+          //     { criteria: "自己分析力", score: 70 },
+          //     { criteria: "成長意欲", score: 80 },
+          //   ];
+          // }
 
           return overallFeedback ? (
-            <div className="bg-white rounded-3xl p-10 shadow-lg border border-gray-100 mb-10">
-              <h2 className="text-3xl font-bold text-[#163300] mb-10 text-center">
+            <div className="bg-white rounded-3xl p-8 shadow-lg border border-gray-100 mb-10">
+              <h2 className="text-3xl font-bold text-[#163300] mb-8 text-center">
                 総合評価
               </h2>
 
               {/* Two-column layout */}
-              <div className="grid lg:grid-cols-2 gap-12 items-start">
+              <div className="grid lg:grid-cols-2 gap-8 items-start">
                 {/* Left Column: Score and Feedback */}
-                <div className="space-y-8">
-                  {/* Score Display - smaller */}
+                <div className="space-y-6">
+                  {/* Score Display */}
                   <div className="text-center lg:text-left">
                     <div className="flex items-end gap-3 justify-center lg:justify-start">
                       <span className="text-6xl lg:text-7xl font-extrabold tracking-tight text-[#163300]">
@@ -151,9 +174,9 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
                     </div>
                   </div>
 
-                  {/* Feedback Text - moved below score */}
-                  <div className="bg-gray-50 rounded-xl p-6">
-                    <h3 className="text-lg font-semibold text-[#163300] mb-4">
+                  {/* Feedback Text */}
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <h3 className="text-lg font-semibold text-[#163300]">
                       総合フィードバック
                     </h3>
                     <p className="text-gray-700 leading-relaxed text-sm whitespace-pre-line">
@@ -163,18 +186,14 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
                 </div>
 
                 {/* Right Column: Chart */}
-                <div className="flex justify-center lg:justify-end">
-                  {chartData.length > 0 ? (
-                    <InterviewRadarChart data={chartData} frameless={true} />
-                  ) : (
-                    <div className="w-full max-w-[400px] h-[400px] flex items-center justify-center bg-gray-50 rounded-xl">
-                      <p className="text-gray-500 text-center">
-                        チャートデータが
-                        <br />
-                        利用できません
-                      </p>
-                    </div>
-                  )}
+                <div className="flex justify-center lg:justify-start -mb-17">
+                  <div className="w-full max-w-[500px]">
+                    <InterviewRadarChart
+                      data={chartData.length > 0 ? chartData : undefined}
+                      frameless={true}
+                      className="w-full"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -193,7 +212,10 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
                   ? JSON.parse(feedbackData.feedback)
                   : feedbackData.feedback;
 
-              if (parsedData?.phaseAnalysis) {
+              if (
+                parsedData?.phaseAnalysis &&
+                Array.isArray(parsedData.phaseAnalysis)
+              ) {
                 phaseAnalysis = parsedData.phaseAnalysis;
               }
             } catch (error) {
@@ -227,10 +249,16 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
                       </div>
                     </div>
 
-                    {/* Progress bar representation */}
+                    {/* Progress bar representation with dynamic colors */}
                     <div className="w-full h-2 bg-gray-200 rounded-full mb-4 overflow-hidden">
                       <div
-                        className="h-2 bg-[#9fe870] rounded-full transition-all duration-700"
+                        className={`h-2 rounded-full transition-all duration-700 ${
+                          phase.score >= 8
+                            ? "bg-[#9fe870]" // Green for high scores (8-10)
+                            : phase.score >= 5
+                            ? "bg-[#fbbf24]" // Yellow for medium scores (5-7.9)
+                            : "bg-[#f97316]" // Orange for low scores (0-4.9)
+                        }`}
                         style={{
                           width: `${
                             Math.max(0, Math.min(10, phase.score)) * 10
@@ -263,11 +291,17 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
                   : feedbackData.feedback;
 
               // Try new format first
-              if (parsedData?.improvements) {
+              if (
+                parsedData?.improvements &&
+                Array.isArray(parsedData.improvements)
+              ) {
                 improvements = parsedData.improvements;
               }
 
-              if (parsedData?.strengths) {
+              if (
+                parsedData?.strengths &&
+                Array.isArray(parsedData.strengths)
+              ) {
                 strengths = parsedData.strengths;
               }
 
@@ -276,13 +310,15 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
                 if (parsedData?.detailedFeedback) {
                   if (
                     improvements.length === 0 &&
-                    parsedData.detailedFeedback.improvements
+                    parsedData.detailedFeedback.improvements &&
+                    Array.isArray(parsedData.detailedFeedback.improvements)
                   ) {
                     improvements = parsedData.detailedFeedback.improvements;
                   }
                   if (
                     strengths.length === 0 &&
-                    parsedData.detailedFeedback.strengths
+                    parsedData.detailedFeedback.strengths &&
+                    Array.isArray(parsedData.detailedFeedback.strengths)
                   ) {
                     strengths = parsedData.detailedFeedback.strengths;
                   }
@@ -386,28 +422,10 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
               </h2>
               <div className="text-center py-12">
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-[#9fe870]/20 rounded-full mb-6">
-                  <svg
-                    className="w-8 h-8 text-[#163300] animate-spin"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
+                  <LoadingSpinner size="lg" color="#163300" />
                 </div>
                 <p className="text-lg text-gray-600 mb-4">
-                  面接の分析が完了し次第、詳細なフィードバックをお届けします
+                  面接の分析が完了次第、詳細なフィードバックをお届けします
                 </p>
                 <p className="text-sm text-gray-500">
                   通常1-2分程度でフィードバックが生成されます

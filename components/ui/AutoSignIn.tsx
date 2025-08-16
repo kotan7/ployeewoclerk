@@ -2,6 +2,7 @@
 
 import { useAuth, SignInButton } from "@clerk/nextjs";
 import { useEffect, useRef, useState } from "react";
+import { Bars } from "react-loader-spinner";
 
 interface AutoSignInProps {
   children: React.ReactNode;
@@ -29,7 +30,15 @@ const AutoSignIn = ({ children }: AutoSignInProps) => {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-[#9fe870] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <Bars
+            height="32"
+            width="32"
+            color="#9fe870"
+            ariaLabel="bars-loading"
+            wrapperStyle={{}}
+            wrapperClass="mx-auto mb-4"
+            visible={true}
+          />
           <p className="text-gray-600">読み込み中...</p>
         </div>
       </div>
@@ -45,7 +54,15 @@ const AutoSignIn = ({ children }: AutoSignInProps) => {
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="text-center">
-        <div className="w-8 h-8 border-2 border-[#9fe870] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <Bars
+          height="32"
+          width="32"
+          color="#9fe870"
+          ariaLabel="bars-loading"
+          wrapperStyle={{}}
+          wrapperClass="mx-auto mb-4"
+          visible={true}
+        />
         <p className="text-gray-600">認証中...</p>
 
         {/* Hidden sign-in button that gets auto-clicked */}

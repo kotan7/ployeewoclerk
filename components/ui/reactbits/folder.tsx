@@ -78,7 +78,7 @@ const Folder: React.FC<FolderProps> = ({
           className="w-full h-full flex flex-col items-center justify-center p-2 text-center hover:bg-gray-50 rounded-lg transition-colors"
         >
           <svg
-            className="w-5 h-5 text-[#163300] mb-1"
+            className="w-6 h-6 text-[#163300] mb-2"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -92,18 +92,20 @@ const Folder: React.FC<FolderProps> = ({
           </svg>
           <span className="text-xs text-[#163300] font-medium">再挑戦</span>
         </Link>,
-        // Card 2: View Feedback (Middle)
+        // Card 2: View Feedback (Middle - now on top)
         <Link
           key="feedback"
           href={`/feedback/${interview.id}`}
           className="w-full h-full flex flex-col items-center justify-center p-2 text-center hover:bg-gray-50 rounded-lg transition-colors"
         >
+          
           <svg
-            className="w-5 h-5 text-[#163300] mb-1"
+            className="w-6 h-6 text-[#163300] mb-2"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
+            
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -112,7 +114,7 @@ const Folder: React.FC<FolderProps> = ({
             />
           </svg>
           <span className="text-xs text-[#163300] font-medium">
-            フィードバック
+            振り返り
           </span>
         </Link>,
         // Card 3: Interview Details (Right)
@@ -121,7 +123,7 @@ const Folder: React.FC<FolderProps> = ({
           className="w-full h-full flex flex-col items-center justify-center p-2 text-center"
         >
           <svg
-            className="w-5 h-5 text-[#163300] mb-1"
+            className="w-6 h-6 text-[#163300] mb-2"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -200,9 +202,14 @@ const Folder: React.FC<FolderProps> = ({
 
   const getOpenTransform = (index: number) => {
     if (index === 0) return "translate(-120%, -70%) rotate(-15deg)"; // 再挑戦 (Left)
-    if (index === 1) return "translate(-50%, -100%) rotate(5deg)"; // フィードバック (Middle)
-    if (index === 2) return "translate(10%, -70%) rotate(15deg)"; // 詳細 (Right)
+    if (index === 1) return "translate(-50%, -120%) rotate(0deg)"; // フィードバック (Top Middle)
+    if (index === 2) return "translate(20%, -70%) rotate(15deg)"; // 詳細 (Right)
     return "";
+  };
+
+  const getZIndex = (index: number) => {
+    if (index === 1) return 25; // フィードバック (feedback) on top
+    return 20;
   };
 
   return (
@@ -245,12 +252,13 @@ const Folder: React.FC<FolderProps> = ({
                 key={i}
                 onMouseMove={(e) => handlePaperMouseMove(e, i)}
                 onMouseLeave={(e) => handlePaperMouseLeave(e, i)}
-                className={`absolute z-20 bottom-[10%] left-1/2 transition-all duration-300 ease-in-out ${
+                className={`absolute bottom-[10%] left-1/2 transition-all duration-300 ease-in-out ${
                   !open
                     ? "transform -translate-x-1/2 translate-y-[10%] group-hover:translate-y-0"
                     : "hover:scale-110"
                 } ${sizeClasses}`}
                 style={{
+                  zIndex: getZIndex(i),
                   ...(!open ? {} : { transform: transformStyle }),
                   backgroundColor: i === 0 ? paper1 : i === 1 ? paper2 : paper3,
                   borderRadius: "10px",

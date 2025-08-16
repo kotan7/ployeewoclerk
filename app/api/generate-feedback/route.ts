@@ -55,7 +55,7 @@ ${workflowAnalysis}
   "chartData": [
     { "criteria": "コミュニケーション力", "score": 0 },
     { "criteria": "論理的思考力", "score": 0 },
-    { "criteria": "志望動機の明確さ", "score": 0 },
+    { "criteria": "志望動機", "score": 0 },
     { "criteria": "自己分析力", "score": 0 },
     { "criteria": "成長意欲", "score": 0 }
   ],

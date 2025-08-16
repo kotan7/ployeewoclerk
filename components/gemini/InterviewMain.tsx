@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { Bars } from "react-loader-spinner";
 
 interface InterviewMainProps {
   isActive: boolean;
@@ -127,7 +128,15 @@ export default function InterviewMain({
           {/* Processing Indicator */}
           {isProcessing && (
             <div className="flex items-center justify-center gap-2">
-              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              <Bars
+                height="16"
+                width="16"
+                color="#3b82f6"
+                ariaLabel="bars-loading"
+                wrapperStyle={{}}
+                wrapperClass=""
+                visible={true}
+              />
               <span className="text-blue-500 font-medium">AI処理中...</span>
             </div>
           )}

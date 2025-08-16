@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createInterview } from "@/lib/actions/interview.actions";
+import { Bars } from "react-loader-spinner";
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -299,7 +300,15 @@ export function InterviewForm() {
               >
                 {isSubmitting ? (
                   <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 border-2 border-[#163300] border-t-transparent rounded-full animate-spin" />
+                    <Bars
+                      height="20"
+                      width="20"
+                      color="#163300"
+                      ariaLabel="bars-loading"
+                      wrapperStyle={{}}
+                      wrapperClass=""
+                      visible={true}
+                    />
                     面接を準備中...
                   </div>
                 ) : (

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const FeedbackLoadingPage = () => {
   const params = useParams();
@@ -154,102 +155,106 @@ const FeedbackLoadingPage = () => {
   }, [interviewId, router]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="max-w-md w-full mx-auto px-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+      <div className="max-w-lg w-full mx-auto px-6">
         {/* Main Loading Card */}
-        <div className="bg-white rounded-3xl p-10 shadow-lg border border-gray-100 text-center">
-          {/* Loading Icon */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200/50 p-12 text-center">
+          {/* Loading Animation */}
           <div className="mb-8">
-            <div className="w-20 h-20 mx-auto bg-gradient-to-br from-[#9fe870] to-[#7dd24a] rounded-full flex items-center justify-center">
-              <svg
-                className="w-10 h-10 text-white animate-spin"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
+            <div className="relative w-16 h-16 mx-auto">
+              <div className="absolute inset-0 rounded-full bg-slate-100 animate-pulse" />
+              <div className="absolute inset-2 rounded-full bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center">
+                <LoadingSpinner size="md" color="#ffffff" />
+              </div>
             </div>
           </div>
 
           {/* Title */}
-          <h1 className="text-2xl font-bold text-[#163300] mb-4">
-            フィードバック生成中{dots}
+          <h1 className="text-3xl font-light text-slate-900 mb-3 tracking-tight">
+            フィードバックを準備中
           </h1>
 
           {/* Description */}
-          <p className="text-gray-600 mb-8 leading-relaxed">
-            AIが面接内容を詳細に分析し、
-            <br />
-            あなた専用のフィードバックを
-            <br />
-            作成しています
+          <p className="text-slate-600 text-lg leading-relaxed font-light">
+            AIが面接内容を分析しています
           </p>
 
-          {/* Progress Bar */}
-          <div className="mb-6">
-            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+          {/* Subtle Divider */}
+          <div className="my-8 flex justify-center">
+            <div className="w-12 h-px bg-slate-200" />
+          </div>
+
+          {/* Progress Indicator */}
+          <div className="mb-8">
+            <div className="relative w-full bg-slate-100 rounded-full h-1 overflow-hidden">
               <div
-                className="bg-gradient-to-r from-[#9fe870] to-[#7dd24a] h-2 rounded-full transition-all duration-300 ease-out"
-                style={{ width: `${progress}%` }}
+                className="absolute inset-y-0 left-0 bg-slate-900 rounded-full transition-all duration-500 ease-out"
+                style={{ width: `${Math.min(progress, 98)}%` }}
               />
             </div>
-            <p className="text-sm text-gray-500 mt-2">
-              {Math.round(progress)}% 完了
+            <p className="text-sm text-slate-500 mt-3 font-light">
+              {Math.round(progress)}%
             </p>
           </div>
 
-          {/* Status Messages */}
-          <div className="space-y-3 text-sm text-gray-500">
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-[#9fe870] rounded-full animate-pulse" />
-              <span>面接内容を解析中</span>
+          {/* Status Steps */}
+          <div className="space-y-4 text-left max-w-xs mx-auto">
+            <div className="flex items-center space-x-3">
+              <div
+                className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${
+                  progress > 20 ? "bg-slate-900" : "bg-slate-300"
+                }`}
+              />
+              <span
+                className={`text-sm transition-colors duration-300 ${
+                  progress > 20 ? "text-slate-700" : "text-slate-400"
+                }`}
+              >
+                会話を分析中
+              </span>
             </div>
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-gray-300 rounded-full" />
-              <span>評価レポート作成中</span>
+            <div className="flex items-center space-x-3">
+              <div
+                className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${
+                  progress > 50 ? "bg-slate-900" : "bg-slate-300"
+                }`}
+              />
+              <span
+                className={`text-sm transition-colors duration-300 ${
+                  progress > 50 ? "text-slate-700" : "text-slate-400"
+                }`}
+              >
+                評価レポート作成中
+              </span>
             </div>
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-gray-300 rounded-full" />
-              <span>改善提案生成中</span>
+            <div className="flex items-center space-x-3">
+              <div
+                className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${
+                  progress > 80 ? "bg-slate-900" : "bg-slate-300"
+                }`}
+              />
+              <span
+                className={`text-sm transition-colors duration-300 ${
+                  progress > 80 ? "text-slate-700" : "text-slate-400"
+                }`}
+              >
+                改善提案を準備中
+              </span>
             </div>
           </div>
 
-          {/* Note */}
-          <div className="mt-8 p-4 bg-gray-50 rounded-xl">
-            <p className="text-xs text-gray-500">
-              ※ 通常1-2分で完了します
-              <br />
-              しばらくお待ちください
+          {/* Minimal Note */}
+          <div className="mt-10">
+            <p className="text-xs text-slate-400 font-light">
+              完了まで 1-2 分程度
             </p>
           </div>
         </div>
 
-        {/* Floating Elements for Visual Interest */}
-        <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div
-            className="absolute top-1/4 left-1/4 w-4 h-4 bg-[#9fe870] rounded-full opacity-20 animate-bounce"
-            style={{ animationDelay: "0s" }}
-          />
-          <div
-            className="absolute top-1/3 right-1/4 w-3 h-3 bg-[#7dd24a] rounded-full opacity-20 animate-bounce"
-            style={{ animationDelay: "1s" }}
-          />
-          <div
-            className="absolute bottom-1/3 left-1/3 w-2 h-2 bg-[#9fe870] rounded-full opacity-20 animate-bounce"
-            style={{ animationDelay: "2s" }}
-          />
+        {/* Subtle Background Elements */}
+        <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-slate-100 rounded-full opacity-20 blur-3xl" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-slate-200 rounded-full opacity-10 blur-3xl" />
         </div>
       </div>
     </div>
