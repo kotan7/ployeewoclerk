@@ -12,7 +12,7 @@ const structuredData = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   name: "プロイー",
-  url: "https://ployee.it.com",
+  url: "https://www.ployee.net",
   description:
     "AI面接官との実践的な面接練習で、自信を持って本番に挑めます。24時間いつでも面接練習が可能。",
   applicationCategory: "EducationalApplication",
@@ -373,7 +373,7 @@ export default function Home() {
                   ref={problemImageRef}
                   className="relative flex justify-center items-center min-h-[600px]"
                 >
-                                    <div className="relative">
+                  <div className="relative">
                     {/* Background decorative elements */}
                     <div className="absolute -bottom-10 -left-10 w-16 h-16 bg-[#9fe870]/40 rounded-full blur-lg"></div>
 

@@ -136,10 +136,7 @@ const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
                   disabled
                   className="cursor-pointer bg-gray-300 text-gray-600 px-12 py-4 rounded-full font-bold text-xl cursor-not-allowed flex items-center gap-3"
                 >
-                  <LoadingSpinner
-                    size="sm"
-                    color="#6b7280"
-                  />
+                  <LoadingSpinner size="sm" color="#6b7280" />
                   処理中...
                 </button>
               )}

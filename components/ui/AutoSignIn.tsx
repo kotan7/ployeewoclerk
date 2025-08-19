@@ -30,10 +30,7 @@ const AutoSignIn = ({ children }: AutoSignInProps) => {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <LoadingSpinner
-            size="md"
-            color="#9fe870"
-          />
+          <LoadingSpinner size="md" color="#9fe870" />
           <p className="text-gray-600">読み込み中...</p>
         </div>
       </div>
@@ -49,10 +46,7 @@ const AutoSignIn = ({ children }: AutoSignInProps) => {
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="text-center">
-        <LoadingSpinner
-          size="md"
-          color="#9fe870"
-        />
+        <LoadingSpinner size="md" color="#9fe870" />
         <p className="text-gray-600">認証中...</p>
 
         {/* Hidden sign-in button that gets auto-clicked */}

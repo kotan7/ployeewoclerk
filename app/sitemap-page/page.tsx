@@ -78,7 +78,7 @@ export default function SitemapPage() {
                 <div className="flex items-center text-sm text-gray-500">
                   <span className="mr-2">URL:</span>
                   <code className="bg-gray-100 px-2 py-1 rounded text-xs">
-                    https://ployee.it.com{page.url}
+                    https://www.ployee.net{page.url}
                   </code>
                 </div>
               </article>

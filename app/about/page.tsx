@@ -19,10 +19,10 @@ export const metadata: Metadata = {
     title: "プロイーについて | AI面接練習サービス",
     description:
       "プロイーは、AI面接官との実践的な面接練習を通じて就活生の内定獲得をサポートします。",
-    url: "https://ployee.it.com/about",
+    url: "https://www.ployee.net/about",
     images: [
       {
-        url: "https://ployee.it.com/og-image.jpg",
+        url: "https://www.ployee.net/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "プロイー - AI面接練習サービスについて",
@@ -35,13 +35,13 @@ const structuredData = {
   "@context": "https://schema.org",
   "@type": "AboutPage",
   name: "プロイーについて",
-  url: "https://ployee.it.com/about",
+  url: "https://www.ployee.net/about",
   description:
     "プロイーは、AI面接官との実践的な面接練習を通じて就活生の内定獲得をサポートするサービスです。",
   mainEntity: {
     "@type": "Organization",
     name: "プロイー",
-    url: "https://ployee.it.com",
+    url: "https://www.ployee.net",
     description: "AI面接練習プラットフォーム",
     foundingDate: "2024",
     areaServed: "日本",

@@ -128,10 +128,7 @@ export default function InterviewMain({
           {/* Processing Indicator */}
           {isProcessing && (
             <div className="flex items-center justify-center gap-2">
-              <LoadingSpinner
-                size="sm"
-                color="#3b82f6"
-              />
+              <LoadingSpinner size="sm" color="#3b82f6" />
               <span className="text-blue-500 font-medium">AI処理中...</span>
             </div>
           )}

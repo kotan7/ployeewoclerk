@@ -300,10 +300,7 @@ export function InterviewForm() {
               >
                 {isSubmitting ? (
                   <div className="flex items-center gap-2">
-                    <LoadingSpinner
-                      size="sm"
-                      color="#163300"
-                    />
+                    <LoadingSpinner size="sm" color="#163300" />
                     面接を準備中...
                   </div>
                 ) : (
