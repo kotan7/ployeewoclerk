@@ -56,13 +56,13 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-6 py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl lg:text-5xl font-bold text-[#163300] mb-6">
+        <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-[#163300] mb-4 sm:mb-6">
             面接フィードバック
           </h1>
-          <p className="text-xl text-gray-600 font-semibold max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg lg:text-xl text-gray-600 font-semibold max-w-3xl mx-auto leading-relaxed">
             あなたの面接パフォーマンスを詳しく分析し、
             <strong>具体的な改善点</strong>をお伝えします
           </p>
@@ -153,41 +153,41 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
           // }
 
           return overallFeedback ? (
-            <div className="bg-white rounded-3xl p-8 shadow-lg border border-gray-100 mb-10">
-              <h2 className="text-3xl font-bold text-[#163300] mb-8 text-center">
+            <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-lg border border-gray-100 mb-6 sm:mb-8 lg:mb-10">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#163300] mb-6 sm:mb-8 text-center">
                 総合評価
               </h2>
 
               {/* Two-column layout */}
-              <div className="grid lg:grid-cols-2 gap-8 items-start">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-start">
                 {/* Left Column: Score and Feedback */}
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6 order-2 lg:order-1">
                   {/* Score Display */}
                   <div className="text-center lg:text-left">
-                    <div className="flex items-end gap-3 justify-center lg:justify-start">
-                      <span className="text-6xl lg:text-7xl font-extrabold tracking-tight text-[#163300]">
+                    <div className="flex items-end gap-2 sm:gap-3 justify-center lg:justify-start">
+                      <span className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight text-[#163300]">
                         {overallFeedback.score}
                       </span>
-                      <span className="pb-2 text-lg text-gray-500 font-medium">
+                      <span className="pb-1 sm:pb-2 text-base sm:text-lg text-gray-500 font-medium">
                         /100
                       </span>
                     </div>
                   </div>
 
                   {/* Feedback Text */}
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <h3 className="text-lg font-semibold text-[#163300]">
+                  <div className="bg-gray-50 rounded-xl p-3 sm:p-4">
+                    <h3 className="text-base sm:text-lg font-semibold text-[#163300]">
                       総合フィードバック
                     </h3>
-                    <p className="text-gray-700 leading-relaxed text-sm whitespace-pre-line">
+                    <p className="text-gray-700 leading-relaxed text-xs sm:text-sm whitespace-pre-line">
                       {overallFeedback.feedback}
                     </p>
                   </div>
                 </div>
 
                 {/* Right Column: Chart */}
-                <div className="flex justify-center lg:justify-start -mb-17">
-                  <div className="w-full max-w-[500px]">
+                <div className="flex justify-center lg:justify-start order-1 lg:order-2">
+                  <div className="w-full max-w-[300px] sm:max-w-[400px] lg:max-w-[500px]">
                     <InterviewRadarChart
                       data={chartData.length > 0 ? chartData : undefined}
                       frameless={true}
@@ -457,16 +457,16 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
         )}
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-6 mt-16 justify-center">
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mt-8 sm:mt-12 lg:mt-16 justify-center">
           <Link href="/interview/new">
-            <Button className="bg-[#9fe870] text-[#163300] hover:bg-[#8fd960] px-10 py-6 text-lg font-semibold rounded-3xl min-w-[220px] shadow-md hover:shadow-lg transition-all duration-200">
+            <Button className="bg-[#9fe870] text-[#163300] hover:bg-[#8fd960] w-full sm:w-auto px-6 sm:px-8 lg:px-10 py-3 sm:py-4 lg:py-6 text-base sm:text-lg font-semibold rounded-2xl sm:rounded-3xl min-w-0 sm:min-w-[220px] shadow-md hover:shadow-lg transition-all duration-200">
               再度練習する
             </Button>
           </Link>
           <Link href="/past">
             <Button
               variant="outline"
-              className="px-10 py-6 text-lg font-semibold border-gray-300 rounded-3xl min-w-[220px] hover:bg-gray-50 transition-all duration-200"
+              className="w-full sm:w-auto px-6 sm:px-8 lg:px-10 py-3 sm:py-4 lg:py-6 text-base sm:text-lg font-semibold border-gray-300 rounded-2xl sm:rounded-3xl min-w-0 sm:min-w-[220px] hover:bg-gray-50 transition-all duration-200"
             >
               他の面接を見る
             </Button>

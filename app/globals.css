@@ -220,3 +220,77 @@ body {
 .shadow-3xl {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
+
+/* Mobile-first responsive utilities */
+.mobile-padding {
+  @apply px-4 sm:px-6 lg:px-8;
+}
+
+.mobile-container {
+  @apply max-w-7xl mx-auto px-6 sm:px-8 lg:px-12;
+}
+
+.mobile-section-padding {
+  @apply py-12 sm:py-16 lg:py-20;
+}
+
+.mobile-text-hero {
+  @apply text-4xl sm:text-5xl md:text-6xl lg:text-6xl xl:text-8xl;
+}
+
+.mobile-text-hero-main {
+  @apply text-5xl sm:text-6xl md:text-7xl lg:text-6xl xl:text-8xl;
+}
+
+.mobile-text-heading {
+  @apply text-2xl sm:text-3xl md:text-4xl lg:text-5xl;
+}
+
+.mobile-text-subheading {
+  @apply text-base sm:text-lg md:text-xl lg:text-2xl;
+}
+
+/* Mobile-specific spacing utilities */
+.mobile-mb-small {
+  @apply mb-4 sm:mb-6 lg:mb-8;
+}
+
+.mobile-mb-medium {
+  @apply mb-6 sm:mb-8 lg:mb-12;
+}
+
+.mobile-mb-large {
+  @apply mb-8 sm:mb-12 lg:mb-16;
+}
+
+/* Mobile grid utilities */
+.mobile-grid-2 {
+  @apply grid grid-cols-1 md:grid-cols-2;
+}
+
+.mobile-grid-3 {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
+}
+
+/* Mobile flex utilities */
+.mobile-flex-col {
+  @apply flex flex-col sm:flex-row;
+}
+
+.mobile-flex-col-reverse {
+  @apply flex flex-col-reverse sm:flex-row;
+}
+
+/* Mobile button utilities */
+.mobile-button-full {
+  @apply w-full sm:w-auto;
+}
+
+/* Mobile navigation hidden utility */
+.mobile-nav-hidden {
+  @apply hidden lg:flex;
+}
+
+.mobile-nav-show {
+  @apply flex lg:hidden;
+}

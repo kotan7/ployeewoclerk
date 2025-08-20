@@ -246,62 +246,53 @@ export default function Home() {
         {/* Main content wrapper */}
         <div ref={mainContentRef} className="relative bg-white">
           {/* Hero Section */}
-          <section className="relative h-screen flex items-center justify-center overflow-hidden bg-[#2F4F3F] -mt-16">
+          <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#2F4F3F] -mt-16">
             {/* Background gradient overlay */}
             <div className="absolute inset-0 bg-[#142d25]"></div>
 
-            <div className="max-w-7xl mx-auto pl-4 sm:pl-8 lg:pl-12 pr-4 sm:pr-8 lg:pr-12 relative z-10">
-              <div className="text-left mb-8">
+            <div className="mobile-container relative z-10">
+              <div className="text-left mobile-mb-medium">
                 {/* Feature badges - moved down to account for navbar */}
-                <div className="flex flex-wrap gap-4 mb-8 mt-32">
-                  <div className="inline-flex items-center px-4 py-2 rounded-full border border-white/20 text-white/80 text-sm font-medium backdrop-blur-sm">
+                <div className="flex flex-wrap gap-2 sm:gap-4 mobile-mb-medium mt-20 sm:mt-32">
+                  <div className="inline-flex items-center px-3 sm:px-4 py-2 rounded-full border border-white/20 text-white/80 text-xs sm:text-sm font-medium backdrop-blur-sm">
                     <div className="w-2 h-2 bg-[#9fe870] rounded-full mr-2"></div>
                     24時間利用可能
                   </div>
-                  <div className="inline-flex items-center px-4 py-2 rounded-full border border-white/20 text-white/80 text-sm font-medium backdrop-blur-sm">
+                  <div className="inline-flex items-center px-3 sm:px-4 py-2 rounded-full border border-white/20 text-white/80 text-xs sm:text-sm font-medium backdrop-blur-sm">
                     <div className="w-2 h-2 bg-[#9fe870] rounded-full mr-2"></div>
                     AI面接官搭載
                   </div>
-                  <div className="inline-flex items-center px-4 py-2 rounded-full border border-white/20 text-white/80 text-sm font-medium backdrop-blur-sm">
+                  <div className="inline-flex items-center px-3 sm:px-4 py-2 rounded-full border border-white/20 text-white/80 text-xs sm:text-sm font-medium backdrop-blur-sm">
                     <div className="w-2 h-2 bg-[#9fe870] rounded-full mr-2"></div>
                     リアルタイム分析
                   </div>
                 </div>
                 {/* Main heading and button container */}
                 <div className="mb-12">
-                  <div className="flex items-end justify-between">
-                    <div className="flex-1">
-                      <div className="text-6xl lg:text-8xl font-bold text-white leading-tight text-left">
-                        面接の不安
-                      </div>
-                    </div>
-                  </div>
+                 {/* Mobile Layout */}
+                  <div className="block lg:hidden text-center space-y-4 sm:space-y-6 p-x-3">
+                    <h1
+                      ref={heroTitleRef}
+                      className="text-5xl sm:text-6xl font-bold text-white leading-relaxed text-left"
+                    > 
+                      面接の不安
+                      <br />
+                      <span className="text-[#9fe870]">AI面接官</span>
+                      <br />
+                      で潰せ
+                    </h1>
 
-                  <div className="flex items-end justify-between">
-                    <div className="flex-1">
-                      <h1
-                        ref={heroTitleRef}
-                        className="text-6xl lg:text-8xl font-bold text-white mb-0 leading-tight text-left"
-                      >
-                        <span className="text-[#9fe870]">AI面接官</span>
-                        で潰せ
-                      </h1>
-                    </div>
-
-                    {/* Main CTA button positioned next to second row */}
-                    <div
-                      ref={heroButtonsRef}
-                      className="flex-shrink-0 mb-2 ml-8"
-                    >
+                    {/* Mobile CTA button */}
+                    <div ref={heroButtonsRef} className="mt-6 sm:mt-8">
                       <button
-                        className="group relative inline-flex items-center px-8 py-4 mb-5 bg-[#9fe870] text-[#163300] rounded-full font-semibold text-lg hover:bg-[#8fd960] transition-all duration-300 hover:scale-105 shadow-xl"
+                        className="group relative inline-flex items-center justify-center w-full px-6 sm:px-8 py-3 sm:py-4 bg-[#9fe870] text-[#163300] rounded-full font-semibold text-base sm:text-lg hover:bg-[#8fd960] transition-all duration-300 hover:scale-105 shadow-xl"
                         onClick={handleClick}
                         aria-label="AI面接練習を無料で体験する"
                       >
                         <span className="mr-3">無料で体験する</span>
-                        <div className="w-8 h-8 bg-[#ff8c5a] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#ff8c5a] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                           <svg
-                            className="w-4 h-4 text-white"
+                            className="w-3 h-3 sm:w-4 sm:h-4 text-white"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -317,27 +308,82 @@ export default function Home() {
                       </button>
                     </div>
                   </div>
+
+                  {/* Desktop Layout - Original Structure */}
+                  <div className="hidden lg:block">
+                    <div className="flex items-end justify-between space-y-5">
+                      <div className="flex-1">
+                        <div className="text-6xl lg:text-8xl font-bold text-white leading-tight text-left">
+                          面接の不安
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-end justify-between">
+                      <div className="flex-1">
+                        <h1
+                          ref={heroTitleRef}
+                          className="text-6xl lg:text-8xl font-bold text-white mb-0 leading-tight text-left"
+                        >
+                          <span className="text-[#9fe870]">AI面接官</span>
+                          で潰せ
+                        </h1>
+                      </div>
+
+                      {/* Desktop CTA button positioned next to second row */}
+                      <div
+                        ref={heroButtonsRef}
+                        className="flex-shrink-0 mb-2 ml-8"
+                      >
+                        <button
+                          className="group relative inline-flex items-center px-8 py-4 mb-5 bg-[#9fe870] text-[#163300] rounded-full font-semibold text-lg hover:bg-[#8fd960] transition-all duration-300 hover:scale-105 shadow-xl"
+                          onClick={handleClick}
+                          aria-label="AI面接練習を無料で体験する"
+                        >
+                          <span className="mr-3">無料で体験する</span>
+                          <div className="w-8 h-8 bg-[#ff8c5a] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                            <svg
+                              className="w-4 h-4 text-white"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 5l7 7-7 7"
+                              />
+                            </svg>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <p
                   ref={heroSubtitleRef}
-                  className="text-xl text-white/80 mb-12 max-w-4xl leading-relaxed text-left"
+                  className="text-sm sm:text-base lg:text-xl text-white/80 mobile-mb-large max-w-4xl leading-relaxed text-left"
                 >
                   プロイーはAI面接官による実践的な面接練習で、次世代の就活・転職活動をサポートします。
-                  <br />
-                  詳細な分析、リアルタイムフィードバック、そして成長を実感できる環境—すべてを統合したプラットフォームです。
+                  <br className="hidden sm:block" />
+                  <span className="block sm:inline">
+                    {" "}
+                    詳細な分析、リアルタイムフィードバック、そして成長を実感できる環境—すべてを統合したプラットフォームです。
+                  </span>
                 </p>
 
                 {/* Trusted by section */}
                 <div className="text-left">
-                  <p className="text-white/60 text-sm mb-6">
+                  <p className="text-white/60 text-xs sm:text-sm mobile-mb-small -mt-5">
                     就活生・転職者から信頼されています
                   </p>
-                  <div className="-ml-5">
+                  <div className="overflow-hidden">
                     <img
                       src="/companies.png"
                       alt="信頼される企業のロゴ - 多くの就活生と転職者に選ばれています"
-                      className="w-full max-w-2xl opacity-60 hover:opacity-80 transition-opacity duration-300"
+                      className="w-full max-w-xs sm:max-w-2xl opacity-60 hover:opacity-80 transition-opacity duration-300"
                       loading="lazy"
                     />
                   </div>
@@ -349,67 +395,72 @@ export default function Home() {
           {/* Enhanced Problem Section - Campfire.ai Style */}
           <section
             ref={problemSectionRef}
-            className="py-32 bg-white relative overflow-hidden -mb-18"
+            className="mobile-section-padding bg-white relative overflow-hidden"
           >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center ">
-                <div className="inline-flex items-center px-6 py-3 rounded-full bg-[#f8f9fa] border border-gray-200 text-gray-600 text-sm font-medium mb-8">
-                  <div className="w-2 h-2 bg-[#ff8c5a] rounded-full mr-3"></div>
+            <div className="mobile-container">
+              <div className="text-center mobile-mb-large">
+                <div className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-[#f8f9fa] border border-gray-200 text-gray-600 text-xs sm:text-sm font-medium mobile-mb-medium">
+                  <div className="w-2 h-2 bg-[#ff8c5a] rounded-full mr-2 sm:mr-3"></div>
                   問題の解決
                 </div>
-                <h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-8 leading-tight max-w-4xl mx-auto">
+                <h2 className="mobile-text-heading font-bold text-gray-900 mobile-mb-medium leading-tight max-w-4xl mx-auto">
                   面接の不安を解消する
                   <br />
                   <span className="text-[#163300]">AI面接官</span>
                 </h2>
-                <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                <p className="mobile-text-subheading text-gray-600 max-w-3xl mx-auto leading-relaxed">
                   従来の面接対策では限界がある問題を、AI技術で根本的に解決します。
                 </p>
               </div>
 
-              <div className="grid lg:grid-cols-2 gap-20 items-center">
-                {/* Left: Modern Cube Animation */}
+              <div className="mobile-grid-2 gap-8 lg:gap-20 items-center">
+                {/* Image - Order changes for mobile (image first) */}
                 <div
                   ref={problemImageRef}
-                  className="relative flex justify-center items-center min-h-[600px]"
+                  className="relative flex justify-center items-center min-h-[300px] sm:min-h-[400px] lg:min-h-[600px] order-1 lg:order-1"
                 >
                   <div className="relative">
                     {/* Background decorative elements */}
-                    <div className="absolute -bottom-10 -left-10 w-16 h-16 bg-[#9fe870]/40 rounded-full blur-lg"></div>
+                    <div className="absolute -bottom-6 -left-6 sm:-bottom-10 sm:-left-10 w-8 h-8 sm:w-16 sm:h-16 bg-[#9fe870]/40 rounded-full blur-lg"></div>
 
                     {/* Main image with enhanced styling */}
                     <div className="relative z-10">
                       <img
                         src="/sound.png"
                         alt="AI面接練習システム"
-                        width={500}
-                        height={500}
-                        className="drop-shadow-lg"
+                        width={300}
+                        height={300}
+                        className="drop-shadow-lg w-full max-w-[300px] sm:max-w-[400px] lg:max-w-[500px] h-auto"
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* Right: Solution Text */}
-                <div ref={problemTextRef} className="space-y-8">
-                  <div className="space-y-6">
-                    <h3 className="text-3xl font-bold text-gray-900 leading-tight">
+                {/* Text Content - Order 2 for mobile */}
+                <div
+                  ref={problemTextRef}
+                  className="space-y-6 sm:space-y-8 order-2 lg:order-2"
+                >
+                  <div className="space-y-4 sm:space-y-6">
+                    <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight text-center lg:text-left">
                       AIとのリアルタイム対話で
-                      <br />
-                      実践的な面接練習を実現
+                      <br className="hidden sm:block" />
+                      <span className="block sm:inline">
+                        実践的な面接練習を実現
+                      </span>
                     </h3>
-                    <p className="text-lg text-gray-600 leading-relaxed">
+                    <p className="text-base sm:text-lg text-gray-600 leading-relaxed text-center lg:text-left">
                       従来の一方向的な学習ではなく、AI面接官との双方向対話により、
                       本番に近い環境での練習が可能。詳細な分析とフィードバックで、
                       あなたの面接スキルを確実に向上させます。
                     </p>
                   </div>
 
-                  <div className="space-y-4">
-                    <div className="flex items-start space-x-4 p-4 bg-[#9fe870]/10 rounded-2xl">
-                      <div className="w-8 h-8 bg-[#9fe870] rounded-xl flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="flex items-start space-x-3 sm:space-x-4 p-3 sm:p-4 bg-[#9fe870]/10 rounded-xl sm:rounded-2xl">
+                      <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#9fe870] rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 mt-1">
                         <svg
-                          className="w-4 h-4 text-[#163300]"
+                          className="w-3 h-3 sm:w-4 sm:h-4 text-[#163300]"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -423,19 +474,19 @@ export default function Home() {
                         </svg>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-gray-900 mb-1">
+                        <h4 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base">
                           24時間いつでも練習可能
                         </h4>
-                        <p className="text-gray-600 text-sm">
+                        <p className="text-gray-600 text-xs sm:text-sm">
                           時間や場所に制約されることなく、自分のペースで面接練習
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-start space-x-4 p-4 bg-[#9fe870]/10 rounded-2xl">
-                      <div className="w-8 h-8 bg-[#9fe870] rounded-xl flex items-center justify-center flex-shrink-0 mt-1">
+                    <div className="flex items-start space-x-3 sm:space-x-4 p-3 sm:p-4 bg-[#9fe870]/10 rounded-xl sm:rounded-2xl">
+                      <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#9fe870] rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 mt-1">
                         <svg
-                          className="w-4 h-4 text-[#163300]"
+                          className="w-3 h-3 sm:w-4 sm:h-4 text-[#163300]"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -449,19 +500,19 @@ export default function Home() {
                         </svg>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-gray-900 mb-1">
+                        <h4 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base">
                           リアルタイム分析・評価
                         </h4>
-                        <p className="text-gray-600 text-sm">
+                        <p className="text-gray-600 text-xs sm:text-sm">
                           音声、表情、回答内容を総合的に分析し、具体的な改善点を提示
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-start space-x-4 p-4 bg-[#9fe870]/10 rounded-2xl">
-                      <div className="w-8 h-8 bg-[#9fe870] rounded-xl flex items-center justify-center flex-shrink-0 mt-1">
+                    <div className="flex items-start space-x-3 sm:space-x-4 p-3 sm:p-4 bg-[#9fe870]/10 rounded-xl sm:rounded-2xl">
+                      <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#9fe870] rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 mt-1">
                         <svg
-                          className="w-4 h-4 text-[#163300]"
+                          className="w-3 h-3 sm:w-4 sm:h-4 text-[#163300]"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -475,10 +526,10 @@ export default function Home() {
                         </svg>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-gray-900 mb-1">
+                        <h4 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base">
                           個人最適化されたフィードバック
                         </h4>
-                        <p className="text-gray-600 text-sm">
+                        <p className="text-gray-600 text-xs sm:text-sm">
                           あなたの特性に合わせた改善提案と強みの発見
                         </p>
                       </div>
@@ -490,17 +541,17 @@ export default function Home() {
           </section>
 
           {/* Features Section */}
-          <section className="py-20 relative z-10 -mb-10">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <section className="mobile-section-padding relative z-10">
+            <div className="mobile-container">
               <h2 className="sr-only">AI面接練習サービスの特徴</h2>
-              <div className="flex items-center gap-16">
+              <div className="mobile-grid-2 gap-8 lg:gap-16 items-center">
                 {/* Text Content - Left Side */}
-                <div className="flex-1 mb-10 ml-15">
-                  <h2 className="text-3xl lg:text-4xl font-bold text-[#163300] mb-8">
+                <div className="mobile-mb-medium order-2 lg:order-1">
+                  <h2 className="mobile-text-heading font-bold text-[#163300] mobile-mb-medium text-center lg:text-left">
                     プロイーの3つの特徴
                   </h2>
-                  <div className="space-y-6">
-                    <p className="text-xl text-gray-600 leading-relaxed">
+                  <div className="space-y-4 sm:space-y-6">
+                    <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed text-center lg:text-left">
                       AIとの<strong>リアルタイム対話</strong>
                       で実践的な面接練習を行い、
                       <strong>詳細な分析とフィードバック</strong>を通じて、
@@ -510,10 +561,11 @@ export default function Home() {
                 </div>
 
                 {/* Image - Right Side */}
-                <div className="flex-1 relative mb-15">
+                <div className="relative order-1 lg:order-2">
                   <img
                     src="/interview.png"
                     alt="interview"
+                    className="w-full max-w-[400px] sm:max-w-[500px] lg:max-w-full h-auto mx-auto"
                     width={1000}
                     height={1000}
                   />
@@ -523,28 +575,28 @@ export default function Home() {
           </section>
 
           {/* Transformation Section */}
-          <section className="w-full flex justify-center items-center py-32 bg-transparent mt-15">
+          <section className="w-full flex justify-center items-center mobile-section-padding bg-transparent">
             <div
-              className="w-full max-w-5xl rounded-[48px] bg-[#163300] flex flex-col items-center px-8 pt-28 pb-20 relative"
+              className="w-full max-w-5xl rounded-[24px] sm:rounded-[32px] lg:rounded-[48px] bg-[#163300] flex flex-col items-center px-4 sm:px-8 pt-20 sm:pt-28 pb-12 sm:pb-20 relative mx-4"
               style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.08)" }}
             >
               <img
                 src="/interviewericon.png"
                 alt="Interviewer Icon"
-                className="w-80 h-80 object-contain absolute -top-40 left-1/2 -translate-x-1/2 drop-shadow-xl"
+                className="w-40 h-40 sm:w-60 sm:h-60 lg:w-80 lg:h-80 object-contain absolute -top-20 sm:-top-30 lg:-top-40 left-1/2 -translate-x-1/2 drop-shadow-xl"
                 style={{ zIndex: 2 }}
                 draggable={false}
               />
-              <h2 className="text-5xl md:text-6xl font-extrabold text-[#9fe870] text-center mb-6 leading-tight mt-2">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-[#9fe870] text-center mobile-mb-small leading-tight mt-2">
                 過去問で鍛えられたAI面接官が
-                <br />
-                あなたの自信を引き出す
+                <br className="hidden sm:block" />
+                <span className="block sm:inline">あなたの自信を引き出す</span>
               </h2>
-              <p className="text-lg md:text-xl text-white text-center mb-10 max-w-2xl">
+              <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-white text-center mobile-mb-medium max-w-2xl px-4">
                 豊富な過去問データでAIが徹底指導。自信を持って本番に挑もう
               </p>
               <button
-                className="bg-[#9fe870] text-[#163300] px-10 py-4 rounded-full font-semibold text-xl transition-colors shadow-lg"
+                className="bg-[#9fe870] text-[#163300] w-full sm:w-auto px-6 sm:px-10 py-3 sm:py-4 rounded-full font-semibold text-base sm:text-lg lg:text-xl transition-colors shadow-lg"
                 onClick={() => router.push("/interview/new")}
               >
                 AI面接を無料で体験する
@@ -555,16 +607,16 @@ export default function Home() {
           {/* Enhanced Speed Comparison Section - Campfire.ai Style */}
           <section
             ref={speedSectionRef}
-            className="py-32 bg-white relative overflow-hidden -mt-24"
+            className="mobile-section-padding bg-white relative overflow-hidden"
           >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="mobile-container relative z-10">
               {/* Main Header */}
-              <div ref={speedHeaderRef} className="text-center mb-20">
-                <div className="inline-flex items-center px-6 py-3 rounded-full bg-[#f8f9fa] border border-gray-200 text-gray-600 text-sm font-medium mb-8">
-                  <div className="w-2 h-2 bg-[#ff8c5a] rounded-full mr-3"></div>
+              <div ref={speedHeaderRef} className="text-center mobile-mb-large">
+                <div className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-[#f8f9fa] border border-gray-200 text-gray-600 text-xs sm:text-sm font-medium mobile-mb-medium">
+                  <div className="w-2 h-2 bg-[#ff8c5a] rounded-full mr-2 sm:mr-3"></div>
                   効率性の比較
                 </div>
-                <h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-8 leading-tight max-w-4xl mx-auto">
+                <h2 className="mobile-text-heading font-bold text-gray-900 mobile-mb-medium leading-tight max-w-4xl mx-auto">
                   従来の面接練習より
                   <br />
                   <span className="text-[#163300] relative">
@@ -572,14 +624,14 @@ export default function Home() {
                     <div className="absolute -bottom-1 left-0 right-0 h-1 bg-[#9fe870] rounded-full"></div>
                   </span>
                 </h2>
-                <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                <p className="mobile-text-subheading text-gray-600 max-w-3xl mx-auto leading-relaxed">
                   書籍や動画での学習では限界がある。AI面接官とのリアルタイム対話で、
                   実践的なスキルを短時間で身につけることができます。
                 </p>
               </div>
 
               {/* Comparison Cards */}
-              <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto mb-16">
+              <div className="mobile-grid-2 gap-6 sm:gap-8 lg:gap-12 max-w-6xl mx-auto mobile-mb-large">
                 {/* Traditional Method Card */}
                 <div
                   ref={keyboardCardRef}
@@ -839,12 +891,12 @@ export default function Home() {
               {/* Call to Action */}
               <div className="text-center">
                 <button
-                  className="bg-[#163300] text-white px-12 py-4 rounded-full font-semibold text-lg hover:bg-[#163300]/90 transition-all duration-300 hover:scale-105 shadow-lg"
+                  className="bg-[#163300] text-white w-full sm:w-auto px-8 sm:px-12 py-3 sm:py-4 rounded-full font-semibold text-base sm:text-lg hover:bg-[#163300]/90 transition-all duration-300 hover:scale-105 shadow-lg"
                   onClick={() => router.push("/interview/new")}
                 >
                   今すぐAI面接練習を体験する
                 </button>
-                <p className="text-gray-500 text-sm mt-4">
+                <p className="text-gray-500 text-xs sm:text-sm mt-3 sm:mt-4">
                   無料で3回まで体験可能
                 </p>
               </div>
@@ -873,24 +925,24 @@ export default function Home() {
 
           <div className="relative z-10">
             {/* Main Footer Content */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mb-15 py-20">
-              <div className="grid lg:grid-cols-2 gap-16 items-start mb-16">
+            <div className="mobile-container mobile-section-padding">
+              <div className="mobile-grid-2 gap-8 lg:gap-16 items-start mobile-mb-large">
                 {/* Left: Call to Action */}
-                <div className="flex flex-col justify-start h-full">
-                  <div className="inline-flex items-center px-4 py-2 rounded-full bg-[#9fe870]/20 text-[#9fe870] text-sm font-medium mb-6">
+                <div className="flex flex-col justify-start h-full text-center lg:text-left">
+                  <div className="inline-flex items-center px-3 sm:px-4 py-2 rounded-full bg-[#9fe870]/20 text-[#9fe870] text-xs sm:text-sm font-medium mobile-mb-small mx-auto lg:mx-0 w-fit">
                     <div className="w-2 h-2 bg-[#9fe870] rounded-full mr-2"></div>
                     始めましょう
                   </div>
-                  <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+                  <h2 className="mobile-text-heading font-bold mobile-mb-small leading-tight">
                     AI面接練習で
                     <br />
                     内定を掴む
                   </h2>
-                  <p className="text-gray-300 text-lg mb-8 leading-relaxed">
+                  <p className="text-gray-300 text-base sm:text-lg mobile-mb-medium leading-relaxed">
                     プロイーで面接スキルを向上させ、理想の企業への内定を実現しましょう。
                   </p>
                   <button
-                    className="bg-[#9fe870] text-[#163300] px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#9fe870]/90 transition-all duration-300 hover:scale-105 shadow-lg w-fit"
+                    className="bg-[#9fe870] text-[#163300] w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold text-base sm:text-lg hover:bg-[#9fe870]/90 transition-all duration-300 hover:scale-105 shadow-lg"
                     onClick={() => router.push("/interview/new")}
                   >
                     無料で始める
@@ -898,8 +950,8 @@ export default function Home() {
                 </div>
 
                 {/* Right: Navigation Menu */}
-                <div className="bg-[#1a4a35] rounded-3xl p-8 h-full">
-                  <div className="grid md:grid-cols-3 gap-8 mb-8">
+                <div className="bg-[#1a4a35] rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 h-full">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 mobile-mb-medium">
                     {/* Products Column */}
                     <div>
                       <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">
@@ -1001,7 +1053,7 @@ export default function Home() {
                   </div>
 
                   {/* Social Links */}
-                  <div className="flex items-center justify-between pt-6 border-t border-gray-600 mt-auto">
+                  <div className="flex flex-col sm:flex-row items-center justify-between pt-4 sm:pt-6 border-t border-gray-600 mt-auto space-y-4 sm:space-y-0">
                     <div className="flex items-center space-x-4">
                       <a
                         href="#"
@@ -1028,7 +1080,7 @@ export default function Home() {
                         </svg>
                       </a>
                     </div>
-                    <p className="text-gray-400 text-xs">
+                    <p className="text-gray-400 text-xs text-center sm:text-right">
                       2025年 プロイー開発チーム
                     </p>
                   </div>
@@ -1038,20 +1090,20 @@ export default function Home() {
 
             {/* Bottom Section */}
             <div className="border-t border-gray-600">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="flex flex-col md:flex-row items-center justify-between">
+              <div className="mobile-container py-6 sm:py-8">
+                <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
                   {/* Logo and Brand */}
-                  <div className="flex items-center space-x-4 mb-4 md:mb-0">
-                    <div className="w-8 h-8 bg-[#9fe870] rounded-lg flex items-center justify-center">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#9fe870] rounded-lg flex items-center justify-center">
                       <Image src={logo} alt="logo" className="w-full h-full" />
                     </div>
-                    <span className="text-white font-bold text-xl">
+                    <span className="text-white font-bold text-lg sm:text-xl">
                       プロイー
                     </span>
                   </div>
 
                   {/* Legal Links */}
-                  <div className="flex items-center space-x-6 text-sm">
+                  <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-6 text-xs sm:text-sm text-center">
                     <a
                       href="#"
                       className="text-gray-400 hover:text-white transition-colors"

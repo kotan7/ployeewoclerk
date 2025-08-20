@@ -61,12 +61,12 @@ const page = () => {
       />
       <div className="min-h-screen bg-white">
         {/* Header Section */}
-        <div className="py-16">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl lg:text-5xl font-bold text-[#163300] mb-6">
+        <div className="py-8 sm:py-12 lg:py-16">
+          <div className="text-center mb-8 sm:mb-12 px-4">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-[#163300] mb-4 sm:mb-6">
               AI面接の準備をしましょう
             </h1>
-            <p className="text-xl text-gray-600 font-semibold max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg lg:text-xl text-gray-600 font-semibold max-w-2xl mx-auto leading-relaxed">
               あなたの情報を入力して、パーソナライズされた
               <strong>面接練習</strong>を始めましょう
             </p>

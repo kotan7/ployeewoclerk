@@ -94,10 +94,10 @@ export function InterviewForm() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
       {/* Form Container */}
       <div
-        className="rounded-3xl p-8 shadow-lg"
+        className="rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-lg"
         style={{
           backgroundColor: "rgba(197, 228, 212, 0.1)",
           backdropFilter: "blur(3px) saturate(65%)",
@@ -106,24 +106,29 @@ export function InterviewForm() {
         }}
       >
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-6 sm:space-y-8"
+          >
             {/* Personal Information Section */}
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-[#163300]">1. 個人情報</h2>
+            <div className="space-y-4 sm:space-y-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-[#163300]">
+                1. 個人情報
+              </h2>
 
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-base font-semibold text-[#163300]">
+                      <FormLabel className="text-sm sm:text-base font-semibold text-[#163300]">
                         お名前 <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
                           placeholder="例: 田中太郎"
-                          className="h-12 text-base"
+                          className="h-10 sm:h-12 text-sm sm:text-base"
                           {...field}
                         />
                       </FormControl>
@@ -137,13 +142,13 @@ export function InterviewForm() {
                   name="education"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-base font-semibold text-[#163300]">
+                      <FormLabel className="text-sm sm:text-base font-semibold text-[#163300]">
                         学歴 <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
                           placeholder="例: 東京大学工学部卒業"
-                          className="h-12 text-base"
+                          className="h-10 sm:h-12 text-sm sm:text-base"
                           {...field}
                         />
                       </FormControl>
@@ -158,17 +163,17 @@ export function InterviewForm() {
                 name="experience"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-base font-semibold text-[#163300]">
+                    <FormLabel className="text-sm sm:text-base font-semibold text-[#163300]">
                       職歴・経験
                     </FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="これまでの職歴や主な経験、スキルについて記載してください。"
-                        className="min-h-[120px] text-base resize-none"
+                        className="min-h-[100px] sm:min-h-[120px] text-sm sm:text-base resize-none"
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>
+                    <FormDescription className="text-xs sm:text-sm">
                       職歴、プロジェクト経験、技術スキル、実績など具体的に記載いただくと、より個人に合わせた面接練習が可能になります。未記載の場合は一般的な質問で面接練習を行います。
                     </FormDescription>
                   </FormItem>
@@ -177,10 +182,12 @@ export function InterviewForm() {
             </div>
 
             {/* Job Information Section */}
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-[#163300]">2. 求人情報</h2>
+            <div className="space-y-4 sm:space-y-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-[#163300]">
+                2. 求人情報
+              </h2>
 
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <FormField
                   control={form.control}
                   name="companyName"
@@ -290,21 +297,25 @@ export function InterviewForm() {
             </div>
 
             {/* Submit Button */}
-            <div className="pt-5">
+            <div className="pt-4 sm:pt-5">
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full h-14 bg-[#9fe870] text-[#163300] hover:bg-[#8fd960] 
-                  text-lg font-semibold rounded-full shadow-lg transition-colors cursor-pointer
+                className="w-full h-12 sm:h-14 bg-[#9fe870] text-[#163300] hover:bg-[#8fd960] 
+                  text-base sm:text-lg font-semibold rounded-full shadow-lg transition-colors cursor-pointer
                   disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <div className="flex items-center gap-2">
                     <LoadingSpinner size="sm" color="#163300" />
-                    面接を準備中...
+                    <span className="text-sm sm:text-base">
+                      面接を準備中...
+                    </span>
                   </div>
                 ) : (
-                  "面接セッションを開始する"
+                  <span className="text-sm sm:text-base">
+                    面接セッションを開始する
+                  </span>
                 )}
               </Button>
             </div>
