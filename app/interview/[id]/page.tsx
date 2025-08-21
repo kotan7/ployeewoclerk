@@ -1,7 +1,8 @@
 import React from "react";
 import { currentUser } from "@clerk/nextjs/server";
 import { CreateSupabaseClient } from "@/lib/supbase";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { canStartSession } from "@/lib/actions/usage.actions";
 import InterviewSessionClient from "./InterviewSessionClient";
 
 interface InterviewSessionProps {
@@ -46,6 +47,28 @@ const InterviewSession = async ({ params }: InterviewSessionProps) => {
   } catch (error) {
     console.error("Failed to fetch interview:", error);
     return notFound();
+  }
+
+  // Check usage limits before allowing access to interview
+  try {
+    const usageInfo = await canStartSession();
+    if (!usageInfo.canStart) {
+      // Redirect to billing page if usage limit exceeded
+      redirect("/billing");
+    }
+  } catch (error) {
+    // Check if this is a redirect error (which should be allowed to propagate)
+    if (
+      error &&
+      typeof error === "object" &&
+      "digest" in error &&
+      typeof error.digest === "string" &&
+      error.digest.includes("NEXT_REDIRECT")
+    ) {
+      throw error; // Re-throw redirect errors
+    }
+    console.error("Failed to check usage limits:", error);
+    // Allow access if usage check fails (don't block users due to technical issues)
   }
 
   return <InterviewSessionClient interview={interview} />;

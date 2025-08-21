@@ -131,16 +131,6 @@ const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
 
           <div className="flex-shrink-0 flex justify-center mt-5">
             <div className="flex justify-center gap-4 flex-wrap min-h-[70px] items-center">
-              {isProcessing && (
-                <button
-                  disabled
-                  className="cursor-pointer bg-gray-300 text-gray-600 px-12 py-4 rounded-full font-bold text-xl cursor-not-allowed flex items-center gap-3"
-                >
-                  <LoadingSpinner size="sm" color="#6b7280" />
-                  処理中...
-                </button>
-              )}
-
               {!isActive && !isProcessing && (
                 <button
                   onClick={toggleRecording}
@@ -153,14 +143,26 @@ const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
               {isActive && (
                 <div className="flex gap-4">
                   <button
-                    onClick={toggleMute}
-                    className={`cursor-pointer px-8 py-4 rounded-full font-semibold transition-all duration-200 flex items-center gap-3 text-base ${
-                      isMuted
-                        ? "bg-[#9fe870] text-[#163300] hover:bg-[#8fd960]"
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    onClick={isProcessing ? undefined : toggleMute}
+                    disabled={isProcessing}
+                    className={`px-8 py-4 rounded-full font-semibold transition-all duration-200 flex items-center gap-3 text-base ${
+                      isProcessing
+                        ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                        : isMuted
+                        ? "bg-[#9fe870] text-[#163300] hover:bg-[#8fd960] cursor-pointer"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer"
                     }`}
                   >
-                    {isMuted ? "ミュート中" : "ミュート"}
+                    {isProcessing ? (
+                      <>
+                        <LoadingSpinner size="sm" color="#6b7280" />
+                        処理中...
+                      </>
+                    ) : isMuted ? (
+                      "ミュート中"
+                    ) : (
+                      "ミュート"
+                    )}
                   </button>
 
                   <button

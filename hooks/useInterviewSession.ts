@@ -55,6 +55,12 @@ export function useInterviewSession(interviewId?: string) {
     finished: false,
   });
 
+  // Usage tracking state
+  const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
+  const [remainingMinutes, setRemainingMinutes] = useState<number>(0);
+  const [currentRemainingMinutes, setCurrentRemainingMinutes] = useState<number>(0);
+  const [usageLimitExceeded, setUsageLimitExceeded] = useState(false);
+
   // Audio references
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -69,6 +75,7 @@ export function useInterviewSession(interviewId?: string) {
   const isProcessingRef = useRef<boolean>(false);
   const isPlayingTTSRef = useRef<boolean>(false);
   const currentRecordingSessionRef = useRef<number>(0);
+  const usageMonitoringIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Complete cleanup function
   const cleanup = useCallback(() => {
@@ -87,6 +94,9 @@ export function useInterviewSession(interviewId?: string) {
     if (analysisIntervalRef.current) {
       clearInterval(analysisIntervalRef.current);
     }
+    if (usageMonitoringIntervalRef.current) {
+      clearInterval(usageMonitoringIntervalRef.current);
+    }
     if (currentAudioRef.current) {
       currentAudioRef.current.pause();
     }
@@ -95,6 +105,7 @@ export function useInterviewSession(interviewId?: string) {
     chunksRef.current = [];
     silenceTimerRef.current = null;
     analysisIntervalRef.current = null;
+    usageMonitoringIntervalRef.current = null;
     currentAudioRef.current = null;
     previousSpeakingStateRef.current = false;
     hasSpokenInCurrentSessionRef.current = false;
@@ -121,6 +132,60 @@ export function useInterviewSession(interviewId?: string) {
       // Add logic to extract info from AI response if needed
     }));
   }, []);
+
+  // Check if user can start an interview (pre-interview check)
+  const checkUsageBeforeStart = useCallback(async (): Promise<boolean> => {
+    try {
+      const response = await fetch("/api/check-usage-limit");
+      if (!response.ok) {
+        throw new Error("Failed to check usage limit");
+      }
+      
+      const usageInfo = await response.json();
+      
+      if (!usageInfo.canStart) {
+        setError("月間の利用時間制限に達しています。プランをアップグレードしてください。");
+        // Redirect to billing page
+        setTimeout(() => {
+          if (typeof window !== "undefined") {
+            window.location.href = "/billing";
+          }
+        }, 2000);
+        return false;
+      }
+      
+      setRemainingMinutes(usageInfo.remainingMinutes);
+      setCurrentRemainingMinutes(usageInfo.remainingMinutes);
+      return true;
+    } catch (error) {
+      console.error("Error checking usage before start:", error);
+      setError("利用制限の確認に失敗しました。しばらく後でお試しください。");
+      return false;
+    }
+  }, []);
+
+  // Monitor usage during interview
+  const monitorUsageDuringInterview = useCallback(() => {
+    if (!sessionStartTime) return;
+
+    const elapsed = (Date.now() - sessionStartTime.getTime()) / (1000 * 60); // minutes
+    const remaining = Math.max(0, remainingMinutes - elapsed);
+
+    // If no time remaining, terminate interview
+    if (remaining <= 0) {
+      setUsageLimitExceeded(true);
+      setError("利用時間制限に達しました。面接を終了します。");
+      
+      // Stop interview and redirect to billing
+      cleanup();
+      setIsActive(false);
+      setTimeout(() => {
+        if (typeof window !== "undefined") {
+          window.location.href = "/billing";
+        }
+      }, 3000);
+    }
+  }, [sessionStartTime, remainingMinutes, cleanup]);
 
   // Start a new recording session
   const startNewRecordingSession = useCallback(() => {
@@ -477,6 +542,12 @@ export function useInterviewSession(interviewId?: string) {
   // Start real-time recording
   const startRealTimeRecording = async () => {
     try {
+      // Check usage limit before starting interview
+      const canStart = await checkUsageBeforeStart();
+      if (!canStart) {
+        return; // Don't start if usage limit exceeded
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -506,6 +577,34 @@ export function useInterviewSession(interviewId?: string) {
       startNewRecordingSession();
 
       analysisIntervalRef.current = setInterval(analyzeAudio, ANALYSIS_INTERVAL);
+      
+      // Set session start time and start usage monitoring
+      const startTime = new Date();
+      setSessionStartTime(startTime);
+      
+      // Start usage monitoring with a function that captures current values
+      usageMonitoringIntervalRef.current = setInterval(() => {
+        const elapsed = (Date.now() - startTime.getTime()) / (1000 * 60); // minutes
+        const remaining = Math.max(0, remainingMinutes - elapsed);
+        
+        // Update current remaining time for UI display
+        setCurrentRemainingMinutes(remaining);
+
+        // If no time remaining, terminate interview
+        if (remaining <= 0) {
+          setUsageLimitExceeded(true);
+          setError("利用時間制限に達しました。面接を終了します。");
+          
+          // Stop interview and redirect to billing
+          cleanup();
+          setIsActive(false);
+          setTimeout(() => {
+            if (typeof window !== "undefined") {
+              window.location.href = "/billing";
+            }
+          }, 3000);
+        }
+      }, 5000); // Check every 5 seconds for more responsive UI
 
       setIsActive(true);
       setError("");
@@ -543,6 +642,11 @@ export function useInterviewSession(interviewId?: string) {
     setIsPlayingTTS(false);
     setIsProcessing(false);
     currentRecordingSessionRef.current = 0;
+    
+    // Reset usage tracking state
+    setSessionStartTime(null);
+    setUsageLimitExceeded(false);
+    setCurrentRemainingMinutes(0);
   };
 
   // Toggle recording state
@@ -678,6 +782,9 @@ export function useInterviewSession(interviewId?: string) {
     interviewPhase,
     candidateInfo,
     isMuted,
+    
+    // Usage tracking state (internal only)
+    // remainingMinutes and usageLimitExceeded are handled internally
     
     // Functions
     toggleRecording,

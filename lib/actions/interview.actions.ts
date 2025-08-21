@@ -2,6 +2,8 @@
 
 import { auth } from "@clerk/nextjs/server"
 import { CreateSupabaseClient } from "../supbase"
+import { addSessionUsage } from "./usage.actions"
+import { calculateSessionMinutes } from "../utils"
 
 // Type definition based on the form schema
 type CreateInterview = {
@@ -210,6 +212,19 @@ export const saveFeedback = async (feedbackData: any, interviewId?: string, sess
     if (sessionId) {
         console.log("Updating existing session with ID:", sessionId);
         
+        // First, get the session data to calculate duration
+        const { data: sessionData, error: sessionError } = await supabase
+            .from('session_history')
+            .select('created_at')
+            .eq('id', sessionId)
+            .eq('user_id', userId)
+            .single();
+
+        if (sessionError) {
+            console.error("Error fetching session data:", sessionError);
+            throw new Error(`Failed to fetch session data: ${sessionError.message}`);
+        }
+
         const { data, error } = await supabase
             .from('session_history')
             .update({
@@ -227,6 +242,26 @@ export const saveFeedback = async (feedbackData: any, interviewId?: string, sess
 
         console.log("Feedback update result:", data);
 
+        // Calculate and track session usage
+        try {
+            if (sessionData?.created_at) {
+                const sessionStartTime = new Date(sessionData.created_at);
+                const sessionEndTime = new Date();
+                const sessionMinutes = calculateSessionMinutes(sessionStartTime, sessionEndTime);
+                
+                console.log(`Interview session completed. Duration: ${sessionMinutes} minutes`);
+                
+                // Add usage tracking
+                await addSessionUsage(sessionMinutes);
+                console.log("Usage tracking added successfully");
+            } else {
+                console.warn("No session start time found, skipping usage tracking");
+            }
+        } catch (usageError) {
+            console.error("Error tracking usage:", usageError);
+            // Don't fail the feedback save if usage tracking fails
+        }
+
         return {
             success: true,
             sessionId: sessionId,
@@ -235,7 +270,8 @@ export const saveFeedback = async (feedbackData: any, interviewId?: string, sess
     } else {
         console.log("Creating new session_history record with feedback");
         
-        // Create new session_history record with feedback
+        // For new records without existing session data, we can't calculate duration
+        // This case typically shouldn't happen in normal flow, but we handle it gracefully
         const { data, error } = await supabase
             .from('session_history')
             .insert({
@@ -253,6 +289,7 @@ export const saveFeedback = async (feedbackData: any, interviewId?: string, sess
         }
 
         console.log("Feedback insert result:", data);
+        console.warn("Created new session without existing interview data - usage tracking skipped");
 
         return {
             success: true,
