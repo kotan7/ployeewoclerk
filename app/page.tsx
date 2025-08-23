@@ -269,12 +269,12 @@ export default function Home() {
                 </div>
                 {/* Main heading and button container */}
                 <div className="mb-12">
-                 {/* Mobile Layout */}
+                  {/* Mobile Layout */}
                   <div className="block lg:hidden text-center space-y-4 sm:space-y-6 p-x-3">
                     <h1
                       ref={heroTitleRef}
                       className="text-5xl sm:text-6xl font-bold text-white leading-relaxed text-left"
-                    > 
+                    >
                       面接の不安
                       <br />
                       <span className="text-[#9fe870]">AI面接官</span>
@@ -575,7 +575,7 @@ export default function Home() {
           </section>
 
           {/* Transformation Section */}
-          <section className="w-full flex justify-center items-center mobile-section-padding bg-transparent">
+          <section className="w-full flex justify-center items-center py-20 sm:py-24 lg:py-32 bg-transparent mt-8 sm:mt-12 lg:mt-16">
             <div
               className="w-full max-w-5xl rounded-[24px] sm:rounded-[32px] lg:rounded-[48px] bg-[#163300] flex flex-col items-center px-4 sm:px-8 pt-20 sm:pt-28 pb-12 sm:pb-20 relative mx-4"
               style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.08)" }}
@@ -583,7 +583,7 @@ export default function Home() {
               <img
                 src="/interviewericon.png"
                 alt="Interviewer Icon"
-                className="w-40 h-40 sm:w-60 sm:h-60 lg:w-80 lg:h-80 object-contain absolute -top-20 sm:-top-30 lg:-top-40 left-1/2 -translate-x-1/2 drop-shadow-xl"
+                className="w-48 h-48 sm:w-60 sm:h-60 lg:w-80 lg:h-80 object-contain absolute -top-24 sm:-top-30 lg:-top-40 left-1/2 -translate-x-1/2 drop-shadow-xl"
                 style={{ zIndex: 2 }}
                 draggable={false}
               />
@@ -624,7 +624,7 @@ export default function Home() {
                     <div className="absolute -bottom-1 left-0 right-0 h-1 bg-[#9fe870] rounded-full"></div>
                   </span>
                 </h2>
-                <p className="mobile-text-subheading text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                <p className="text-xs sm:text-base lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
                   書籍や動画での学習では限界がある。AI面接官とのリアルタイム対話で、
                   実践的なスキルを短時間で身につけることができます。
                 </p>
@@ -657,19 +657,22 @@ export default function Home() {
                           </svg>
                         </div>
                         <div>
-                          <h3 className="text-xl font-bold text-gray-900">
-                            従来の学習方法
+                          <h3 className="text-lg sm:text-xl font-bold text-gray-900">
+                            <span className="sm:hidden">従来の方法</span>
+                            <span className="hidden sm:inline">
+                              従来の学習方法
+                            </span>
                           </h3>
-                          <p className="text-gray-500 text-sm">
+                          <p className="text-gray-500 text-xs sm:text-sm">
                             参考書・動画学習
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-[#ff8c5a]">
+                        <div className="text-lg sm:text-2xl font-bold text-[#ff8c5a]">
                           週5時間
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="hidden sm:block text-xs text-gray-500">
                           必要な学習時間
                         </div>
                       </div>
@@ -768,19 +771,19 @@ export default function Home() {
                           </svg>
                         </div>
                         <div>
-                          <h3 className="text-xl font-bold text-[#163300]">
+                          <h3 className="text-lg sm:text-xl font-bold text-[#163300]">
                             AI面接練習
                           </h3>
-                          <p className="text-[#163300]/70 text-sm">
+                          <p className="text-[#163300]/70 text-xs sm:text-sm">
                             AI面接官との対話
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-[#163300]">
+                        <div className="text-lg sm:text-2xl font-bold text-[#163300]">
                           週1時間
                         </div>
-                        <div className="text-xs text-[#163300]/70">
+                        <div className="hidden sm:block text-xs text-[#163300]/70">
                           効率的な学習時間
                         </div>
                       </div>

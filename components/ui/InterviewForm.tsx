@@ -3,8 +3,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth, SignInButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -63,6 +64,14 @@ const interviewFocusOptions = [
 
 export function InterviewForm() {
   const router = useRouter();
+  const { isSignedIn, isLoaded } = useAuth();
+  const signInButtonRef = useRef<HTMLButtonElement>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [pendingFormData, setPendingFormData] = useState<z.infer<
+    typeof formSchema
+  > | null>(null);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -75,9 +84,60 @@ export function InterviewForm() {
     },
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Handle authentication check and form submission
+  useEffect(() => {
+    if (isLoaded && isSignedIn && pendingFormData) {
+      // User just signed in and we have pending form data, proceed with submission
+      setShowAuthModal(false); // Hide the modal
+      handleAuthenticatedSubmit(pendingFormData);
+    }
+  }, [isLoaded, isSignedIn, pendingFormData]);
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  // Add effect to make modal non-closable when authentication is required
+  useEffect(() => {
+    if (showAuthModal) {
+      // Add CSS to hide close button and prevent ESC key
+      const style = document.createElement("style");
+      style.id = "non-closable-modal-style";
+      style.textContent = `
+        .cl-modalCloseButton {
+          display: none !important;
+        }
+        .cl-modalBackdrop {
+          pointer-events: none !important;
+        }
+        .cl-modalContent {
+          pointer-events: auto !important;
+        }
+      `;
+      document.head.appendChild(style);
+
+      // Prevent ESC key from closing modal
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      };
+
+      document.addEventListener("keydown", handleKeyDown, true);
+
+      return () => {
+        // Cleanup when component unmounts or modal is closed
+        const existingStyle = document.getElementById(
+          "non-closable-modal-style"
+        );
+        if (existingStyle) {
+          existingStyle.remove();
+        }
+        document.removeEventListener("keydown", handleKeyDown, true);
+      };
+    }
+  }, [showAuthModal]);
+
+  const handleAuthenticatedSubmit = async (
+    values: z.infer<typeof formSchema>
+  ) => {
     setIsSubmitting(true);
     try {
       const interview = await createInterview(values);
@@ -90,7 +150,32 @@ export function InterviewForm() {
     } catch (error) {
       console.error("Error creating interview:", error);
       setIsSubmitting(false);
+    } finally {
+      setPendingFormData(null);
     }
+  };
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    // Check if user is authenticated
+    if (!isLoaded) {
+      return; // Wait for auth to load
+    }
+
+    if (!isSignedIn) {
+      // Store form data and trigger authentication
+      setPendingFormData(values);
+      setShowAuthModal(true);
+
+      // Automatically trigger the hidden sign-in button
+      setTimeout(() => {
+        signInButtonRef.current?.click();
+      }, 100);
+
+      return;
+    }
+
+    // User is already authenticated, proceed directly
+    await handleAuthenticatedSubmit(values);
   };
 
   return (
@@ -321,6 +406,19 @@ export function InterviewForm() {
             </div>
           </form>
         </Form>
+
+        {/* Hidden sign-in button that gets triggered when form is submitted without auth */}
+        {showAuthModal && (
+          <SignInButton mode="modal" forceRedirectUrl="/interview/new">
+            <button
+              ref={signInButtonRef}
+              style={{ display: "none" }}
+              aria-hidden="true"
+            >
+              Hidden Sign In
+            </button>
+          </SignInButton>
+        )}
       </div>
     </div>
   );

@@ -45,9 +45,11 @@ const InterviewHistoryPage = () => {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <AutoSignIn>
+        <AutoSignIn nonClosableModal={true}>
           <div className="mb-8 text-center">
-            <h1 className="text-4xl font-bold text-[#163300] mb-4 mt-4">面接履歴</h1>
+            <h1 className="text-4xl font-bold text-[#163300] mb-4 mt-4">
+              面接履歴
+            </h1>
             <p className="text-gray-600">
               これまでの面接練習履歴を確認できます
             </p>
@@ -120,7 +122,13 @@ const InterviewHistoryPage = () => {
                       className="flex flex-col items-center"
                     >
                       {/* Folder Component - increased height and added padding for expansion space */}
-                      <div style={{ height: "220px", position: "relative", paddingTop: "15px" }}>
+                      <div
+                        style={{
+                          height: "220px",
+                          position: "relative",
+                          paddingTop: "15px",
+                        }}
+                      >
                         <Folder
                           size={1.5}
                           color="#9fe870"

@@ -1,7 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
 import { InterviewForm } from "@/components/ui/InterviewForm";
-import AutoSignIn from "@/components/ui/AutoSignIn";
 
 export const metadata: Metadata = {
   title: "新しい面接練習を始める | AI面接官との実践練習 - プロイー",
@@ -72,9 +71,7 @@ const page = () => {
             </p>
           </div>
 
-          <AutoSignIn>
-            <InterviewForm />
-          </AutoSignIn>
+          <InterviewForm />
         </div>
       </div>
     </>

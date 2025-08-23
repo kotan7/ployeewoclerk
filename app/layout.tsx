@@ -132,6 +132,9 @@ export default function RootLayout({
               animation: "none",
               transition: "none",
             },
+            modalCloseButton: {
+              display: "block", // Default behavior, will be overridden with CSS for non-closable modals
+            },
           },
         },
         signUp: {
