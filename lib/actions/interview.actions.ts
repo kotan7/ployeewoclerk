@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server"
 import { CreateSupabaseClient } from "../supbase"
-import { addSessionUsage } from "./usage.actions"
+import { addInterviewUsage } from "./usage.actions"
 import { calculateSessionMinutes } from "../utils"
 
 // Type definition based on the form schema
@@ -242,23 +242,15 @@ export const saveFeedback = async (feedbackData: any, interviewId?: string, sess
 
         console.log("Feedback update result:", data);
 
-        // Calculate and track session usage
+        // Track interview completion
         try {
-            if (sessionData?.created_at) {
-                const sessionStartTime = new Date(sessionData.created_at);
-                const sessionEndTime = new Date();
-                const sessionMinutes = calculateSessionMinutes(sessionStartTime, sessionEndTime);
-                
-                console.log(`Interview session completed. Duration: ${sessionMinutes} minutes`);
-                
-                // Add usage tracking
-                await addSessionUsage(sessionMinutes);
-                console.log("Usage tracking added successfully");
-            } else {
-                console.warn("No session start time found, skipping usage tracking");
-            }
+            console.log("Interview session completed - adding to usage count");
+            
+            // Add interview completion to usage tracking
+            await addInterviewUsage();
+            console.log("Interview usage tracking added successfully");
         } catch (usageError) {
-            console.error("Error tracking usage:", usageError);
+            console.error("Error tracking interview usage:", usageError);
             // Don't fail the feedback save if usage tracking fails
         }
 

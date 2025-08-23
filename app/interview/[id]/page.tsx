@@ -52,8 +52,10 @@ const InterviewSession = async ({ params }: InterviewSessionProps) => {
   // Check usage limits before allowing access to interview
   try {
     const usageInfo = await canStartSession();
+
+    // Check if user has remaining interviews
+    // Redirect to billing if they have no interviews left
     if (!usageInfo.canStart) {
-      // Redirect to billing page if usage limit exceeded
       redirect("/billing");
     }
   } catch (error) {
@@ -67,6 +69,7 @@ const InterviewSession = async ({ params }: InterviewSessionProps) => {
     ) {
       throw error; // Re-throw redirect errors
     }
+
     console.error("Failed to check usage limits:", error);
     // Allow access if usage check fails (don't block users due to technical issues)
   }
