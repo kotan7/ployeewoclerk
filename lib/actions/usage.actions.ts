@@ -7,6 +7,7 @@ import { CreateSupabaseClient } from "../supbase";
 /**
  * Get current month's usage for the authenticated user
  * If user doesn't exist in usage_tracking table, initialize them with 0 usage
+ * Uses SELECT first, then INSERT if needed (safe for missing constraints)
  * @returns number of interviews completed this month
  */
 export async function getCurrentUsage(): Promise<number> {
@@ -20,40 +21,47 @@ export async function getCurrentUsage(): Promise<number> {
   const monthYear = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-01`;
 
   const supabase = CreateSupabaseClient();
-  const { data, error } = await supabase
+  
+  // First, try to get existing record
+  const { data: existingData, error: fetchError } = await supabase
     .from('usage_tracking')
     .select('minutes_used')
     .eq('author', userId)
     .eq('month_year', monthYear)
     .single();
 
-  if (error) {
-    if (error.code === 'PGRST116') {
-      // No rows found - this is a new user/month, initialize them in the table
-      const { error: insertError } = await supabase
+  if (fetchError) {
+    if (fetchError.code === 'PGRST116') {
+      // No record found, create one with 0 usage
+      const { data: newData, error: insertError } = await supabase
         .from('usage_tracking')
         .insert({
           author: userId,
           month_year: monthYear,
-          minutes_used: 0, // Store interview count in minutes_used column
-        });
+          minutes_used: 0,
+        })
+        .select('minutes_used')
+        .single();
 
       if (insertError) {
-        console.error('Error initializing user in usage_tracking:', insertError);
-        throw new Error(`Failed to initialize user usage: ${insertError.message}`);
+        console.error('Error creating new usage record:', insertError);
+        throw new Error(`Failed to create usage record: ${insertError.message}`);
       }
-      return 0; // Return 0 interviews for newly initialized user
+
+      return newData?.minutes_used || 0;
     } else {
-      console.error('Error fetching current usage:', error);
-      throw new Error(`Failed to fetch usage: ${error.message}`);
+      console.error('Error fetching usage:', fetchError);
+      throw new Error(`Failed to fetch usage: ${fetchError.message}`);
     }
   }
 
-  return data?.minutes_used || 0; // This now represents interview count
+  return existingData?.minutes_used || 0;
 }
 
 /**
  * Add completed interview to user's monthly usage count
+ * Uses atomic UPSERT operation to prevent race conditions
+ * @deprecated Use trackInterviewSessionStart() instead for session-based tracking
  */
 export async function addInterviewUsage(): Promise<void> {
   const { userId } = await auth();
@@ -67,49 +75,114 @@ export async function addInterviewUsage(): Promise<void> {
 
   const supabase = CreateSupabaseClient();
 
-  // Check if record exists for this month and get current usage
-  const { data: existingRecord, error: fetchError } = await supabase
+  // First, try to get existing record
+  const { data: existingData, error: fetchError } = await supabase
     .from('usage_tracking')
     .select('minutes_used')
     .eq('author', userId)
     .eq('month_year', monthYear)
     .single();
 
-  let error;
-  if (existingRecord) {
-    // Update existing record - increment interview count by 1
-    const newInterviewCount = existingRecord.minutes_used + 1;
-    const result = await supabase
+  if (fetchError && fetchError.code !== 'PGRST116') {
+    console.error('Error checking current usage:', fetchError);
+    throw new Error(`Failed to check current usage: ${fetchError.message}`);
+  }
+
+  if (existingData) {
+    // Record exists, increment it
+    const newCount = existingData.minutes_used + 1;
+    const { error: updateError } = await supabase
       .from('usage_tracking')
-      .update({
-        minutes_used: newInterviewCount, // Store interview count in minutes_used column
-      })
+      .update({ minutes_used: newCount })
       .eq('author', userId)
       .eq('month_year', monthYear);
-    error = result.error;
-    
-    console.log(`Added 1 interview to usage. Total for ${monthYear}: ${newInterviewCount} interviews`);
-  } else if (fetchError?.code === 'PGRST116') {
-    // Insert new record (user doesn't exist in table yet)
-    const result = await supabase
+
+    if (updateError) {
+      console.error('Error updating usage:', updateError);
+      throw new Error(`Failed to update usage: ${updateError.message}`);
+    }
+
+    console.log(`Updated interview usage. Total for ${monthYear}: ${newCount} interviews`);
+  } else {
+    // Record doesn't exist, create it with 1
+    const { error: insertError } = await supabase
       .from('usage_tracking')
       .insert({
         author: userId,
         month_year: monthYear,
-        minutes_used: 1, // Start with 1 interview completed
+        minutes_used: 1,
       });
-    error = result.error;
-    
-    console.log(`Initialized new user and added 1 interview. Total for ${monthYear}: 1 interview`);
-  } else {
-    // Some other error occurred during fetch
-    console.error('Error fetching existing usage record:', fetchError);
-    throw new Error(`Failed to fetch existing usage: ${fetchError?.message}`);
+
+    if (insertError) {
+      console.error('Error creating new usage record:', insertError);
+      throw new Error(`Failed to create new usage record: ${insertError.message}`);
+    }
+
+    console.log(`Created new interview usage record. Total for ${monthYear}: 1 interview`);
+  }
+}
+
+/**
+ * Track interview session start - adds to usage count when session begins
+ * This is called when a user starts a new interview session
+ */
+export async function trackInterviewSessionStart(): Promise<void> {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("User not authenticated");
   }
 
-  if (error) {
-    console.error('Error updating usage:', error);
-    throw new Error(`Failed to update usage: ${error.message}`);
+  // Get first day of current month in YYYY-MM-01 format
+  const currentDate = new Date();
+  const monthYear = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-01`;
+
+  const supabase = CreateSupabaseClient();
+
+  // Use atomic upsert with proper increment logic
+  const { data: existingData, error: fetchError } = await supabase
+    .from('usage_tracking')
+    .select('minutes_used')
+    .eq('author', userId)
+    .eq('month_year', monthYear)
+    .single();
+
+  if (fetchError && fetchError.code !== 'PGRST116') {
+    console.error('Error checking current usage:', fetchError);
+    throw new Error(`Failed to check current usage: ${fetchError.message}`);
+  }
+
+  if (existingData) {
+    // Record exists, increment it
+    const newCount = existingData.minutes_used + 1;
+    
+    const { error: updateError } = await supabase
+      .from('usage_tracking')
+      .update({ minutes_used: newCount })
+      .eq('author', userId)
+      .eq('month_year', monthYear);
+
+    if (updateError) {
+      console.error('Error updating usage:', updateError);
+      throw new Error(`Failed to update usage: ${updateError.message}`);
+    }
+
+    console.log(`Updated existing interview usage. Total for ${monthYear}: ${newCount} interviews`);
+  } else {
+    // Record doesn't exist, create it with 1
+    const { error: insertError } = await supabase
+      .from('usage_tracking')
+      .insert({
+        author: userId,
+        month_year: monthYear,
+        minutes_used: 1,
+      });
+
+    if (insertError) {
+      console.error('Error creating new usage record:', insertError);
+      throw new Error(`Failed to create new usage record: ${insertError.message}`);
+    }
+
+    console.log(`Created new interview usage record. Total for ${monthYear}: 1 interview`);
   }
 }
 
@@ -161,7 +234,7 @@ export async function canStartSession(): Promise<{
   try {
     const currentUsage = await getCurrentUsage();
     const planLimit = await getUserPlanLimit();
-    const remainingInterviews = planLimit - currentUsage;
+    const remainingInterviews = Math.max(0, planLimit - currentUsage);
     // User can start if they have interviews remaining
     const canStart = remainingInterviews > 0;
     

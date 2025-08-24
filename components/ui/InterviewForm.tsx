@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createInterview } from "@/lib/actions/interview.actions";
+import { canStartSession } from "@/lib/actions/usage.actions";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const formSchema = z.object({
@@ -50,16 +51,16 @@ const formSchema = z.object({
 
   jobDescription: z.string().optional(),
 
-  interviewFocus: z.enum(["hr", "case", "technical", "final"], {
-    required_error: "面接の種類を選択してください",
+  interviewFocus: z.enum(["first", "second", "final", "hr"], {
+    required_error: "面接の回数を選択してください",
   }),
 });
 
 const interviewFocusOptions = [
-  { value: "hr", label: "人事面接" },
-  { value: "case", label: "ケース面接" },
-  { value: "technical", label: "テクニカル面接" },
+  { value: "first", label: "一次面接" },
+  { value: "second", label: "二次面接" },
   { value: "final", label: "最終面接" },
+  { value: "hr", label: "人事面接" },
 ] as const;
 
 export function InterviewForm() {
@@ -91,6 +92,7 @@ export function InterviewForm() {
       setShowAuthModal(false); // Hide the modal
       handleAuthenticatedSubmit(pendingFormData);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, isSignedIn, pendingFormData]);
 
   // Add effect to make modal non-closable when authentication is required
@@ -140,6 +142,15 @@ export function InterviewForm() {
   ) => {
     setIsSubmitting(true);
     try {
+      // Check usage limits before creating interview
+      const usageCheck = await canStartSession();
+
+      if (!usageCheck.canStart) {
+        // Redirect to billing page if usage limit exceeded
+        router.push("/billing");
+        return;
+      }
+
       const interview = await createInterview(values);
       if (interview) {
         router.push(`/interview/${interview.id}`);
@@ -180,16 +191,7 @@ export function InterviewForm() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
-      {/* Form Container */}
-      <div
-        className="rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-lg"
-        style={{
-          backgroundColor: "rgba(197, 228, 212, 0.1)",
-          backdropFilter: "blur(3px) saturate(65%)",
-          WebkitBackdropFilter: "blur(30px) saturate(65%)",
-          border: "2px solid rgba(210, 211, 210, 0.2)",
-        }}
-      >
+      {/* Form */}
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -340,7 +342,7 @@ export function InterviewForm() {
             {/* Interview Type Section */}
             <div className="space-y-4">
               <h2 className="text-2xl font-bold text-[#163300]">
-                3. 面接の種類
+                3. 面接の回数
               </h2>
 
               <FormField
@@ -349,7 +351,7 @@ export function InterviewForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-base font-semibold text-[#163300]">
-                      面接フォーカス <span className="text-red-500">*</span>
+                      面接の回数 <span className="text-red-500">*</span>
                     </FormLabel>
                     <Select
                       onValueChange={field.onChange}
@@ -373,7 +375,7 @@ export function InterviewForm() {
                       </SelectContent>
                     </Select>
                     <FormDescription>
-                      選択した種類に応じて、最適な質問と評価基準で面接練習を行います
+                      面接の段階に応じて、適切なレベルの質問と評価基準で面接練習を行います
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -419,7 +421,6 @@ export function InterviewForm() {
             </button>
           </SignInButton>
         )}
-      </div>
     </div>
   );
 }

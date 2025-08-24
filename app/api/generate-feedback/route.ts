@@ -109,15 +109,39 @@ AI面接官が応募者の情報に基づいて動的に生成した質問によ
 
     const result = JSON.parse(completion.choices[0]?.message?.content || '{}');
     
+    // Calculate overall score based on sum of phase scores, adjusted to 100
+    let calculatedOverallScore = 0;
+    if (result.phaseAnalysis && Array.isArray(result.phaseAnalysis)) {
+      const totalPhaseScore = result.phaseAnalysis.reduce((sum: number, phase: any) => {
+        const score = typeof phase.score === 'string' ? parseFloat(phase.score) : phase.score;
+        return sum + (isNaN(score) ? 0 : score);
+      }, 0);
+      
+      // Convert from phase total (max 40 for 4 phases) to 100-point scale
+      calculatedOverallScore = Math.round((totalPhaseScore / 40) * 100);
+    }
+    
+    // Ensure the score is within 0-100 range
+    calculatedOverallScore = Math.max(0, Math.min(100, calculatedOverallScore));
+    
+    // Update the overallFeedback score with calculated value
+    const updatedResult = {
+      ...result,
+      overallFeedback: {
+        ...(result.overallFeedback || {}),
+        score: calculatedOverallScore.toString()
+      }
+    };
+    
     return NextResponse.json({ 
-      overallFeedback: result.overallFeedback || {},
-      chartData: result.chartData || [],
-      phaseAnalysis: result.phaseAnalysis || [],
-      improvements: result.improvements || [],
-      strengths: result.strengths || [],
+      overallFeedback: updatedResult.overallFeedback || {},
+      chartData: updatedResult.chartData || [],
+      phaseAnalysis: updatedResult.phaseAnalysis || [],
+      improvements: updatedResult.improvements || [],
+      strengths: updatedResult.strengths || [],
       // Keep legacy format for backward compatibility
-      detailedFeedback: result.detailedFeedback || {},
-      feedback: result.feedback || []
+      detailedFeedback: updatedResult.detailedFeedback || {},
+      feedback: updatedResult.feedback || []
     });
 
   } catch (error) {
