@@ -582,9 +582,7 @@ export function useInterviewSession(interviewId?: string) {
     currentRecordingSessionRef.current = 0;
     
     // Reset usage tracking state
-    setSessionStartTime(null);
     setUsageLimitExceeded(false);
-    setCurrentRemainingMinutes(0);
   };
 
   // Toggle recording state

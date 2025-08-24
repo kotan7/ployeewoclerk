@@ -92,6 +92,7 @@ export function InterviewForm() {
       setShowAuthModal(false); // Hide the modal
       handleAuthenticatedSubmit(pendingFormData);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, isSignedIn, pendingFormData]);
 
   // Add effect to make modal non-closable when authentication is required
@@ -143,10 +144,10 @@ export function InterviewForm() {
     try {
       // Check usage limits before creating interview
       const usageCheck = await canStartSession();
-      
+
       if (!usageCheck.canStart) {
         // Redirect to billing page if usage limit exceeded
-        router.push('/billing');
+        router.push("/billing");
         return;
       }
 
