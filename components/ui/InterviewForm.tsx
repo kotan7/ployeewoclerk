@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createInterview } from "@/lib/actions/interview.actions";
+import { canStartSession } from "@/lib/actions/usage.actions";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const formSchema = z.object({
@@ -140,6 +141,15 @@ export function InterviewForm() {
   ) => {
     setIsSubmitting(true);
     try {
+      // Check usage limits before creating interview
+      const usageCheck = await canStartSession();
+      
+      if (!usageCheck.canStart) {
+        // Redirect to billing page if usage limit exceeded
+        router.push('/billing');
+        return;
+      }
+
       const interview = await createInterview(values);
       if (interview) {
         router.push(`/interview/${interview.id}`);

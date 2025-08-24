@@ -483,9 +483,36 @@ export function useInterviewSession(interviewId?: string) {
   // Start real-time recording
   const startRealTimeRecording = async () => {
     try {
+      // Track interview session start (usage increment happens here)
+      console.log("Tracking interview session start...");
+      try {
+        const response = await fetch('/api/track-interview-start', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+          console.log("Interview session start tracked successfully", result);
+        } else {
+          console.warn("Failed to track interview session start:", result);
+          
+          // Handle usage limit exceeded
+          if (result.error === 'Usage limit exceeded') {
+            console.log("Usage limit exceeded, redirecting to billing...");
+            // The API already checked usage limits, so this shouldn't happen
+            // if canStartSession was called properly
+          }
+        }
+      } catch (trackingError) {
+        console.warn("Error tracking interview session start:", trackingError);
+        // Continue with interview even if tracking fails
+      }
+
       // NOTE: Usage limit already checked on server-side before page load
-      // Usage check already passed server-side before page load
-      console.log("Starting interview - server-side usage check already passed");
+      console.log("Starting interview - usage tracking complete");
 
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -555,7 +582,9 @@ export function useInterviewSession(interviewId?: string) {
     currentRecordingSessionRef.current = 0;
     
     // Reset usage tracking state
+    setSessionStartTime(null);
     setUsageLimitExceeded(false);
+    setCurrentRemainingMinutes(0);
   };
 
   // Toggle recording state

@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server"
 import { CreateSupabaseClient } from "../supbase"
-import { addInterviewUsage } from "./usage.actions"
+import { trackInterviewSessionStart } from "./usage.actions"
 import { calculateSessionMinutes } from "../utils"
 
 // Type definition based on the form schema
@@ -242,17 +242,7 @@ export const saveFeedback = async (feedbackData: any, interviewId?: string, sess
 
         console.log("Feedback update result:", data);
 
-        // Track interview completion
-        try {
-            console.log("Interview session completed - adding to usage count");
-            
-            // Add interview completion to usage tracking
-            await addInterviewUsage();
-            console.log("Interview usage tracking added successfully");
-        } catch (usageError) {
-            console.error("Error tracking interview usage:", usageError);
-            // Don't fail the feedback save if usage tracking fails
-        }
+        // Note: Usage tracking now happens at session start, not completion
 
         return {
             success: true,
@@ -420,3 +410,19 @@ export const saveWorkflowState = async (
         message: "Workflow state saved successfully"
     };
 }
+
+/**
+ * Track interview session start - adds to usage count when session begins
+ * This function is called when a user starts a new interview session
+ */
+export const trackInterviewStart = async () => {
+    try {
+        console.log("Tracking interview session start...");
+        await trackInterviewSessionStart();
+        console.log("Interview session start tracked successfully");
+        return { success: true };
+    } catch (error) {
+        console.error("Error tracking interview session start:", error);
+        return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+    }
+};
