@@ -8,25 +8,22 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.ployee.net"),
-  title: "プロイー | AI面接練習で内定を掴む - 面接AI練習プラットフォーム",
+  title: "AI面接練習プラットフォーム「プロイー」| 24時間対応で内定率UP",
   description:
-    "AI面接官との実践的な面接練習で、自信を持って本番に挑めます。24時間いつでも面接練習が可能。面接AI、AI面接、面接練習、就活対策に最適なプラットフォーム。",
+    "AI面接官との実践練習で面接突破率を5倍向上。リアルタイム分析・個別フィードバック付き。就活生95%が「自信がついた」と評価。無料体験3回まで。",
   keywords: [
-    "面接AI",
-    "AI面接",
-    "面接練習",
-    "就活対策",
-    "面接対策",
-    "AI面接官",
-    "面接シミュレーション",
-    "就職活動",
-    "転職面接",
-    "面接準備",
-    "面接フィードバック",
+    "AI面接練習",
+    "面接対策 AI",
     "オンライン面接練習",
-    "AI就活支援",
+    "面接シミュレーション",
+    "就活 面接対策",
+    "転職 面接練習",
+    "面接 フィードバック",
     "面接スキル向上",
     "面接不安解消",
+    "24時間面接練習",
+    "リアルタイム面接分析",
+    "個別面接指導",
   ],
   authors: [{ name: "プロイー開発チーム" }],
   creator: "プロイー",
@@ -46,9 +43,9 @@ export const metadata: Metadata = {
     type: "website",
     locale: "ja_JP",
     url: "https://www.ployee.net",
-    title: "プロイー | AI面接練習で内定を掴む",
+    title: "AI面接練習プラットフォーム「プロイー」| 24時間対応",
     description:
-      "AI面接官との実践的な面接練習で、自信を持って本番に挑めます。24時間いつでも面接練習が可能。",
+      "AI面接官との実践練習で面接突破率を5倍向上。リアルタイム分析・個別フィードバック付き。",
     siteName: "プロイー",
     images: [
       {
@@ -61,9 +58,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "プロイー | AI面接練習で内定を掴む",
+    title: "AI面接練習プラットフォーム「プロイー」| 24時間対応",
     description:
-      "AI面接官との実践的な面接練習で、自信を持って本番に挑めます。24時間いつでも面接練習が可能。",
+      "AI面接官との実践練習で面接突破率を5倍向上。リアルタイム分析・個別フィードバック付き。",
     images: ["https://www.ployee.net/og-image.jpg"],
     creator: "@ployee_jp",
   },
