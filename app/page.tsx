@@ -6,67 +6,6 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import logo from "../constants/logo.png";
 import Image from "next/image";
-import type { Metadata } from "next";
-import Head from "next/head";
-
-// Server-side metadata export for homepage SEO
-export const metadata: Metadata = {
-  title: "AI面接練習プラットフォーム「プロイー」| 24時間対応で内定率UP",
-  description:
-    "AI面接官との実践練習で面接突破率を5倍向上。リアルタイム分析・個別フィードバック付き。就活生95%が「自信がついた」と評価。無料体験3回まで。",
-  keywords: [
-    "AI面接練習",
-    "面接対策 AI",
-    "オンライン面接練習",
-    "面接シミュレーション",
-    "就活 面接対策",
-    "転職 面接練習",
-    "面接 フィードバック",
-    "面接スキル向上",
-    "面接不安解消",
-    "24時間面接練習",
-    "リアルタイム面接分析",
-    "個別面接指導",
-  ],
-  openGraph: {
-    title: "AI面接練習プラットフォーム「プロイー」| 24時間対応で内定率UP",
-    description:
-      "AI面接官との実践練習で面接突破率を5倍向上。リアルタイム分析・個別フィードバック付き。就活生95%が「自信がついた」と評価。",
-    url: "https://www.ployee.net",
-    siteName: "プロイー",
-    images: [
-      {
-        url: "https://www.ployee.net/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "プロイー - AI面接練習プラットフォーム",
-      },
-    ],
-    type: "website",
-    locale: "ja_JP",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "AI面接練習プラットフォーム「プロイー」| 24時間対応で内定率UP",
-    description:
-      "AI面接官との実践練習で面接突破率を5倍向上。リアルタイム分析・個別フィードバック付き。",
-    images: ["https://www.ployee.net/og-image.jpg"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  alternates: {
-    canonical: "https://www.ployee.net",
-  },
-};
 
 // Enhanced Structured Data for SEO and Rich Snippets
 const structuredData = {
@@ -389,24 +328,7 @@ export default function Home() {
 
   return (
     <>
-      <Head>
-        <title>AI面接練習プラットフォーム「プロイー」| 24時間対応で内定率UP</title>
-        <meta
-          name="description"
-          content="AI面接官との実践練習で面接突破率を5倍向上。リアルタイム分析・個別フィードバック付き。就活生95%が「自信がついた」と評価。無料体験3回まで。"
-        />
-        <meta name="keywords" content="AI面接練習,面接対策 AI,オンライン面接練習,面接シミュレーション,就活 面接対策,転職 面接練習" />
-        <link rel="canonical" href="https://www.ployee.net" />
-        <meta property="og:title" content="AI面接練習プラットフォーム「プロイー」| 24時間対応で内定率UP" />
-        <meta property="og:description" content="AI面接官との実践練習で面接突破率を5倍向上。リアルタイム分析・個別フィードバック付き。就活生95%が「自信がついた」と評価。" />
-        <meta property="og:url" content="https://www.ployee.net" />
-        <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://www.ployee.net/og-image.jpg" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="AI面接練習プラットフォーム「プロイー」| 24時間対応で内定率UP" />
-        <meta name="twitter:description" content="AI面接官との実践練習で面接突破率を5倍向上。リアルタイム分析・個別フィードバック付き。" />
-        <meta name="twitter:image" content="https://www.ployee.net/og-image.jpg" />
-      </Head>
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
