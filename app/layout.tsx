@@ -79,11 +79,12 @@ export const metadata: Metadata = {
   },
 };
 
+
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <ClerkProvider
       localization={jaJP}
@@ -116,56 +117,18 @@ export default function RootLayout({
           },
         },
         signIn: {
-          variables: {
-            colorPrimary: "#004526",
-          },
-          elements: {
-            modalContent: {
-              position: "fixed",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              margin: "0",
-              animation: "none",
-              transition: "none",
-            },
-            modalCloseButton: {
-              display: "block", // Default behavior, will be overridden with CSS for non-closable modals
-            },
-          },
+          variables: { colorPrimary: "#004526" },
+          elements: { modalContent: { position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)", margin: 0, animation: "none", transition: "none" } },
         },
         signUp: {
-          variables: {
-            colorPrimary: "#004526",
-          },
-          elements: {
-            modalContent: {
-              position: "fixed",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              margin: "0",
-              animation: "none",
-              transition: "none",
-            },
-          },
+          variables: { colorPrimary: "#004526" },
+          elements: { modalContent: { position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)", margin: 0, animation: "none", transition: "none" } },
         },
       }}
     >
       <html lang="ja" suppressHydrationWarning>
-        <head>
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link
-            rel="preconnect"
-            href="https://fonts.gstatic.com"
-            crossOrigin=""
-          />
-          <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap"
-            rel="stylesheet"
-          />
-        </head>
         <body className="antialiased">
+          {/* Fonts are loaded via app/head.tsx */}
           <ScrollRestoration />
           <Header />
           {children}
