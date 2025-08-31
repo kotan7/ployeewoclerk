@@ -51,16 +51,21 @@ const formSchema = z.object({
 
   jobDescription: z.string().optional(),
 
-  interviewFocus: z.enum(["first", "second", "final", "hr"], {
-    required_error: "面接の回数を選択してください",
+  interviewFocus: z.enum(["consulting", "finance", "manufacturing", "trading", "it", "advertising", "hr", "infrastructure", "real_estate"], {
+    required_error: "志望業界を選択してください",
   }),
 });
 
 const interviewFocusOptions = [
-  { value: "first", label: "一次面接" },
-  { value: "second", label: "二次面接" },
-  { value: "final", label: "最終面接" },
-  { value: "hr", label: "人事面接" },
+  { value: "consulting", label: "コンサル" },
+  { value: "finance", label: "金融" },
+  { value: "manufacturing", label: "メーカー" },
+  { value: "trading", label: "商社" },
+  { value: "it", label: "IT・通信" },
+  { value: "advertising", label: "広告・マスコミ" },
+  { value: "hr", label: "人材" },
+  { value: "infrastructure", label: "インフラ" },
+  { value: "real_estate", label: "不動産・建設" },
 ] as const;
 
 export function InterviewForm() {
@@ -342,7 +347,7 @@ export function InterviewForm() {
             {/* Interview Type Section */}
             <div className="space-y-4">
               <h2 className="text-2xl font-bold text-[#163300]">
-                3. 面接の回数
+                3. 志望業界
               </h2>
 
               <FormField
@@ -351,7 +356,7 @@ export function InterviewForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-base font-semibold text-[#163300]">
-                      面接の回数 <span className="text-red-500">*</span>
+                      志望業界 <span className="text-red-500">*</span>
                     </FormLabel>
                     <Select
                       onValueChange={field.onChange}
@@ -359,7 +364,7 @@ export function InterviewForm() {
                     >
                       <FormControl>
                         <SelectTrigger className="h-12 text-base">
-                          <SelectValue placeholder="面接の種類を選択してください" />
+                          <SelectValue placeholder="志望する業界を選択してください" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -375,7 +380,7 @@ export function InterviewForm() {
                       </SelectContent>
                     </Select>
                     <FormDescription>
-                      面接の段階に応じて、適切なレベルの質問と評価基準で面接練習を行います
+                      選択した業界に特化した質問を含む面接練習を行います
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

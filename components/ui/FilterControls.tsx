@@ -31,10 +31,15 @@ const FilterControls = ({
 
   const filterOptions = [
     { value: "all", label: "全ての面接" },
-    { value: "hr", label: "人事面接" },
-    { value: "case", label: "ケース面接" },
-    { value: "technical", label: "テクニカル面接" },
-    { value: "final", label: "最終面接" },
+    { value: "consulting", label: "コンサル" },
+    { value: "finance", label: "金融" },
+    { value: "manufacturing", label: "メーカー" },
+    { value: "trading", label: "商社" },
+    { value: "it", label: "IT・通信" },
+    { value: "advertising", label: "広告・マスコミ" },
+    { value: "hr", label: "人材" },
+    { value: "infrastructure", label: "インフラ" },
+    { value: "real_estate", label: "不動産・建設" },
   ];
 
   const sortOptions = [

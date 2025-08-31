@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { TextToSpeechClient } from '@google-cloud/text-to-speech';
 import { getWorkflowState, saveWorkflowState } from '../../../lib/actions/interview.actions';
+import { CreateSupabaseClient } from '../../../lib/supbase';
+import { auth } from '@clerk/nextjs/server';
 
 // Configure runtime for Vercel
 export const runtime = 'nodejs';
@@ -66,48 +68,358 @@ export async function POST(request: NextRequest) {
 
     const transcript = transcriptionResult.response.text().trim();
     
-    // Step 2: Load workflow state from database instead of client context
+    // Step 2: Load workflow state from database and fetch interview data to get industry
     const dbWorkflowState = await getWorkflowState(effectiveInterviewId);
+    
+    // Fetch interview data to get the selected industry
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: "User not authenticated" }, { status: 401 });
+    }
+    
+    const supabase = CreateSupabaseClient();
+    const { data: interviewData, error: interviewError } = await supabase
+      .from("interviews")
+      .select("interviewFocus")
+      .eq("id", effectiveInterviewId)
+      .eq("author", userId)
+      .single();
+    
+    if (interviewError || !interviewData) {
+      console.error("Failed to fetch interview data:", interviewError);
+      return NextResponse.json({ error: "Failed to fetch interview data" }, { status: 500 });
+    }
+    
+    const selectedIndustry = interviewData.interviewFocus;
+    
+    // Industry-specific questions data
+    const industryQuestions = {
+      consulting: [
+        {
+          id: 'consulting_case_light',
+          prompt: 'フェルミ推定：日本のコンビニの年間コーヒー販売杯数を概算してください（仮定→分解→計算→示唆）。',
+          expected_data: ['assumptions','structure','calculation_steps','sense_check','insights']
+        },
+        {
+          id: 'problem_structuring',
+          prompt: '「国内アパレルECの成長が鈍化」の要因をMECEに分解し、優先仮説を1つ提示してください。',
+          expected_data: ['issue_tree','hypotheses','prioritization_reason']
+        },
+        {
+          id: 'client_communication',
+          prompt: '困難なクライアントをどう巻き込み、合意形成しましたか？',
+          expected_data: ['context','stakeholders','tactics','outcome']
+        },
+        {
+          id: 'thinktank_policy',
+          prompt: '関心のある政策テーマと、その効果検証設計（KPI/データ/手法）を簡潔に説明してください。',
+          expected_data: ['policy_theme','kpi','data_sources','method']
+        },
+        {
+          id: 'consulting_fit',
+          prompt: 'ハードワーク環境で心身をどうセルフマネジメントしますか？',
+          expected_data: ['stress_signs','routines','safeguards']
+        }
+      ],
+      finance: [
+        {
+          id: 'finance_markets_quickcheck',
+          prompt: '直近のマーケット（株価指数/為替/金利）の変動要因を1分で要約してください。',
+          expected_data: ['index_fx_rate','movement','drivers','sources']
+        },
+        {
+          id: 'finance_news',
+          prompt: '最近注目したM&A/金融規制ニュースを挙げ、当該プレーヤーの狙いを推測してください。',
+          expected_data: ['news_topic','players','rationale','implications']
+        },
+        {
+          id: 'risk_compliance',
+          prompt: 'コンプライアンスと収益性が競合する局面での判断軸を教えてください。',
+          expected_data: ['principles','precedents','decision']
+        },
+        {
+          id: 'numeracy_check',
+          prompt: '年1.5%の複利で100万円を5年運用。概算最終金額を口頭で算出してください。',
+          expected_data: ['approx_method','result']
+        },
+        {
+          id: 'client_trust',
+          prompt: '個人/法人いずれかを選び、信頼構築のための初回ヒアリング設計を説明してください。',
+          expected_data: ['segmentation','questions_plan','risk_disclosure']
+        }
+      ],
+      manufacturing: [
+        {
+          id: 'monodukuri_motivation',
+          prompt: 'ものづくりに惹かれた具体的契機と、対象製品/工程で活かせる強みを教えてください。',
+          expected_data: ['trigger','target_product_or_process','skills']
+        },
+        {
+          id: 'rd_or_prodexp',
+          prompt: '研究/設計/生産いずれかを選び、課題→仮説→実験/対策→検証の経験を説明してください。',
+          expected_data: ['problem','hypothesis','action','validation','quant_result']
+        },
+        {
+          id: 'quality_cost_delivery',
+          prompt: '品質・コスト・納期（QCD）のトレードオフで下した判断を例示してください。',
+          expected_data: ['context','tradeoff','decision','impact']
+        },
+        {
+          id: 'site_adaptability',
+          prompt: '現場（工場/サプライヤ）配属の生活・安全面での自己管理方針を教えてください。',
+          expected_data: ['safety_mind','shift_or_transfer','healthcare']
+        },
+        {
+          id: 'ip_and_learning',
+          prompt: '技術キャッチアップの習慣（論文/特許/展示会 等）を教えてください。',
+          expected_data: ['sources','cadence','recent_learning']
+        }
+      ],
+      trading: [
+        {
+          id: 'why_sogo_shosha',
+          prompt: 'なぜ総合商社か。他業界ではなく商社である必然性を論理的に説明してください。',
+          expected_data: ['industry_reason','why_not_others','value_you_add']
+        },
+        {
+          id: 'biz_dev_interest',
+          prompt: '興味のある事業領域と、その共通する魅力（配属に依存しない軸）を述べてください。',
+          expected_data: ['areas','common_axes','transferability']
+        },
+        {
+          id: 'grit_and_mobility',
+          prompt: 'タフな環境（長時間/海外/未整備）で成果を出した経験を教えてください。',
+          expected_data: ['context','actions','result','learning']
+        },
+        {
+          id: 'stakeholder_play',
+          prompt: '多国籍の関係者を巻き込む際の交渉戦略を、具体ステップで説明してください。',
+          expected_data: ['mapping','sequencing','give_and_take']
+        },
+        {
+          id: 'company_specific_reason',
+          prompt: '総合商社各社の違いを踏まえ、当社を選ぶ理由と逆質問を1つずつ提示してください。',
+          expected_data: ['positioning_view','this_company_reason','reverse_q']
+        }
+      ],
+      it: [
+        {
+          id: 'tech_interest',
+          prompt: '最近キャッチアップしている技術トピックと、学習ソース/アウトプットを教えてください。',
+          expected_data: ['topic','sources','artifact_or_code','impact']
+        },
+        {
+          id: 'proj_problem_solving',
+          prompt: '開発/データ/企画いずれかの小規模プロジェクトで、要件定義とスコープ管理をどう行いましたか？',
+          expected_data: ['requirements','scope','tradeoffs','result']
+        },
+        {
+          id: 'telecom_career',
+          prompt: '通信キャリア志望の場合、ネットワーク/サービス/端末のどこで価値を出したいですか？',
+          expected_data: ['layer','why','example_idea']
+        },
+        {
+          id: 'security_privacy',
+          prompt: 'ユーザデータを扱う際のセキュリティ/プライバシー配慮で意識していることは？',
+          expected_data: ['threat_model','controls','past_behavior']
+        },
+        {
+          id: 'dx_biz',
+          prompt: '非IT業界の課題をデジタルで解くとしたら、どの課題に何を実装しますか？',
+          expected_data: ['target_industry','pain_point','solution','kpi']
+        }
+      ],
+      advertising: [
+        {
+          id: 'campaign_pitch',
+          prompt: '20代向け新商品のプロモ案を60秒でピッチしてください（ターゲット→インサイト→施策→測定）。',
+          expected_data: ['target','insight','idea','kpi']
+        },
+        {
+          id: 'trend_sense',
+          prompt: '最近刺さった広告/コンテンツを挙げ、評価軸で言語化してください。',
+          expected_data: ['work','criteria','why']
+        },
+        {
+          id: 'creative_process',
+          prompt: '企画の発散と収束のプロセスを、過去の活動例で説明してください。',
+          expected_data: ['diverge','converge','validation']
+        },
+        {
+          id: 'media_ethics',
+          prompt: '炎上/表現配慮のガイドラインをどう捉え、リスクを下げますか？',
+          expected_data: ['guidelines','checks','fallback']
+        },
+        {
+          id: 'account_roleplay',
+          prompt: '（ロールプレイ）広告主から「効果が見えない」と言われた際の説明と追加提案を行ってください。',
+          expected_data: ['diagnosis','explanation','new_plan']
+        }
+      ],
+      hr: [
+        {
+          id: 'sales_fit',
+          prompt: '個人/法人いずれかのRA/CA（両面/片面）を想定し、KPIの置き方と行動計画を説明してください。',
+          expected_data: ['model','kpi','activity_plan']
+        },
+        {
+          id: 'listening_skill',
+          prompt: '候補者の「本音」を引き出した具体的ヒアリング手法を教えてください。',
+          expected_data: ['questions','signals','trust_building']
+        },
+        {
+          id: 'multi_stake',
+          prompt: '企業・候補者・社内の利害調整で難しかった場面と対応を教えてください。',
+          expected_data: ['context','tradeoffs','resolution']
+        },
+        {
+          id: 'value_view',
+          prompt: '「成果主義」と「候補者の長期幸福」の両立をどう実現しますか？',
+          expected_data: ['principles','tactics','example']
+        },
+        {
+          id: 'reverse_for_hr',
+          prompt: '人材業界に特化した逆質問を1つ提示し、意図を説明してください。',
+          expected_data: ['question','intent']
+        }
+      ],
+      infrastructure: [
+        {
+          id: 'public_mission',
+          prompt: '公共インフラの社会的使命を一言で定義し、日々の行動に落とす方法を述べてください。',
+          expected_data: ['mission_phrase','daily_translation']
+        },
+        {
+          id: 'safety_first',
+          prompt: '安全・保安・災害対応での判断基準と、訓練/学習の習慣を教えてください。',
+          expected_data: ['criteria','training','past_example']
+        },
+        {
+          id: 'shift_and_resilience',
+          prompt: 'シフト勤務/繁忙期/緊急呼び出しがある前提で、生活設計と体調管理をどう最適化しますか？',
+          expected_data: ['schedule_design','sleep_nutrition','fallbacks']
+        },
+        {
+          id: 'stake_local',
+          prompt: '地域住民/行政/企業を巻き込む企画を1つ提案し、合意形成プランを説明してください。',
+          expected_data: ['idea','stakeholders','consensus_plan']
+        },
+        {
+          id: 'ethics_public',
+          prompt: '公共性と採算性が衝突した際の考え方を教えてください。',
+          expected_data: ['framework','examples','decision']
+        }
+      ],
+      real_estate: [
+        {
+          id: 'real_estate_market',
+          prompt: '最近の不動産市場のトレンドと、それが投資戦略に与える影響について説明してください。',
+          expected_data: ['trend','impact','strategy']
+        },
+        {
+          id: 'project_management',
+          prompt: '建設プロジェクトでのスケジュール管理と品質管理をどう両立させましたか？',
+          expected_data: ['approach','challenges','outcome']
+        },
+        {
+          id: 'client_relations',
+          prompt: '顧客との信頼関係構築で重視していることと、具体的な取り組みを教えてください。',
+          expected_data: ['principles','methods','results']
+        },
+        {
+          id: 'regulatory_compliance',
+          prompt: '建築法規や環境規制への対応で工夫していることがあれば教えてください。',
+          expected_data: ['compliance_approach','innovation','efficiency']
+        },
+        {
+          id: 'sustainability',
+          prompt: '持続可能な建設・開発に向けた取り組みや考えを聞かせてください。',
+          expected_data: ['approach','examples','future_vision']
+        }
+      ]
+    };
+    
+    // Industry name mapping for the final question
+    const industryNames = {
+      consulting: 'コンサルティング業界',
+      finance: '金融業界',
+      manufacturing: 'メーカー・製造業界',
+      trading: '商社業界',
+      it: 'IT・通信業界',
+      advertising: '広告・マスコミ業界',
+      hr: '人材業界',
+      infrastructure: 'インフラ業界',
+      real_estate: '不動産・建設業界'
+    };
+    
+    // Generate dynamic workflow based on selected industry
+    const generateWorkflow = () => {
+      // Base questions that might be selected for middle phases
+      const baseQuestions = [
+        {
+          id: 'gakuchika',
+          prompt: '学生時代に最も力を入れて取り組まれたことについて、具体的にお聞かせください。',
+          expected_data: ['topic', 'actions', 'outcome'],
+        },
+        {
+          id: 'strength',
+          prompt: 'ご自身の強みについて、具体的なエピソードと併せて教えていただけますでしょうか。',
+          expected_data: ['strength', 'example', 'outcome'],
+        },
+        {
+          id: 'weakness',
+          prompt: 'ご自身の課題となる部分や改善点について、どのような対策を講じていらっしゃるか教えてください。',
+          expected_data: ['weakness', 'coping_strategy'],
+        },
+      ];
+      
+      // Select 1 random industry question
+      const industryQs = industryQuestions[selectedIndustry as keyof typeof industryQuestions] || [];
+      const randomIndustryQ = industryQs[Math.floor(Math.random() * industryQs.length)];
+      
+      // Select 2 random base questions
+      const shuffledBaseQs = [...baseQuestions].sort(() => Math.random() - 0.5);
+      const selectedBaseQs = shuffledBaseQs.slice(0, 2);
+      
+      // Create workflow phases
+      const phases = [
+        {
+          id: 'self_intro',
+          prompt: 'まずは簡単に自己紹介をお願いいたします。',
+          expected_data: ['name', 'education'],
+          next_state: selectedBaseQs[0].id,
+        },
+        {
+          ...selectedBaseQs[0],
+          next_state: selectedBaseQs[1].id,
+        },
+        {
+          ...selectedBaseQs[1],
+          next_state: randomIndustryQ.id,
+        },
+        {
+          ...randomIndustryQ,
+          next_state: 'industry_motivation',
+        },
+        {
+          id: 'industry_motivation',
+          prompt: `${industryNames[selectedIndustry as keyof typeof industryNames]}を志望される理由と、これまでのご経験との関連性についてお聞かせください。`,
+          expected_data: ['motivation', 'connection_to_experience', 'future_goal'],
+          next_state: 'end',
+        },
+      ];
+      
+      return phases;
+    };
+    
+    // Generate workflow for this interview
+    const workflow = generateWorkflow();
     
     // Use database state as primary source, fall back to context if needed
     const contextObj = JSON.parse(conversationContext || '{}');
     const history = dbWorkflowState.conversationHistory.length > 0 
       ? dbWorkflowState.conversationHistory 
       : (contextObj.history || []);
-
-    // Improved workflow definition with more natural Japanese prompts
-    const workflow = [
-      {
-        id: 'self_intro',
-        prompt: 'まずは簡単に自己紹介をお願いいたします。',
-        expected_data: ['name', 'education'],
-        next_state: 'gakuchika',
-      },
-      {
-        id: 'gakuchika',
-        prompt: '学生時代に最も力を入れて取り組まれたことについて、具体的にお聞かせください。',
-        expected_data: ['topic', 'actions', 'outcome'],
-        next_state: 'strength',
-      },
-      {
-        id: 'strength',
-        prompt: 'ご自身の強みについて、具体的なエピソードと併せて教えていただけますでしょうか。',
-        expected_data: ['strength', 'example', 'outcome'],
-        next_state: 'weakness',
-      },
-      {
-        id: 'weakness',
-        prompt: 'ご自身の課題となる部分や改善点について、どのような対策を講じていらっしゃるか教えてください。',
-        expected_data: ['weakness', 'coping_strategy'],
-        next_state: 'industry_motivation',
-      },
-      {
-        id: 'industry_motivation',
-        prompt: '弊社の業界を志望される理由と、これまでのご経験との関連性についてお聞かせください。',
-        expected_data: ['motivation', 'connection_to_experience', 'future_goal'],
-        next_state: 'end',
-      },
-    ] as const;
 
     type WorkflowPhaseId = typeof workflow[number]['id'] | 'end';
 
@@ -255,20 +567,43 @@ ${(workflow.find(p => p.id === currentPhaseId)!.expected_data).map(k => `- ${k}`
       nextPhaseId = (workflow.find(p => p.id === currentPhaseId)!.next_state as WorkflowPhaseId);
     }
 
-    // Improved key labels in more natural Japanese
-    const keyLabels: Record<string, string> = {
-      name: 'お名前',
-      education: 'ご出身校や学歴',
-      topic: '取り組まれた内容',
-      actions: '具体的な行動や取り組み',
-      outcome: '成果や結果',
-      strength: 'ご自身の強み',
-      example: '具体的なエピソード',
-      weakness: '課題や改善点',
-      coping_strategy: '改善に向けた取り組み',
-      motivation: '志望理由',
-      connection_to_experience: 'これまでのご経験との関連',
-      future_goal: '今後の目標',
+    // Improved key labels in more natural Japanese - updated for dynamic questions
+    const getKeyLabels = (phaseId: string): Record<string, string> => {
+      const baseLabels: Record<string, string> = {
+        name: 'お名前',
+        education: 'ご出身校や学歴',
+        topic: '取り組まれた内容',
+        actions: '具体的な行動や取り組み',
+        outcome: '成果や結果',
+        strength: 'ご自身の強み',
+        example: '具体的なエピソード',
+        weakness: '課題や改善点',
+        coping_strategy: '改善に向けた取り組み',
+        motivation: '志望理由',
+        connection_to_experience: 'これまでのご経験との関連',
+        future_goal: '今後の目標',
+        // Industry-specific labels
+        assumptions: '仮定',
+        structure: '構造化',
+        calculation_steps: '計算ステップ',
+        sense_check: 'センスチェック',
+        insights: '示唆',
+        issue_tree: '問題の構造化',
+        hypotheses: '仮説',
+        prioritization_reason: '優先順位の理由',
+        context: '背景情報',
+        stakeholders: 'ステークホルダー',
+        tactics: '戦術',
+        policy_theme: '政策テーマ',
+        kpi: 'KPI',
+        data_sources: 'データソース',
+        method: '手法',
+        stress_signs: 'ストレスサイン',
+        routines: 'ルーティン',
+        safeguards: 'セーフガード',
+        // Add more as needed for other industries
+      };
+      return baseLabels;
     };
 
     let interviewerObjective = '';
@@ -287,6 +622,7 @@ ${(workflow.find(p => p.id === currentPhaseId)!.expected_data).map(k => `- ${k}`
       // stay in phase, ask focused follow-up on first missing key
       const missing = expectedKeys.filter(k => !fulfilled[currentPhaseId][k]);
       const targetKey = missing[0];
+      const keyLabels = getKeyLabels(currentPhaseId);
       const jpKey = keyLabels[targetKey] || targetKey;
       
       // More natural follow-up questions based on context
