@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from 'resend';
-import { render } from '@react-email/render';
 import { EmailTemplate } from '../../../components/EmailTemplate';
 import * as React from 'react';
 
@@ -94,28 +93,42 @@ ${message}
       `
     };
 
-    // In a production environment, you would integrate with an email service
-    // such as SendGrid, Nodemailer with SMTP, or Resend
-    
-    // For now, we'll use a simple approach with Nodemailer
-    // You'll need to install nodemailer: npm install nodemailer @types/nodemailer
-    
-    // Since we can't install packages in this context, I'll provide a solution
-    // that you can implement by adding the necessary email service
-    
-    // Example with fetch to an email service API:
+    // Send email via Resend service
     const emailServiceResponse = await sendEmailViaService(emailContent);
     
     if (emailServiceResponse.success) {
+      console.log('Email service completed successfully:', {
+        fallback: emailServiceResponse.fallback || false,
+        emailId: emailServiceResponse.emailId || 'none',
+        timestamp: new Date().toISOString()
+      });
+      
       return NextResponse.json(
         { 
           message: "お問い合わせを受け付けました。24時間以内にご返信いたします。",
-          success: true 
+          success: true,
+          emailId: emailServiceResponse.emailId || null
         },
         { status: 200 }
       );
     } else {
-      throw new Error("Email service failed");
+      // Log the specific error for debugging
+      console.error('Email service failed:', {
+        error: emailServiceResponse.error,
+        details: emailServiceResponse.details || 'No details',
+        type: emailServiceResponse.type || 'unknown',
+        timestamp: new Date().toISOString()
+      });
+      
+      // Still return success to user but log the issue
+      return NextResponse.json(
+        { 
+          message: "お問い合わせを受け付けました。技術的な問題が発生した可能性があります。",
+          success: true,
+          warning: "Email delivery issue detected"
+        },
+        { status: 200 }
+      );
     }
 
   } catch (error) {
@@ -145,10 +158,17 @@ async function sendEmailViaService(emailContent: any) {
       return { success: true, fallback: true };
     }
 
+    console.log('Attempting to send email with Resend:', {
+      to: emailContent.to,
+      subject: emailContent.subject,
+      replyTo: emailContent.from,
+      timestamp: new Date().toISOString()
+    });
+
     // Send email using Resend with React EmailTemplate
     const { data, error } = await resend.emails.send({
-      from: 'プロイー <noreply@resend.dev>', // Default Resend domain for testing
-      to: [emailContent.to],
+      from: 'プロイー Contact Form <contact@ployee.net>', // Use your verified domain
+      to: ['ployee.officialcontact@gmail.com'],
       subject: emailContent.subject,
       react: EmailTemplate({
         name: emailContent.name,
@@ -156,36 +176,45 @@ async function sendEmailViaService(emailContent: any) {
         subject: emailContent.originalSubject,
         message: emailContent.message
       }) as React.ReactElement,
-      replyTo: emailContent.from,
+      replyTo: emailContent.from, // User's email as reply-to
     });
     
     if (error) {
-      console.error('Resend API error:', error);
-      // Fallback to console logging on API error
-      console.log("Email fallback - would be sent:", {
-        to: emailContent.to,
-        subject: emailContent.subject,
-        from: emailContent.from
+      console.error('Resend API error details:', {
+        error: error,
+        message: error.message || 'Unknown error',
+        timestamp: new Date().toISOString()
       });
-      console.log("Content:", emailContent.text);
-      return { success: true, fallback: true, error: error.message };
+      
+      // Return actual error instead of fallback for debugging
+      return { 
+        success: false, 
+        error: error.message || 'Unknown Resend API error',
+        details: error
+      };
     }
     
-    console.log('Email sent successfully:', data);
-    return { success: true, data };
+    console.log('Email sent successfully with Resend:', {
+      emailId: data?.id || 'no-id',
+      to: emailContent.to,
+      timestamp: new Date().toISOString()
+    });
+    
+    return { success: true, data, emailId: data?.id };
     
   } catch (error) {
-    console.error("Email service error:", error);
-    
-    // Fallback to console logging if email fails
-    console.log("Email fallback - would be sent:", {
-      to: emailContent.to,
-      subject: emailContent.subject,
-      from: emailContent.from
+    console.error("Email service error:", {
+      error: error,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString()
     });
-    console.log("Content:", emailContent.text);
     
-    // Still return success for user experience, but log the error
-    return { success: true, fallback: true, error: error instanceof Error ? error.message : String(error) };
+    // Return actual error for debugging
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : String(error),
+      type: 'service_error'
+    };
   }
 }
