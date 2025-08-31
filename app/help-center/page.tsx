@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function HelpCenter() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -107,9 +109,7 @@ export default function HelpCenter() {
               <p className="text-gray-600 text-sm mb-4">
                 ブラウザの設定でマイクのアクセス許可を確認してください。Chrome/Safari の設定から音声入力を許可する必要があります。
               </p>
-              <button className="text-[#9fe870] hover:text-[#8fd960] text-sm font-medium">
-                詳細を見る →
-              </button>
+             
             </div>
 
             <div className="bg-gray-50 rounded-2xl p-6 hover:shadow-lg transition-shadow">
@@ -123,7 +123,7 @@ export default function HelpCenter() {
                 カメラのアクセス許可とWebカメラの接続を確認してください。他のアプリケーションでカメラを使用していないかも確認してください。
               </p>
               <button className="text-[#9fe870] hover:text-[#8fd960] text-sm font-medium">
-                詳細を見る →
+                
               </button>
             </div>
 
@@ -137,9 +137,7 @@ export default function HelpCenter() {
               <p className="text-gray-600 text-sm mb-4">
                 面接終了後、フィードバック生成には数秒かかります。ページを更新せずにお待ちください。それでも表示されない場合はお問い合わせください。
               </p>
-              <button className="text-[#9fe870] hover:text-[#8fd960] text-sm font-medium">
-                詳細を見る →
-              </button>
+
             </div>
 
             <div className="bg-gray-50 rounded-2xl p-6 hover:shadow-lg transition-shadow">
@@ -150,9 +148,12 @@ export default function HelpCenter() {
               </div>
               <h3 className="font-semibold text-[#163300] mb-2">料金について</h3>
               <p className="text-gray-600 text-sm mb-4">
-                無料プランでは月3回まで利用可能です。プロプランにアップグレードすることで無制限利用が可能になります。
+                無料プランでは月1回まで利用可能です。プロプランにアップグレードすることで無制限利用が可能になります。
               </p>
-              <button className="text-[#9fe870] hover:text-[#8fd960] text-sm font-medium">
+              <button 
+                onClick={() => router.push("/pricing")}
+                className="text-[#9fe870] hover:text-[#8fd960] text-sm font-medium"
+              >
                 料金プランを見る →
               </button>
             </div>
@@ -167,9 +168,8 @@ export default function HelpCenter() {
               <p className="text-gray-600 text-sm mb-4">
                 プロフィール情報の変更、パスワードリセット、アカウント削除などのアカウント関連の設定について説明します。
               </p>
-              <button className="text-[#9fe870] hover:text-[#8fd960] text-sm font-medium">
-                詳細を見る →
-              </button>
+             
+        
             </div>
 
             <div className="bg-gray-50 rounded-2xl p-6 hover:shadow-lg transition-shadow">
@@ -182,9 +182,7 @@ export default function HelpCenter() {
               <p className="text-gray-600 text-sm mb-4">
                 効果的な面接練習のコツや、AIフィードバックの活用方法について詳しく説明します。
               </p>
-              <button className="text-[#9fe870] hover:text-[#8fd960] text-sm font-medium">
-                詳細を見る →
-              </button>
+           
             </div>
           </div>
         </div>

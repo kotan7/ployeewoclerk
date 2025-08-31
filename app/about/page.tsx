@@ -192,7 +192,7 @@ export default function AboutPage() {
                 無料で面接練習を始める
               </a>
               <p className="text-sm text-gray-500 mt-4">
-                ※ 無料プランでは3回まで面接練習が可能です
+                ※ 無料プランでは1回まで面接練習が可能です
               </p>
             </section>
           </main>
