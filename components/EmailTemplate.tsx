@@ -58,7 +58,7 @@ export const EmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
         <div style={{ textAlign: 'center', padding: '20px' }}>
           <h3 style={{ color: '#163300' }}>Hello {firstName}!</h3>
           <p style={{ color: '#666', lineHeight: '1.6' }}>
-            Welcome to プロイー! We're excited to have you on board.
+            Welcome to プロイー! We&apos;re excited to have you on board.
           </p>
         </div>
       )}
