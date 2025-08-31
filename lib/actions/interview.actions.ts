@@ -13,7 +13,7 @@ type CreateInterview = {
   companyName: string;
   role: string;
   jobDescription?: string;
-  interviewFocus: "first" | "second" | "final" | "hr";
+  interviewFocus: "consulting" | "finance" | "manufacturing" | "trading" | "it" | "advertising" | "hr" | "infrastructure" | "real_estate";
 }
 
 

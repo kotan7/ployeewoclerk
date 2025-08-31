@@ -43,7 +43,16 @@ const darkenColor = (hex: string, percent: number): string => {
 // Helper function to translate interview focus to Japanese
 const getInterviewFocusLabel = (focus: string) => {
   const focusMap: { [key: string]: string } = {
-    hr: "人事面接",
+    consulting: "コンサル",
+    finance: "金融",
+    manufacturing: "メーカー",
+    trading: "商社",
+    it: "IT・通信",
+    advertising: "広告・マスコミ",
+    hr: "人材",
+    infrastructure: "インフラ",
+    real_estate: "不動産・建設",
+    // Legacy mappings for backwards compatibility
     case: "ケース面接",
     technical: "テクニカル面接",
     final: "最終面接",
