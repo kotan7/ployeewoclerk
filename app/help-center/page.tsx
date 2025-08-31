@@ -26,25 +26,30 @@ export default function HelpCenter() {
     setSubmitStatus("idle");
 
     try {
-      // Send email using a service like EmailJS or your backend API
-      // For now, we'll simulate the form submission
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
-      
-      // In a real implementation, you would send this data to your backend
-      // which would then send an email to ployee.officialcontact@gmail.com
-      console.log("Help Center form data to be sent:", {
-        to: "ployee.officialcontact@gmail.com",
-        type: "help_center",
-        ...formData
+      const response = await fetch("/api/send-contact-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          subject: `[ヘルプセンター] ${formData.subject}`, // Add help center prefix
+        }),
       });
 
-      setSubmitStatus("success");
-      setFormData({
-        name: "",
-        email: "",
-        subject: "",
-        message: ""
-      });
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        setSubmitStatus("success");
+        setFormData({
+          name: "",
+          email: "",
+          subject: "",
+          message: ""
+        });
+      } else {
+        throw new Error(result.error || "送信に失敗しました");
+      }
     } catch (error) {
       console.error("Error submitting help form:", error);
       setSubmitStatus("error");

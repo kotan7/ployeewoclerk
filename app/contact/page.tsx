@@ -26,24 +26,27 @@ export default function Contact() {
     setSubmitStatus("idle");
 
     try {
-      // Send email using a service like EmailJS or your backend API
-      // For now, we'll simulate the form submission
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
-      
-      // In a real implementation, you would send this data to your backend
-      // which would then send an email to ployee.officialcontact@gmail.com
-      console.log("Form data to be sent:", {
-        to: "ployee.officialcontact@gmail.com",
-        ...formData
+      const response = await fetch("/api/send-contact-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       });
 
-      setSubmitStatus("success");
-      setFormData({
-        name: "",
-        email: "",
-        subject: "",
-        message: ""
-      });
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        setSubmitStatus("success");
+        setFormData({
+          name: "",
+          email: "",
+          subject: "",
+          message: ""
+        });
+      } else {
+        throw new Error(result.error || "送信に失敗しました");
+      }
     } catch (error) {
       console.error("Error submitting form:", error);
       setSubmitStatus("error");
