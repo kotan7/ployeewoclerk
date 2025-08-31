@@ -43,34 +43,34 @@ export default function Pricing() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
             {/* Free Plan */}
-            <div className="bg-white rounded-3xl border-2 border-gray-200 p-8 relative">
+            <div className="bg-white rounded-3xl border-2 border-gray-200 p-6 relative">
               <div className="text-center">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">フリー</h3>
-                <div className="mb-6">
-                  <span className="text-4xl font-bold text-[#163300]">¥0</span>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">フリー</h3>
+                <div className="mb-4">
+                  <span className="text-3xl font-bold text-[#163300]">¥0</span>
                   <span className="text-gray-500">/月</span>
                 </div>
-                <p className="text-gray-600 mb-8">
+                <p className="text-gray-600 mb-6 text-sm">
                   まずはお試しで始めたい方に
                 </p>
                 
-                <ul className="text-left space-y-4 mb-8">
+                <ul className="text-left space-y-3 mb-6 text-sm">
                   <li className="flex items-center">
-                    <svg className="w-5 h-5 text-[#9fe870] mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                     月3回まで面接練習
                   </li>
                   <li className="flex items-center">
-                    <svg className="w-5 h-5 text-[#9fe870] mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                     基本的なフィードバック
                   </li>
                   <li className="flex items-center">
-                    <svg className="w-5 h-5 text-[#9fe870] mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                     面接履歴の保存
@@ -86,8 +86,56 @@ export default function Pricing() {
               </div>
             </div>
 
+            {/* Starter Plan - New ¥500 Plan */}
+            <div className="bg-white rounded-3xl border-2 border-gray-200 p-6 relative">
+              <div className="text-center">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">スターター</h3>
+                <div className="mb-4">
+                  <span className="text-3xl font-bold text-[#163300]">¥300</span>
+                  <span className="text-gray-500">/月</span>
+                </div>
+                <p className="text-gray-600 mb-6 text-sm">
+                  もう少し練習したい方に
+                </p>
+                
+                <ul className="text-left space-y-3 mb-6 text-sm">
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    月10回まで面接練習
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    詳細なフィードバック
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    面接履歴の保存
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    メールサポート
+                  </li>
+                </ul>
+                
+                <button 
+                  onClick={() => router.push("/billing")}
+                  className="w-full bg-[#163300] text-white py-3 rounded-full font-semibold hover:bg-[#163300]/90 transition-colors"
+                >
+                  スタータープランを始める
+                </button>
+              </div>
+            </div>
+
             {/* Pro Plan */}
-            <div className="bg-white rounded-3xl border-2 border-[#9fe870] p-8 relative transform scale-105">
+            <div className="bg-white rounded-3xl border-2 border-[#9fe870] p-6 relative">
               <div className="absolute top-4 right-4">
                 <div className="bg-[#9fe870] text-[#163300] px-3 py-1 rounded-full text-xs font-semibold">
                   人気
@@ -95,42 +143,42 @@ export default function Pricing() {
               </div>
               
               <div className="text-center">
-                <h3 className="text-xl font-bold text-[#163300] mb-2">プロ</h3>
-                <div className="mb-6">
-                  <span className="text-4xl font-bold text-[#163300]">¥1,980</span>
+                <h3 className="text-lg font-bold text-[#163300] mb-2">プロ</h3>
+                <div className="mb-4">
+                  <span className="text-3xl font-bold text-[#163300]">¥500</span>
                   <span className="text-gray-500">/月</span>
                 </div>
-                <p className="text-gray-600 mb-8">
+                <p className="text-gray-600 mb-6 text-sm">
                   本格的に面接対策をしたい方に
                 </p>
                 
-                <ul className="text-left space-y-4 mb-8">
+                <ul className="text-left space-y-3 mb-6 text-sm">
                   <li className="flex items-center">
-                    <svg className="w-5 h-5 text-[#9fe870] mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
-                    <strong>無制限</strong>の面接練習
+                    <strong>20個</strong>の面接練習
                   </li>
                   <li className="flex items-center">
-                    <svg className="w-5 h-5 text-[#9fe870] mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                     詳細な分析レポート
                   </li>
                   <li className="flex items-center">
-                    <svg className="w-5 h-5 text-[#9fe870] mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                     個別改善提案
                   </li>
                   <li className="flex items-center">
-                    <svg className="w-5 h-5 text-[#9fe870] mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                     業界別面接対策
                   </li>
                   <li className="flex items-center">
-                    <svg className="w-5 h-5 text-[#9fe870] mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                     優先サポート
@@ -138,7 +186,7 @@ export default function Pricing() {
                 </ul>
                 
                 <button 
-                  onClick={() => router.push("/interview/new")}
+                  onClick={() => router.push("/billing")}
                   className="w-full bg-[#9fe870] text-[#163300] py-3 rounded-full font-semibold hover:bg-[#8fd960] transition-colors"
                 >
                   プロプランを始める
@@ -147,37 +195,37 @@ export default function Pricing() {
             </div>
 
             {/* Enterprise Plan */}
-            <div className="bg-white rounded-3xl border-2 border-gray-200 p-8 relative">
+            <div className="bg-white rounded-3xl border-2 border-gray-200 p-6 relative">
               <div className="text-center">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">エンタープライズ</h3>
-                <div className="mb-6">
-                  <span className="text-4xl font-bold text-[#163300]">お問い合わせ</span>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">エンタープライズ</h3>
+                <div className="mb-4">
+                  <span className="text-2xl font-bold text-[#163300]">お問い合わせ</span>
                 </div>
-                <p className="text-gray-600 mb-8">
+                <p className="text-gray-600 mb-6 text-sm">
                   企業・団体での導入をお考えの方に
                 </p>
                 
-                <ul className="text-left space-y-4 mb-8">
+                <ul className="text-left space-y-3 mb-6 text-sm">
                   <li className="flex items-center">
-                    <svg className="w-5 h-5 text-[#9fe870] mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                     カスタマイズ可能
                   </li>
                   <li className="flex items-center">
-                    <svg className="w-5 h-5 text-[#9fe870] mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                     専任サポート
                   </li>
                   <li className="flex items-center">
-                    <svg className="w-5 h-5 text-[#9fe870] mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                     分析ダッシュボード
                   </li>
                   <li className="flex items-center">
-                    <svg className="w-5 h-5 text-[#9fe870] mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                     API統合
@@ -214,7 +262,7 @@ export default function Pricing() {
                 無料プランでできることは何ですか？
               </h3>
               <p className="text-gray-600">
-                無料プランでは月3回まで面接練習ができ、基本的なフィードバックを受けることができます。プロイーの機能をお試しいただくのに十分な内容です。
+                無料プランでは月1回まで面接練習ができ、基本的なフィードバックを受けることができます。プロイーの機能をお試しいただくのに十分な内容です。
               </p>
             </div>
 
