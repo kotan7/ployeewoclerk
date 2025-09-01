@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AutoSignIn from "@/components/ui/AutoSignIn";
 import { canStartSession, getCurrentESUsage, getESPlanLimit, getUserPlanName } from "@/lib/actions/usage.actions";
+import { MessageCircle, History, Edit, FileText } from "lucide-react";
+import { PlanAndUsageWidgets } from "@/components/ui/plan-and-usage-widgets";
 
 const DashboardPage = () => {
   const router = useRouter();
@@ -49,44 +51,28 @@ const DashboardPage = () => {
       id: "new-interview",
       title: "新しいAI面接",
       description: "AI面接官との実践的な面接練習を始める",
-      icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-        </svg>
-      ),
+      icon: MessageCircle,
       route: "/interview/new"
     },
     {
       id: "past-interviews",
       title: "過去の面接",
-      description: "これまでの面接練習履歴を確認する",
-      icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a2 2 0 012-2h2a2 2 0 012 2v5m-6 0h6" />
-        </svg>
-      ),
+      description: "これまでの面接練習履歴を確認する", 
+      icon: History,
       route: "/past"
     },
     {
       id: "es-correction",
       title: "ES添削",
       description: "エントリーシートをAIが詳細分析・添削",
-      icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-        </svg>
-      ),
+      icon: Edit,
       route: "/es-correction"
     },
     {
       id: "past-es-corrections",
       title: "過去のES添削",
       description: "これまでのES添削履歴を確認する",
-      icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      ),
+      icon: FileText,
       route: "/es-correction/history"
     }
   ];
@@ -96,124 +82,107 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f8fffe] to-[#f0f9f6]">
+    <div className="min-h-screen bg-gray-50">
       <AutoSignIn nonClosableModal={true}>
-        {/* Hero Section - Homepage Style */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-[#163300] to-[#2F4F3F] pt-20 pb-16">
-          <div className="absolute inset-0 bg-[#142d25] opacity-50"></div>
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
+        {/* Modern Hero Section */}
+        <div className="bg-gradient-to-br from-white via-gray-50 to-[#f8fffe] pt-20 pb-12">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-10">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-[#163300] to-[#2F4F3F] bg-clip-text text-transparent mb-6">
                 おかえりなさい！
               </h1>
-              <p className="text-lg sm:text-xl text-white/80 max-w-2xl mx-auto">
+              <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
                 今日も面接練習とES添削で、理想の未来に一歩近づきましょう
               </p>
             </div>
 
-            {/* User Plan Info Section */}
+            {/* Modern User Plan Info */}
             <div className="max-w-4xl mx-auto mb-8">
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-                {userInfo.isLoading ? (
-                  <div className="flex items-center justify-center py-4">
-                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin mr-3"></div>
-                    <span className="text-white">プラン情報を読み込み中...</span>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                    <div className="space-y-2">
-                      <div className="text-white/60 text-sm font-medium">現在のプラン</div>
-                      <div className="text-white text-xl font-bold">{userInfo.planName}</div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="text-white/60 text-sm font-medium">残り面接回数</div>
-                      <div className={`text-xl font-bold ${
-                        userInfo.remainingInterviews <= 3 ? 'text-[#ff8c5a]' : 'text-[#9fe870]'
-                      }`}>
-                        {userInfo.remainingInterviews === 999 ? '無制限' : `${userInfo.remainingInterviews}回`}
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="text-white/60 text-sm font-medium">残りES添削回数</div>
-                      <div className={`text-xl font-bold ${
-                        userInfo.remainingES <= 3 ? 'text-[#ff8c5a]' : 'text-[#9fe870]'
-                      }`}>
-                        {userInfo.remainingES === 999 ? '無制限' : `${userInfo.remainingES}回`}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <PlanAndUsageWidgets
+                planName={userInfo.planName}
+                remainingInterviews={userInfo.remainingInterviews}
+                remainingES={userInfo.remainingES}
+                loading={userInfo.isLoading}
+              />
             </div>
           </div>
         </div>
 
         {/* Main Dashboard Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           {/* Welcome Message */}
-          <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#163300] mb-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#163300] mb-6">
               何から始めますか？
             </h2>
-            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
               AI面接練習とES添削で、あなたの就活・転職活動を全面サポート
             </p>
           </div>
 
-          {/* Dashboard Cards Grid */}
-          <div className="grid gap-8 grid-cols-1 md:grid-cols-2 max-w-5xl mx-auto">
-            {dashboardOptions.map((option) => (
-              <div
-                key={option.id}
-                onClick={() => handleCardClick(option.route)}
-                className="bg-white border border-gray-200 rounded-2xl p-8 hover:shadow-xl hover:border-[#9fe870]/30 transition-all duration-300 cursor-pointer group transform hover:-translate-y-1"
-              >
-                <div className="flex items-start space-x-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#9fe870] to-[#8fd960] rounded-2xl flex items-center justify-center text-[#163300] group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                    {option.icon}
+          {/* Modern Dashboard Cards Grid */}
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-2 mb-16">
+            {dashboardOptions.map((option) => {
+              const IconComponent = option.icon;
+              return (
+                <div
+                  key={option.id}
+                  onClick={() => handleCardClick(option.route)}
+                  className="group bg-white hover:bg-gray-50 border border-gray-200 hover:border-[#9fe870]/50 rounded-2xl p-8 cursor-pointer transition-all duration-300 hover:shadow-[0_20px_40px_rgba(159,232,112,0.15)] hover:-translate-y-1 hover:scale-[1.02]"
+                >
+                  <div className="flex items-center space-x-6">
+                    <div className="relative">
+                      <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 group-hover:from-[#9fe870]/20 group-hover:to-[#8fd960]/20 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:shadow-[#9fe870]/25">
+                        <IconComponent className="w-8 h-8 text-gray-600 group-hover:text-[#163300] transition-colors duration-300" />
+                      </div>
+                      <div className="absolute -inset-1 bg-gradient-to-br from-[#9fe870]/0 to-[#8fd960]/0 group-hover:from-[#9fe870]/20 group-hover:to-[#8fd960]/20 rounded-2xl transition-all duration-300 -z-10 blur-sm"></div>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[#163300] transition-colors duration-300">
+                        {option.title}
+                      </h3>
+                      <p className="text-gray-600 text-sm leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+                        {option.description}
+                      </p>
+                    </div>
+                    <div className="text-gray-400 group-hover:text-[#9fe870] transition-colors duration-300">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-2xl font-bold text-[#163300] mb-3 group-hover:text-[#2F4F3F] transition-colors">
-                      {option.title}
-                    </h3>
-                    <p className="text-gray-600 text-base leading-relaxed">
-                      {option.description}
-                    </p>
-                  </div>
-                  <svg 
-                    className="w-6 h-6 text-gray-400 group-hover:text-[#9fe870] transition-colors flex-shrink-0 mt-2" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
-          {/* Quick Actions */}
-          <div className="mt-16 text-center">
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 max-w-2xl mx-auto">
-              <h3 className="text-xl font-bold text-[#163300] mb-4">
+          {/* Modern Quick Actions */}
+          <div className="text-center">
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl p-10 shadow-xl border border-gray-100">
+              <h3 className="text-2xl font-bold text-[#163300] mb-4">
                 今すぐ始めよう
               </h3>
-              <p className="text-gray-600 mb-8">
+              <p className="text-gray-600 mb-10 text-lg leading-relaxed">
                 面接練習またはES添削で、理想の未来への第一歩を踏み出しましょう
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex flex-col sm:flex-row gap-6 justify-center">
                 <button
                   onClick={() => router.push("/interview/new")}
-                  className="px-8 py-4 bg-gradient-to-r from-[#9fe870] to-[#8fd960] text-[#163300] rounded-full font-bold hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+                  className="group px-10 py-4 bg-gradient-to-r from-[#9fe870] to-[#8fd960] text-[#163300] rounded-2xl font-bold transition-all duration-300 hover:shadow-[0_15px_30px_rgba(159,232,112,0.4)] hover:scale-105 hover:-translate-y-1"
                 >
-                  面接練習を始める
+                  <span className="flex items-center justify-center space-x-2">
+                    <MessageCircle className="w-5 h-5" />
+                    <span>面接練習を始める</span>
+                  </span>
                 </button>
                 <button
                   onClick={() => router.push("/es-correction")}
-                  className="px-8 py-4 border-2 border-[#9fe870] text-[#163300] rounded-full font-bold hover:bg-[#9fe870] hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+                  className="group px-10 py-4 bg-white border-2 border-[#9fe870] text-[#163300] rounded-2xl font-bold transition-all duration-300 hover:bg-[#9fe870] hover:shadow-[0_15px_30px_rgba(159,232,112,0.3)] hover:scale-105 hover:-translate-y-1"
                 >
-                  ES添削を試す
+                  <span className="flex items-center justify-center space-x-2">
+                    <Edit className="w-5 h-5" />
+                    <span>ES添削を試す</span>
+                  </span>
                 </button>
               </div>
             </div>
