@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from 'openai';
+import { canStartESCorrection, trackESUsage } from "@/lib/actions/usage.actions";
 
 // Configure runtime for Vercel
 export const runtime = 'nodejs';
@@ -115,6 +116,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "回答は50文字以上で入力してください" },
         { status: 400 }
+      );
+    }
+
+    // Check if user has remaining ES corrections
+    const usageCheck = await canStartESCorrection();
+    if (!usageCheck.canStart) {
+      return NextResponse.json(
+        { 
+          error: `今月のES添削回数の上限（${usageCheck.planLimit}回）に達しました。より多くのES添削を利用するには、プランをアップグレードしてください。`,
+          usageInfo: {
+            currentUsage: usageCheck.currentUsage,
+            planLimit: usageCheck.planLimit,
+            remainingCorrections: usageCheck.remainingCorrections
+          },
+          redirectToBilling: true
+        },
+        { status: 429 }
+      );
+    }
+
+    // Track ES usage before creating the record
+    try {
+      await trackESUsage();
+    } catch (usageError) {
+      console.error("Error tracking ES usage:", usageError);
+      return NextResponse.json(
+        { error: "使用量の記録に失敗しました" },
+        { status: 500 }
       );
     }
 

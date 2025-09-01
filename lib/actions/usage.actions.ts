@@ -229,30 +229,30 @@ export async function getESPlanLimit(): Promise<number> {
   try {
     const { has } = await auth();
     
+    const has50 = await has({ feature: 'es_50' });
+    if (has50) {
+      return 50; // Premium plan
+    }
+    
     const has20 = await has({ feature: 'es_20' });
     if (has20) {
-      return 20; // Premium plan
+      return 20; // Pro plan
     }
     
-    const has10 = await has({ feature: 'es_10' });
-    if (has10) {
-      return 10; // Basic plan
-    }
-    
-    const has3 = await has({ feature: 'es_3' });
-    if (has3) {
-      return 3; // Free/trial plan
+    const has5 = await has({ feature: 'es_5' });
+    if (has5) {
+      return 5; // Custom plan
     }
     
     // Default to free plan
-    console.warn('User does not have any recognized ES plan feature, defaulting to 3 ES corrections');
-    return 3; // Default to free plan
+    console.warn('User does not have any recognized ES plan feature, defaulting to 5 ES corrections');
+    return 5; // Default to free plan
     
   } catch (error) {
     console.error('Error checking user ES plan features:', error);
     // Default to free plan on error
-    console.warn('Defaulting to 3 ES corrections due to error checking features');
-    return 3;
+    console.warn('Defaulting to 5 ES corrections due to error checking features');
+    return 5;
   }
 }
 
@@ -272,19 +272,41 @@ export async function getCurrentESUsage(): Promise<number> {
 
   const supabase = CreateSupabaseClient();
   
-  // Count ES corrections created this month
-  const { count, error } = await supabase
-    .from('es_corrections')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId)
-    .gte('created_at', monthYear);
+  // First, try to get existing record from usage_tracking
+  const { data: existingData, error: fetchError } = await supabase
+    .from('usage_tracking')
+    .select('es_corrections_used')
+    .eq('author', userId)
+    .eq('month_year', monthYear)
+    .single();
 
-  if (error) {
-    console.error('Error fetching ES usage:', error);
-    throw new Error(`Failed to fetch ES usage: ${error.message}`);
+  if (fetchError) {
+    if (fetchError.code === 'PGRST116') {
+      // No record found, create one with 0 usage
+      const { data: newData, error: insertError } = await supabase
+        .from('usage_tracking')
+        .insert({
+          author: userId,
+          month_year: monthYear,
+          minutes_used: 0,
+          es_corrections_used: 0,
+        })
+        .select('es_corrections_used')
+        .single();
+
+      if (insertError) {
+        console.error('Error creating new ES usage record:', insertError);
+        throw new Error(`Failed to create ES usage record: ${insertError.message}`);
+      }
+
+      return newData?.es_corrections_used || 0;
+    } else {
+      console.error('Error fetching ES usage:', fetchError);
+      throw new Error(`Failed to fetch ES usage: ${fetchError.message}`);
+    }
   }
 
-  return count || 0;
+  return existingData?.es_corrections_used || 0;
 }
 
 /**
@@ -312,6 +334,105 @@ export async function getUserPlanName(): Promise<string> {
   } catch (error) {
     console.error('Error checking user plan features:', error);
     return 'フリープラン'; // Default to free plan
+  }
+}
+
+/**
+ * Track ES correction usage - adds to usage count when ES correction is created
+ * This is called when a user starts a new ES correction
+ */
+export async function trackESUsage(): Promise<void> {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("User not authenticated");
+  }
+
+  // Get first day of current month in YYYY-MM-01 format
+  const currentDate = new Date();
+  const monthYear = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-01`;
+
+  const supabase = CreateSupabaseClient();
+
+  // First, try to get existing record
+  const { data: existingData, error: fetchError } = await supabase
+    .from('usage_tracking')
+    .select('es_corrections_used, minutes_used')
+    .eq('author', userId)
+    .eq('month_year', monthYear)
+    .single();
+
+  if (fetchError && fetchError.code !== 'PGRST116') {
+    console.error('Error checking current ES usage:', fetchError);
+    throw new Error(`Failed to check current ES usage: ${fetchError.message}`);
+  }
+
+  if (existingData) {
+    // Record exists, increment ES usage
+    const newCount = (existingData.es_corrections_used || 0) + 1;
+    const { error: updateError } = await supabase
+      .from('usage_tracking')
+      .update({ es_corrections_used: newCount })
+      .eq('author', userId)
+      .eq('month_year', monthYear);
+
+    if (updateError) {
+      console.error('Error updating ES usage:', updateError);
+      throw new Error(`Failed to update ES usage: ${updateError.message}`);
+    }
+
+    console.log(`Updated ES usage. Total for ${monthYear}: ${newCount} ES corrections`);
+  } else {
+    // Record doesn't exist, create it with 1 ES usage
+    const { error: insertError } = await supabase
+      .from('usage_tracking')
+      .insert({
+        author: userId,
+        month_year: monthYear,
+        minutes_used: 0,
+        es_corrections_used: 1,
+      });
+
+    if (insertError) {
+      console.error('Error creating new ES usage record:', insertError);
+      throw new Error(`Failed to create new ES usage record: ${insertError.message}`);
+    }
+
+    console.log(`Created new ES usage record. Total for ${monthYear}: 1 ES correction`);
+  }
+}
+
+/**
+ * Check if user can start a new ES correction (pre-correction check)
+ * @returns object with canStart boolean and current usage info
+ */
+export async function canStartESCorrection(): Promise<{
+  canStart: boolean;
+  currentUsage: number;
+  planLimit: number;
+  remainingCorrections: number;
+}> {
+  try {
+    const currentUsage = await getCurrentESUsage();
+    const planLimit = await getESPlanLimit();
+    const remainingCorrections = Math.max(0, planLimit - currentUsage);
+    // User can start if they have corrections remaining
+    const canStart = remainingCorrections > 0;
+    
+    return {
+      canStart,
+      currentUsage,
+      planLimit,
+      remainingCorrections
+    };
+  } catch (error) {
+    console.error('Error in canStartESCorrection:', error);
+    // Instead of throwing, return safe defaults that allow access
+    return {
+      canStart: true,
+      currentUsage: 0,
+      planLimit: 5,
+      remainingCorrections: 5
+    };
   }
 }
 

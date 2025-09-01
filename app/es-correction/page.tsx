@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AutoSignIn from "@/components/ui/AutoSignIn";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { getCurrentESUsage, getESPlanLimit } from "@/lib/actions/usage.actions";
 
 interface FormData {
   companyName: string;
@@ -27,6 +28,12 @@ const ESCorrectionPage = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string>("");
+  const [usageInfo, setUsageInfo] = useState<{
+    currentUsage: number;
+    planLimit: number;
+    remainingCorrections: number;
+  } | null>(null);
+  const [isLoadingUsage, setIsLoadingUsage] = useState(true);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -101,6 +108,13 @@ const ESCorrectionPage = () => {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.error("API Error:", errorData);
+        
+        // If the error indicates we should redirect to billing, do so
+        if (errorData.redirectToBilling) {
+          router.push("/billing");
+          return;
+        }
+        
         throw new Error(errorData.error || "ES分析に失敗しました");
       }
 
@@ -125,10 +139,42 @@ const ESCorrectionPage = () => {
     }
   };
 
+  // Load usage information on component mount
+  useEffect(() => {
+    const loadUsageInfo = async () => {
+      try {
+        const [currentUsage, planLimit] = await Promise.all([
+          getCurrentESUsage(),
+          getESPlanLimit()
+        ]);
+        
+        setUsageInfo({
+          currentUsage,
+          planLimit,
+          remainingCorrections: Math.max(0, planLimit - currentUsage)
+        });
+      } catch (error) {
+        console.error("Error loading usage info:", error);
+        // Set default values on error
+        setUsageInfo({
+          currentUsage: 0,
+          planLimit: 5,
+          remainingCorrections: 5
+        });
+      } finally {
+        setIsLoadingUsage(false);
+      }
+    };
+
+    loadUsageInfo();
+  }, []);
+
   const isFormValid = formData.companyName.trim() && 
                      formData.question.trim() && 
                      formData.answer.trim().length >= 50 &&
                      formData.answer.trim().length <= 2000;
+
+  const canSubmit = isFormValid && usageInfo && usageInfo.remainingCorrections > 0;
 
   return (
     <div className="min-h-screen bg-white">
@@ -142,6 +188,46 @@ const ESCorrectionPage = () => {
             <p className="text-base sm:text-lg lg:text-xl text-gray-600 font-semibold max-w-2xl mx-auto leading-relaxed">
               エントリーシート情報を入力して、<strong>AI添削</strong>を始めましょう
             </p>
+            
+            {/* Usage Information */}
+            {isLoadingUsage ? (
+              <div className="mt-4 flex items-center justify-center gap-2">
+                <LoadingSpinner size="sm" color="#163300" />
+                <span className="text-sm text-gray-600">使用状況を確認中...</span>
+              </div>
+            ) : usageInfo && (
+              <div className="mt-6 max-w-md mx-auto">
+                <div className={`
+                  px-4 py-3 rounded-xl border-2 
+                  ${usageInfo.remainingCorrections > 0 
+                    ? "bg-green-50 border-green-200" 
+                    : "bg-red-50 border-red-200"
+                  }
+                `}>
+                  <p className={`
+                    text-sm font-semibold
+                    ${usageInfo.remainingCorrections > 0 
+                      ? "text-green-700" 
+                      : "text-red-700"
+                    }
+                  `}>
+                    今月の使用状況: {usageInfo.currentUsage} / {usageInfo.planLimit} 回
+                  </p>
+                  <p className={`
+                    text-xs mt-1
+                    ${usageInfo.remainingCorrections > 0 
+                      ? "text-green-600" 
+                      : "text-red-600"
+                    }
+                  `}>
+                    {usageInfo.remainingCorrections > 0 
+                      ? `残り ${usageInfo.remainingCorrections} 回利用可能です`
+                      : "プランをアップグレードして、より多くのES添削をご利用ください"
+                    }
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Form */}
@@ -248,6 +334,24 @@ const ESCorrectionPage = () => {
                 </div>
               </div>
 
+              {/* Usage Limit Warning */}
+              {usageInfo && usageInfo.remainingCorrections === 0 && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                  <p className="text-red-700 text-sm font-semibold">
+                    今月のES添削回数の上限（{usageInfo.planLimit}回）に達しました
+                  </p>
+                  <p className="text-red-600 text-xs mt-1 mb-3">
+                    より多くのES添削を利用するには、プランをアップグレードしてください。
+                  </p>
+                  <button
+                    onClick={() => router.push("/billing")}
+                    className="bg-[#9fe870] text-[#163300] hover:bg-[#8fd960] px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+                  >
+                    プランをアップグレード
+                  </button>
+                </div>
+              )}
+
               {/* Submit Error */}
               {submitError && (
                 <div className="bg-red-50 border border-red-200 rounded-xl p-4">
@@ -258,11 +362,12 @@ const ESCorrectionPage = () => {
               {/* Submit Button */}
               <div className="pt-4 sm:pt-5">
                 <button
-                  type="submit"
-                  disabled={!isFormValid || isSubmitting}
+                  type={usageInfo && usageInfo.remainingCorrections === 0 ? "button" : "submit"}
+                  onClick={usageInfo && usageInfo.remainingCorrections === 0 ? () => router.push("/billing") : undefined}
+                  disabled={(!canSubmit && !(usageInfo && usageInfo.remainingCorrections === 0)) || isSubmitting || isLoadingUsage}
                   className={`
                     w-full h-12 sm:h-14 rounded-full shadow-lg transition-all duration-300 text-base sm:text-lg font-semibold
-                    ${isFormValid && !isSubmitting
+                    ${(canSubmit || (usageInfo && usageInfo.remainingCorrections === 0)) && !isSubmitting && !isLoadingUsage
                       ? "bg-[#9fe870] text-[#163300] hover:bg-[#8fd960] cursor-pointer"
                       : "bg-gray-300 text-gray-500 cursor-not-allowed"
                     }
@@ -273,6 +378,15 @@ const ESCorrectionPage = () => {
                       <LoadingSpinner size="sm" color="#163300" />
                       <span className="text-sm sm:text-base">AI分析中...</span>
                     </div>
+                  ) : isLoadingUsage ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <LoadingSpinner size="sm" color="#666" />
+                      <span className="text-sm sm:text-base">読み込み中...</span>
+                    </div>
+                  ) : usageInfo && usageInfo.remainingCorrections === 0 ? (
+                    <span className="text-sm sm:text-base">
+                      プランをアップグレード
+                    </span>
                   ) : (
                     <span className="text-sm sm:text-base">ES添削を開始する</span>
                   )}
