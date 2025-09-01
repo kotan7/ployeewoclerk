@@ -309,7 +309,8 @@ export const getWorkflowState = async (interviewId: string) => {
                 failedPhases: [],
                 finished: false,
                 conversationHistory: [],
-                sessionId: null
+                sessionId: null,
+                workflowDefinition: null
             };
         }
         console.error("Database error:", error);
@@ -323,7 +324,8 @@ export const getWorkflowState = async (interviewId: string) => {
         failedPhases: Array.isArray(data.failed_phases) ? data.failed_phases : [],
         finished: data.interview_finished || false,
         conversationHistory: Array.isArray(data.conversation_history) ? data.conversation_history : [],
-        sessionId: data.id
+        sessionId: data.id,
+        workflowDefinition: data.workflow_state?.workflowDefinition || null
     };
 }
 
@@ -335,6 +337,8 @@ export const saveWorkflowState = async (
         fulfilled: Record<string, Record<string, string>>;
         failedPhases: string[];
         finished: boolean;
+        workflowDefinition?: any[];
+        totalQuestionsAsked?: number;
     },
     conversationHistory: any[],
 
@@ -351,10 +355,12 @@ export const saveWorkflowState = async (
     const upsertData = {
         user_id: userId,
         interview_id: interviewId,
-        workflow_state: workflowState,
+        workflow_state: {
+            ...workflowState,
+            workflowDefinition: workflowState.workflowDefinition
+        },
         current_phase_id: workflowState.currentPhaseId,
         question_counts: workflowState.questionCounts,
-
         failed_phases: workflowState.failedPhases,
         interview_finished: workflowState.finished,
         conversation_history: conversationHistory,
@@ -378,10 +384,12 @@ export const saveWorkflowState = async (
         result = await supabase
             .from('session_history')
             .update({
-                workflow_state: workflowState,
+                workflow_state: {
+                    ...workflowState,
+                    workflowDefinition: workflowState.workflowDefinition
+                },
                 current_phase_id: workflowState.currentPhaseId,
                 question_counts: workflowState.questionCounts,
-        
                 failed_phases: workflowState.failedPhases,
                 interview_finished: workflowState.finished,
                 conversation_history: conversationHistory,

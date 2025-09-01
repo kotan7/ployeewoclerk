@@ -412,8 +412,18 @@ export async function POST(request: NextRequest) {
       return phases;
     };
     
-    // Generate workflow for this interview
-    const workflow = generateWorkflow();
+    // Generate workflow for this interview - ONLY generate once and persist
+    let workflow;
+    if (dbWorkflowState.workflowDefinition && Array.isArray(dbWorkflowState.workflowDefinition)) {
+      // Use existing workflow from database
+      workflow = dbWorkflowState.workflowDefinition;
+      console.log('Using existing workflow from database:', workflow.map((p: any) => p.id));
+    } else {
+      // Generate new workflow for first time
+      console.log('Generating new workflow for interview');
+      workflow = generateWorkflow();
+      console.log('Generated workflow phases:', workflow.map((p: any) => p.id));
+    }
     
     // Use database state as primary source, fall back to context if needed
     const contextObj = JSON.parse(conversationContext || '{}');
@@ -429,6 +439,15 @@ export async function POST(request: NextRequest) {
     let fulfilled: Record<string, Record<string, string>> = dbWorkflowState.fulfilled || {};
     let failedPhases: string[] = Array.isArray(dbWorkflowState.failedPhases) ? dbWorkflowState.failedPhases : [];
     let finished: boolean = Boolean(dbWorkflowState.finished);
+    let totalQuestionsAsked: number = Object.values(questionCounts).reduce((sum, count) => sum + count, 0);
+    
+    // Increase question limit to allow all 5 phases to complete
+    // Each phase can have up to 3 questions, so maximum 15 questions for all phases
+    // But we'll keep a reasonable limit to prevent infinite loops
+    if (totalQuestionsAsked >= 15 && !finished) {
+      finished = true;
+      currentPhaseId = 'end';
+    }
     
     // Get the last 4 rounds (8 messages: 4 user + 4 assistant)
     const recentHistory = history.slice(-8);
@@ -471,7 +490,7 @@ ${readableHistory || '（面接開始前）'}
 ${transcript}
 
 【評価すべき項目】
-${(workflow.find(p => p.id === currentPhaseId)!.expected_data).map(k => `- ${k}`).join('\n')}
+${(workflow.find(p => p.id === currentPhaseId)!.expected_data).map((k: string) => `- ${k}`).join('\n')}
 
 【出力形式】
 以下のJSON形式でのみ回答してください。他の文章は一切含めないでください。
@@ -550,21 +569,30 @@ ${(workflow.find(p => p.id === currentPhaseId)!.expected_data).map(k => `- ${k}`
       }
     }
 
-    // Determine if phase complete or failed by question cap
+    // CORRECT PHASE ADVANCEMENT: Up to 3 questions per phase to fill all expected outcomes
     const allKeysFulfilled = expectedKeys.every(k => Boolean(fulfilled[currentPhaseId][k]));
     let advancePhase = false;
     let markFailed = false;
     let nextPhaseId: WorkflowPhaseId = currentPhaseId;
-
+    
+    console.log(`Phase advancement check - Phase: ${currentPhaseId}, Questions asked: ${questionCounts[currentPhaseId] || 0}, Keys fulfilled: ${expectedKeys.filter(k => Boolean(fulfilled[currentPhaseId][k])).length}/${expectedKeys.length}`);
+    
     if (allKeysFulfilled) {
+      // All expected outcomes filled - advance to next phase
+      console.log('All keys fulfilled, advancing to next phase');
       advancePhase = true;
       nextPhaseId = (workflow.find(p => p.id === currentPhaseId)!.next_state as WorkflowPhaseId);
     } else if (questionCounts[currentPhaseId] >= 3) {
-      // cap reached -> fail phase and advance
+      // Hit 3-question limit but not all outcomes filled - mark as failed and advance
+      console.log('Hit 3-question limit, marking phase as failed and advancing');
       markFailed = true;
-      if (!failedPhases.includes(currentPhaseId)) failedPhases.push(currentPhaseId);
+      if (!failedPhases.includes(currentPhaseId)) {
+        failedPhases.push(currentPhaseId);
+      }
       advancePhase = true;
       nextPhaseId = (workflow.find(p => p.id === currentPhaseId)!.next_state as WorkflowPhaseId);
+    } else {
+      console.log('Staying in current phase for follow-up question');
     }
 
     // Improved key labels in more natural Japanese - updated for dynamic questions
@@ -606,20 +634,28 @@ ${(workflow.find(p => p.id === currentPhaseId)!.expected_data).map(k => `- ${k}`
       return baseLabels;
     };
 
+    // Extract user's name from fulfilled data for natural conversation
+    let userName = '';
+    if (fulfilled['self_intro'] && fulfilled['self_intro']['name']) {
+      userName = fulfilled['self_intro']['name'];
+    }
+    
     let interviewerObjective = '';
     if (advancePhase) {
       if (nextPhaseId === 'end') {
         finished = true;
-        interviewerObjective = 'お忙しい中、貴重なお時間をいただき、ありがとうございました。以上で面接を終了させていただきます。';
+        const nameAddress = userName ? `${userName}さん、` : '';
+        interviewerObjective = `${nameAddress}お忙しい中、貴重なお時間をいただき、ありがとうございました。以上で面接を終了させていただきます。`;
       } else {
         const nextPhase = workflow.find(p => p.id === nextPhaseId)!;
         interviewerObjective = nextPhase.prompt;
-        // entering a new phase -> count first question for that phase
+        // Count question for the new phase we're entering
         questionCounts[nextPhaseId] = (questionCounts[nextPhaseId] || 0) + 1;
+        totalQuestionsAsked++;
       }
       currentPhaseId = nextPhaseId;
     } else {
-      // stay in phase, ask focused follow-up on first missing key
+      // Stay in current phase, ask follow-up question for missing expected outcomes
       const missing = expectedKeys.filter(k => !fulfilled[currentPhaseId][k]);
       const targetKey = missing[0];
       const keyLabels = getKeyLabels(currentPhaseId);
@@ -633,8 +669,9 @@ ${(workflow.find(p => p.id === currentPhaseId)!.expected_data).map(k => `- ${k}`
       ];
       
       interviewerObjective = followUpPhrases[Math.floor(Math.random() * followUpPhrases.length)];
-      // increment question count because we will ask again for this phase
+      // Count question for current phase
       questionCounts[currentPhaseId] = (questionCounts[currentPhaseId] || 0) + 1;
+      totalQuestionsAsked++;
     }
 
     // 2) Dramatically improved interviewer response prompt with proper 敬語 context
@@ -697,13 +734,15 @@ ${interviewerObjective}
       { role: "assistant", content: responseText }
     ];
 
-    // Save workflow state to database
+    // Save workflow state to database - include workflow definition for persistence
     const workflowStateToSave = {
       currentPhaseId,
       questionCounts,
       fulfilled,
       failedPhases,
       finished,
+      workflowDefinition: workflow, // Add workflow definition to persist it
+      totalQuestionsAsked
     };
 
     try {

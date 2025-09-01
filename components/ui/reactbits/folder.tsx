@@ -107,14 +107,12 @@ const Folder: React.FC<FolderProps> = ({
           href={`/feedback/${interview.id}`}
           className="w-full h-full flex flex-col items-center justify-center p-2 text-center hover:bg-gray-50 rounded-lg transition-colors"
         >
-          
           <svg
             className="w-6 h-6 text-[#163300] mb-2"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -122,9 +120,7 @@ const Folder: React.FC<FolderProps> = ({
               d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
             />
           </svg>
-          <span className="text-xs text-[#163300] font-medium">
-            振り返り
-          </span>
+          <span className="text-xs text-[#163300] font-medium">振り返り</span>
         </Link>,
         // Card 3: Interview Details (Right)
         <div

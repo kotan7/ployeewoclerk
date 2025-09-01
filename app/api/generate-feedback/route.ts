@@ -18,8 +18,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Conversation history is required" }, { status: 400 });
     }
 
-    // Create detailed analysis based on workflow state
-    const workflowAnalysis = workflowState ? `
+    // Create detailed analysis based on actual workflow state and phases
+    let workflowAnalysis = '';
+    if (workflowState && workflowState.workflowDefinition) {
+      // Build dynamic phase analysis based on actual workflow
+      const phaseDetails = workflowState.workflowDefinition.map((phase: any) => {
+        const fulfilledData = workflowState.fulfilled[phase.id] || {};
+        const fulfilledKeys = Object.keys(fulfilledData).filter(key => fulfilledData[key]);
+        const isFailed = workflowState.failedPhases?.includes(phase.id);
+        
+        return `- ${phase.id}: ${phase.prompt}
+  期待要素: ${Array.isArray(phase.expected_data) ? phase.expected_data.join(', ') : 'N/A'}
+  回答済み: ${fulfilledKeys.length > 0 ? fulfilledKeys.join(', ') : 'なし'}
+  状態: ${isFailed ? '失敗' : (fulfilledKeys.length > 0 ? '進行中' : '未開始')}`;
+      }).join('\n');
+
+      workflowAnalysis = `
+**面接進行状況分析:**
+- 現在のフェーズ: ${workflowState.currentPhaseId}
+- 完了済み回答: ${JSON.stringify(workflowState.fulfilled, null, 2)}
+- 失敗フェーズ: ${workflowState.failedPhases?.join(', ') || 'なし'}
+- 面接完了状況: ${workflowState.finished ? '完了' : '未完了'}
+
+**実際の面接フェーズ:**
+${phaseDetails}
+`;
+    } else if (workflowState) {
+      // Fallback to original hardcoded analysis if no workflow definition
+      workflowAnalysis = `
 **面接進行状況分析:**
 - 現在のフェーズ: ${workflowState.currentPhaseId}
 - 完了済み回答: ${JSON.stringify(workflowState.fulfilled, null, 2)}
@@ -32,7 +58,8 @@ export async function POST(request: NextRequest) {
 - strength: 強み、具体例、成果
 - weakness: 弱み、対処法
 - industry_motivation: 志望動機、経験との関連、将来目標
-` : '';
+`;
+    }
 
     const prompt = `
 あなたは経験豊富な面接官です。以下の面接トランスクリプトと構造化されたワークフロー状況を分析し、詳細なフィードバックを提供してください。
