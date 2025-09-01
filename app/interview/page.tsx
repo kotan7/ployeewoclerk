@@ -85,12 +85,22 @@ const InterviewPage = async ({ searchParams }: PageProps) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <AutoSignIn nonClosableModal={true}>
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-[#163300] mb-2">
-              全ての面接セッション
-            </h1>
-            <p className="text-gray-600">
-              全ユーザーの面接練習セッションを確認できます ({total}件)
-            </p>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="text-3xl font-bold text-[#163300] mb-2">
+                  全ての面接セッション
+                </h1>
+                <p className="text-gray-600">
+                  全ユーザーの面接練習セッションを確認できます ({total}件)
+                </p>
+              </div>
+              <Link
+                href="/dashboard"
+                className="px-4 py-2 text-sm font-medium text-[#163300] bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                ダッシュボード
+              </Link>
+            </div>
           </div>
 
           <FilterControls currentFilter={filter} currentSort={sortBy} />

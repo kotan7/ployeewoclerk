@@ -187,7 +187,7 @@ export async function trackInterviewSessionStart(): Promise<void> {
 }
 
 /**
- * Get user's plan limit based on Clerk features
+ * Get user's interview plan limit based on Clerk features
  * @returns number of interviews allowed per month
  */
 export async function getUserPlanLimit(): Promise<number> {
@@ -218,6 +218,100 @@ export async function getUserPlanLimit(): Promise<number> {
     // Default to free plan on error instead of throwing
     console.warn('Defaulting to 1 interview due to error checking features');
     return 1;
+  }
+}
+
+/**
+ * Get user's ES correction plan limit based on Clerk features
+ * @returns number of ES corrections allowed per month
+ */
+export async function getESPlanLimit(): Promise<number> {
+  try {
+    const { has } = await auth();
+    
+    const has20 = await has({ feature: 'es_20' });
+    if (has20) {
+      return 20; // Premium plan
+    }
+    
+    const has10 = await has({ feature: 'es_10' });
+    if (has10) {
+      return 10; // Basic plan
+    }
+    
+    const has3 = await has({ feature: 'es_3' });
+    if (has3) {
+      return 3; // Free/trial plan
+    }
+    
+    // Default to free plan
+    console.warn('User does not have any recognized ES plan feature, defaulting to 3 ES corrections');
+    return 3; // Default to free plan
+    
+  } catch (error) {
+    console.error('Error checking user ES plan features:', error);
+    // Default to free plan on error
+    console.warn('Defaulting to 3 ES corrections due to error checking features');
+    return 3;
+  }
+}
+
+/**
+ * Get current month's ES correction usage for the authenticated user
+ * @returns number of ES corrections completed this month
+ */
+export async function getCurrentESUsage(): Promise<number> {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("User not authenticated");
+  }
+
+  // Get first day of current month in YYYY-MM-01 format
+  const currentDate = new Date();
+  const monthYear = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-01`;
+
+  const supabase = CreateSupabaseClient();
+  
+  // Count ES corrections created this month
+  const { count, error } = await supabase
+    .from('es_corrections')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .gte('created_at', monthYear);
+
+  if (error) {
+    console.error('Error fetching ES usage:', error);
+    throw new Error(`Failed to fetch ES usage: ${error.message}`);
+  }
+
+  return count || 0;
+}
+
+/**
+ * Get user's plan name based on Clerk features
+ * @returns string representing the plan name
+ */
+export async function getUserPlanName(): Promise<string> {
+  try {
+    const { has } = await auth();
+    
+    const has20Interview = await has({ feature: 'interview_20' });
+    const has20ES = await has({ feature: 'es_20' });
+    if (has20Interview || has20ES) {
+      return 'プレミアムプラン'; // Premium plan
+    }
+    
+    const has10Interview = await has({ feature: 'interview_10' });
+    const has10ES = await has({ feature: 'es_10' });
+    if (has10Interview || has10ES) {
+      return 'ベーシックプラン'; // Basic plan
+    }
+    
+    return 'フリープラン'; // Free plan
+    
+  } catch (error) {
+    console.error('Error checking user plan features:', error);
+    return 'フリープラン'; // Default to free plan
   }
 }
 
