@@ -10,12 +10,8 @@ interface Interview {
   id: string;
   name?: string;
   education?: string;
-  experience?: string;
   company_name?: string;
   companyName?: string;
-  role: string;
-  job_description?: string;
-  jobDescription?: string;
   interview_focus?: string;
   interviewFocus?: string;
   questions?: string[];
@@ -34,6 +30,22 @@ enum InterviewStatus {
 const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
   const router = useRouter();
   const lottieRef = useRef<HTMLDivElement>(null);
+
+  // Helper function to translate interview focus to Japanese
+  const getInterviewFocusLabel = (focus: string) => {
+    const focusMap: { [key: string]: string } = {
+      consulting: "コンサルティング業界",
+      finance: "金融業界",
+      manufacturing: "メーカー・製造業界",
+      trading: "商社業界",
+      it: "IT・通信業界",
+      advertising: "広告・マスコミ業界",
+      hr: "人材業界",
+      infrastructure: "インフラ業界",
+      real_estate: "不動産・建設業界",
+    };
+    return focusMap[focus] || "面接練習";
+  };
 
   const {
     isActive,
@@ -85,6 +97,9 @@ const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
   const companyName =
     interview.company_name || interview.companyName || "AI面接官";
 
+  const industryFocus = interview.interviewFocus || interview.interview_focus || "";
+  const industryLabel = getInterviewFocusLabel(industryFocus);
+
   return (
     <div className="h-[calc(100vh-64px)] bg-white flex flex-col overflow-hidden">
       <div className="flex-shrink-0 bg-white py-6">
@@ -92,7 +107,7 @@ const InterviewSessionClient = ({ interview }: InterviewSessionClientProps) => {
           <h1 className="text-4xl font-bold text-[#163300] mb-3 mt-8">
             {companyName}
           </h1>
-          <p className="text-xl text-gray-600 mb-3">{interview.role}</p>
+          <p className="text-xl text-gray-600 mb-3">{industryLabel}</p>
         </div>
       </div>
 

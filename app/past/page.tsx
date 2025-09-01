@@ -12,6 +12,22 @@ const InterviewHistoryPage = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  // Helper function to translate interview focus to Japanese
+  const getInterviewFocusLabel = (focus: string) => {
+    const focusMap: { [key: string]: string } = {
+      consulting: "コンサルティング業界",
+      finance: "金融業界",
+      manufacturing: "メーカー・製造業界",
+      trading: "商社業界",
+      it: "IT・通信業界",
+      advertising: "広告・マスコミ業界",
+      hr: "人材業界",
+      infrastructure: "インフラ業界",
+      real_estate: "不動産・建設業界",
+    };
+    return focusMap[focus] || "面接練習";
+  };
+
   useEffect(() => {
     const fetchInterviews = async () => {
       try {
@@ -112,11 +128,14 @@ const InterviewHistoryPage = () => {
                     id: string;
                     companyName?: string;
                     company_name?: string;
-                    role: string;
                     interviewFocus?: string;
                     interview_focus?: string;
                     created_at: string;
-                  }) => (
+                  }) => {
+                    const industryFocus = interview.interviewFocus || interview.interview_focus || "";
+                    const industryLabel = getInterviewFocusLabel(industryFocus);
+                    
+                    return (
                     <div
                       key={interview.id}
                       className="flex flex-col items-center"
@@ -143,7 +162,7 @@ const InterviewHistoryPage = () => {
                           {interview.companyName || interview.company_name}
                         </h3>
                         <p className="text-sm text-gray-600 font-medium">
-                          {interview.role}
+                          {industryLabel}
                         </p>
                         <div className="flex flex-col items-center space-y-1 text-sm text-gray-500">
                           <time className="text-xs">
@@ -159,7 +178,8 @@ const InterviewHistoryPage = () => {
                         </div>
                       </div>
                     </div>
-                  )
+                  );
+                  }
                 )}
               </div>
 

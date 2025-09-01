@@ -32,7 +32,6 @@ interface Interview {
   id: string;
   companyName?: string;
   company_name?: string;
-  role: string;
   interviewFocus?: string;
   interview_focus?: string;
   created_at: string;
@@ -156,9 +155,6 @@ const InterviewPage = async ({ searchParams }: PageProps) => {
                       <h3 className="text-lg font-semibold text-[#163300] line-clamp-1">
                         {interview.companyName || interview.company_name}
                       </h3>
-                      <p className="text-gray-600 font-medium">
-                        {interview.role}
-                      </p>
                       <div className="flex items-center justify-between text-sm text-gray-500">
                         <span className="inline-block px-2 py-1 bg-[#9fe870]/20 text-[#163300] rounded-full text-xs font-medium">
                           {getInterviewFocusLabel(
