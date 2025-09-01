@@ -67,13 +67,13 @@ export default function Pricing() {
                     <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
-                    基本的なフィードバック
+                    ES添削5回
                   </li>
                   <li className="flex items-center">
                     <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
-                    面接履歴の保存
+                    基本的なフィードバック
                   </li>
                 </ul>
                 
@@ -109,7 +109,7 @@ export default function Pricing() {
                     <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
-                    詳細なフィードバック
+                    ES添削20回
                   </li>
                   <li className="flex items-center">
                     <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -121,7 +121,7 @@ export default function Pricing() {
                     <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
-                    メールサポート
+                    詳細なフィードバック
                   </li>
                 </ul>
                 
@@ -157,19 +157,19 @@ export default function Pricing() {
                     <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
-                    <strong>20個</strong>の面接練習
+                    <strong>20回</strong>の面接練習
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                     <strong>50回</strong>のES添削
                   </li>
                   <li className="flex items-center">
                     <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                     詳細な分析レポート
-                  </li>
-                  <li className="flex items-center">
-                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    個別改善提案
                   </li>
                   <li className="flex items-center">
                     <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">

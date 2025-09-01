@@ -7,6 +7,10 @@ interface PlanAndUsageWidgetsProps {
   planName: string;
   remainingInterviews: number;
   remainingES: number;
+  planLimitInterviews: number;
+  planLimitES: number;
+  currentUsageInterviews: number;
+  currentUsageES: number;
   loading?: boolean;
 }
 
@@ -14,6 +18,10 @@ export function PlanAndUsageWidgets({
   planName,
   remainingInterviews,
   remainingES,
+  planLimitInterviews,
+  planLimitES,
+  currentUsageInterviews,
+  currentUsageES,
   loading = false
 }: PlanAndUsageWidgetsProps) {
   return (
@@ -31,6 +39,10 @@ export function PlanAndUsageWidgets({
         planName={planName}
         remainingInterviews={remainingInterviews}
         remainingES={remainingES}
+        planLimitInterviews={planLimitInterviews}
+        planLimitES={planLimitES}
+        currentUsageInterviews={currentUsageInterviews}
+        currentUsageES={currentUsageES}
         loading={loading}
       />
     </div>

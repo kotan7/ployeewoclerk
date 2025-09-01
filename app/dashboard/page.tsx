@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AutoSignIn from "@/components/ui/AutoSignIn";
-import { canStartSession, getCurrentESUsage, getESPlanLimit, getUserPlanName } from "@/lib/actions/usage.actions";
+import { canStartSession, getCurrentESUsage, getESPlanLimit, getUserPlanName, getUserPlanLimit } from "@/lib/actions/usage.actions";
 import { MessageCircle, History, Edit, FileText } from "lucide-react";
 import { PlanAndUsageWidgets } from "@/components/ui/plan-and-usage-widgets";
 
@@ -13,28 +13,41 @@ const DashboardPage = () => {
     planName: string;
     remainingInterviews: number;
     remainingES: number;
+    planLimitInterviews: number;
+    planLimitES: number;
+    currentUsageInterviews: number;
+    currentUsageES: number;
     isLoading: boolean;
   }>({
     planName: '',
     remainingInterviews: 0,
     remainingES: 0,
+    planLimitInterviews: 0,
+    planLimitES: 0,
+    currentUsageInterviews: 0,
+    currentUsageES: 0,
     isLoading: true,
   });
 
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const [sessionInfo, planName, esUsage, esLimit] = await Promise.all([
+        const [sessionInfo, planName, esUsage, esLimit, interviewLimit] = await Promise.all([
           canStartSession(),
           getUserPlanName(),
           getCurrentESUsage(),
           getESPlanLimit(),
+          getUserPlanLimit(),
         ]);
 
         setUserInfo({
           planName,
           remainingInterviews: sessionInfo.remainingInterviews,
           remainingES: Math.max(0, esLimit - esUsage),
+          planLimitInterviews: interviewLimit,
+          planLimitES: esLimit,
+          currentUsageInterviews: sessionInfo.currentUsage,
+          currentUsageES: esUsage,
           isLoading: false,
         });
       } catch (error) {
@@ -85,15 +98,12 @@ const DashboardPage = () => {
     <div className="min-h-screen bg-gray-50">
       <AutoSignIn nonClosableModal={true}>
         {/* Modern Hero Section */}
-        <div className="bg-gradient-to-br from-white via-gray-50 to-[#f8fffe] pt-20 pb-12">
+        <div className="bg-gradient-to-br from-white via-gray-50 to-[#f8fffe] pt-20 pb-1">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-[#163300] to-[#2F4F3F] bg-clip-text text-transparent mb-6">
                 おかえりなさい！
               </h1>
-              <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                今日も面接練習とES添削で、理想の未来に一歩近づきましょう
-              </p>
             </div>
 
             {/* Modern User Plan Info */}
@@ -102,6 +112,10 @@ const DashboardPage = () => {
                 planName={userInfo.planName}
                 remainingInterviews={userInfo.remainingInterviews}
                 remainingES={userInfo.remainingES}
+                planLimitInterviews={userInfo.planLimitInterviews}
+                planLimitES={userInfo.planLimitES}
+                currentUsageInterviews={userInfo.currentUsageInterviews}
+                currentUsageES={userInfo.currentUsageES}
                 loading={userInfo.isLoading}
               />
             </div>

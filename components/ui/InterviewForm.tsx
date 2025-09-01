@@ -39,17 +39,9 @@ const formSchema = z.object({
     message: "学歴を入力してください",
   }),
 
-  experience: z.string().optional(),
-
   companyName: z.string().min(1, {
     message: "会社名を入力してください",
   }),
-
-  role: z.string().min(1, {
-    message: "職種・ポジションを入力してください",
-  }),
-
-  jobDescription: z.string().optional(),
 
   interviewFocus: z.enum(
     [
@@ -96,10 +88,7 @@ export function InterviewForm() {
     defaultValues: {
       name: "",
       education: "",
-      experience: "",
       companyName: "",
-      role: "",
-      jobDescription: "",
     },
   });
 
@@ -262,28 +251,6 @@ export function InterviewForm() {
                 )}
               />
             </div>
-
-            <FormField
-              control={form.control}
-              name="experience"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm sm:text-base font-semibold text-[#163300]">
-                    職歴・経験
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="これまでの職歴や主な経験、スキルについて記載してください。"
-                      className="min-h-[100px] sm:min-h-[120px] text-sm sm:text-base resize-none"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription className="text-xs sm:text-sm">
-                    職歴、プロジェクト経験、技術スキル、実績など具体的に記載いただくと、より個人に合わせた面接練習が可能になります。未記載の場合は一般的な質問で面接練習を行います。
-                  </FormDescription>
-                </FormItem>
-              )}
-            />
           </div>
 
           {/* Job Information Section */}
@@ -298,13 +265,13 @@ export function InterviewForm() {
                 name="companyName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-base font-semibold text-[#163300]">
+                    <FormLabel className="text-sm sm:text-base font-semibold text-[#163300]">
                       会社名 <span className="text-red-500">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="例: 株式会社サンプル"
-                        className="h-12 text-base"
+                        className="h-10 sm:h-12 text-sm sm:text-base"
                         {...field}
                       />
                     </FormControl>
@@ -315,88 +282,41 @@ export function InterviewForm() {
 
               <FormField
                 control={form.control}
-                name="role"
+                name="interviewFocus"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-base font-semibold text-[#163300]">
-                      職種・ポジション <span className="text-red-500">*</span>
+                    <FormLabel className="text-sm sm:text-base font-semibold text-[#163300]">
+                      志望業界 <span className="text-red-500">*</span>
                     </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="例: ソフトウェアエンジニア"
-                        className="h-12 text-base"
-                        {...field}
-                      />
-                    </FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="h-10 sm:h-12 text-sm sm:text-base">
+                          <SelectValue placeholder="志望する業界を選択してください" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {interviewFocusOptions.map((option) => (
+                          <SelectItem
+                            key={option.value}
+                            value={option.value}
+                            className="text-sm sm:text-base"
+                          >
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription className="text-xs sm:text-sm">
+                      選択した業界に特化した質問を含む面接練習を行います
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-
-            <FormField
-              control={form.control}
-              name="jobDescription"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-base font-semibold text-[#163300]">
-                    職務内容・求人詳細
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="求人票の内容や職務内容を記載してください。より具体的な面接練習が可能になります。"
-                      className="min-h-[120px] text-base resize-none"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    詳細な情報を提供いただくことで、より実際の面接に近い練習が可能になります
-                  </FormDescription>
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Interview Type Section */}
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-[#163300]">3. 志望業界</h2>
-
-            <FormField
-              control={form.control}
-              name="interviewFocus"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-base font-semibold text-[#163300]">
-                    志望業界 <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="h-12 text-base">
-                        <SelectValue placeholder="志望する業界を選択してください" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {interviewFocusOptions.map((option) => (
-                        <SelectItem
-                          key={option.value}
-                          value={option.value}
-                          className="text-base"
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>
-                    選択した業界に特化した質問を含む面接練習を行います
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </div>
 
           {/* Submit Button */}

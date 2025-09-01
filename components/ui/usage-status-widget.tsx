@@ -7,6 +7,10 @@ interface UsageStatusWidgetProps {
   planName: string;
   remainingInterviews: number;
   remainingES: number;
+  planLimitInterviews: number;
+  planLimitES: number;
+  currentUsageInterviews: number;
+  currentUsageES: number;
   loading?: boolean;
 }
 
@@ -14,6 +18,10 @@ export function UsageStatusWidget({
   planName,
   remainingInterviews,
   remainingES,
+  planLimitInterviews,
+  planLimitES,
+  currentUsageInterviews,
+  currentUsageES,
   loading = false
 }: UsageStatusWidgetProps) {
   if (loading) {
@@ -68,29 +76,15 @@ export function UsageStatusWidget({
     );
   }
 
-  // Calculate max limits based on plan
-  const getMaxInterviews = (planName: string) => {
-    if (planName.includes("プレミアム")) return 999;
-    if (planName.includes("ベーシック")) return 20;
-    return 3; // Free plan
-  };
+  // Use the actual usage data passed from the dashboard
+  const maxInterviews = planLimitInterviews;
+  const maxES = planLimitES;
+  const interviewsUsed = currentUsageInterviews;
+  const esUsed = currentUsageES;
 
-  const getMaxES = (planName: string) => {
-    if (planName.includes("プレミアム")) return 999;
-    if (planName.includes("ベーシック")) return 10;
-    return 1; // Free plan
-  };
-
-  const maxInterviews = getMaxInterviews(planName);
-  const maxES = getMaxES(planName);
-
-  // Calculate used amounts (total - remaining)
-  const interviewsUsed = maxInterviews === 999 ? 0 : Math.max(0, maxInterviews - remainingInterviews);
-  const esUsed = maxES === 999 ? 0 : Math.max(0, maxES - remainingES);
-
-  // Calculate usage percentages
-  const interviewUsagePercentage = maxInterviews === 999 ? 0 : Math.min((interviewsUsed / maxInterviews) * 100, 100);
-  const esUsagePercentage = maxES === 999 ? 0 : Math.min((esUsed / maxES) * 100, 100);
+  // Calculate usage percentages based on actual data
+  const interviewUsagePercentage = maxInterviews > 0 ? Math.min((interviewsUsed / maxInterviews) * 100, 100) : 0;
+  const esUsagePercentage = maxES > 0 ? Math.min((esUsed / maxES) * 100, 100) : 0;
 
   return (
     <Card className="bg-white/70 backdrop-blur-md border-0 shadow-lg rounded-2xl">
@@ -111,7 +105,7 @@ export function UsageStatusWidget({
             <div className="flex justify-between items-center mb-1">
               <span className="text-xs font-medium text-gray-700">面接回数</span>
               <span className="text-xs font-semibold text-black">
-                {maxInterviews === 999 ? "無制限" : `${interviewsUsed} / ${maxInterviews}`}
+                {maxInterviews >= 999 ? "無制限" : `${interviewsUsed} / ${maxInterviews}`}
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-1.5">
@@ -128,7 +122,7 @@ export function UsageStatusWidget({
             <div className="flex justify-between items-center mb-1">
               <span className="text-xs font-medium text-gray-700">ES添削回数</span>
               <span className="text-xs font-semibold text-black">
-                {maxES === 999 ? "無制限" : `${esUsed} / ${maxES}`}
+                {maxES >= 999 ? "無制限" : `${esUsed} / ${maxES}`}
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-1.5">
