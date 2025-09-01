@@ -202,6 +202,117 @@ const DashboardPage = () => {
             </div>
           </div>
         </div>
+
+        {/* Footer */}
+        <footer className="bg-gradient-to-br from-[#f8fffe] to-white border-t border-gray-100 mt-20">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12">
+              {/* Logo and Company Info */}
+              <div className="md:col-span-1">
+                <div className="flex items-center mb-6">
+                  <div className="text-2xl font-bold text-[#163300]">
+                    プロイー
+                  </div>
+                </div>
+                <p className="text-gray-600 text-sm leading-relaxed mb-6">
+                  AI面接練習で理想の未来を掴む
+                </p>
+                <div className="text-sm text-gray-500">
+                  © 2025 プロイー. All rights reserved.
+                </div>
+              </div>
+
+              {/* Services */}
+              <div>
+                <h3 className="text-base font-bold text-[#163300] mb-4">
+                  サービス
+                </h3>
+                <ul className="space-y-3">
+                  <li>
+                    <a href="/interview/new" className="text-sm text-gray-600 hover:text-[#163300] transition-colors duration-200">
+                      AI面接練習
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/es-correction" className="text-sm text-gray-600 hover:text-[#163300] transition-colors duration-200">
+                      フィードバック分析
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/pricing" className="text-sm text-gray-600 hover:text-[#163300] transition-colors duration-200">
+                      料金プラン
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Resources */}
+              <div>
+                <h3 className="text-base font-bold text-[#163300] mb-4">
+                  リソース
+                </h3>
+                <ul className="space-y-3">
+                  <li>
+                    <a href="/help" className="text-sm text-gray-600 hover:text-[#163300] transition-colors duration-200">
+                      ヘルプセンター
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/interview-guide" className="text-sm text-gray-600 hover:text-[#163300] transition-colors duration-200">
+                      面接対策ガイド
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/contact" className="text-sm text-gray-600 hover:text-[#163300] transition-colors duration-200">
+                      お問い合わせ
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Solutions */}
+              <div>
+                <h3 className="text-base font-bold text-[#163300] mb-4">
+                  ソリューション
+                </h3>
+                <ul className="space-y-3">
+                  <li>
+                    <a href="/students" className="text-sm text-gray-600 hover:text-[#163300] transition-colors duration-200">
+                      就活生向け
+                    </a>
+                  </li>
+                  <li>
+                    <span className="text-sm text-gray-400">
+                      転職者向け（近日公開）
+                    </span>
+                  </li>
+                  <li>
+                    <a href="/enterprise" className="text-sm text-gray-600 hover:text-[#163300] transition-colors duration-200">
+                      企業向け
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Bottom Bar */}
+            <div className="border-t border-gray-200 mt-12 pt-8">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="text-sm text-gray-500">
+                  2025年 プロイー開発チーム
+                </div>
+                <div className="flex gap-6">
+                  <a href="/terms" className="text-sm text-gray-600 hover:text-[#163300] transition-colors duration-200">
+                    利用規約
+                  </a>
+                  <a href="/privacy" className="text-sm text-gray-600 hover:text-[#163300] transition-colors duration-200">
+                    プライバシーポリシー
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </footer>
       </AutoSignIn>
     </div>
   );
