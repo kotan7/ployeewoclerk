@@ -5,9 +5,15 @@ import OpenAI from 'openai';
 export const runtime = 'nodejs';
 export const maxDuration = 30;
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy initialization of OpenAI client
+const getOpenAI = () => {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY environment variable is not configured');
+  }
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -115,7 +121,7 @@ ${conversationHistory.map((msg: { role: string; content: string }) =>
 AI面接官が応募者の情報に基づいて動的に生成した質問による面接
 `;
 
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
           {

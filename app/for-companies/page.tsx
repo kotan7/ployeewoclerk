@@ -62,9 +62,9 @@ export default function ForCompanies() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2-2V7a2 2 0 012-2h2a2 2 0 002 2v2a2 2 0 002 2h2a2 2 0 012-2V7a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 00-2 2H9z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">評価の主観性</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">効率化</h3>
               <p className="text-gray-600">
-                面接官による個人差や感情に左右され、客観的で公平な評価が困難
+                面接、特に一次面接はAI面接が担う時代。採用プロセスを効率化するには必須。
               </p>
             </div>
 
@@ -146,7 +146,7 @@ export default function ForCompanies() {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700">採用効率</span>
-                    <span className="text-2xl font-bold text-[#9fe870]">+250%</span>
+                    <span className="text-2xl font-bold text-[#9fe870]">++</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-3">
                     <div className="bg-[#9fe870] h-3 rounded-full" style={{ width: '85%' }}></div>
@@ -156,7 +156,7 @@ export default function ForCompanies() {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700">時間短縮</span>
-                    <span className="text-2xl font-bold text-[#9fe870]">-60%</span>
+                    <span className="text-2xl font-bold text-[#9fe870]">++</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-3">
                     <div className="bg-[#9fe870] h-3 rounded-full" style={{ width: '90%' }}></div>
@@ -166,7 +166,7 @@ export default function ForCompanies() {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700">評価の一貫性</span>
-                    <span className="text-2xl font-bold text-[#9fe870]">+180%</span>
+                    <span className="text-2xl font-bold text-[#9fe870]">+++</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-3">
                     <div className="bg-[#9fe870] h-3 rounded-full" style={{ width: '95%' }}></div>
@@ -175,7 +175,7 @@ export default function ForCompanies() {
               </div>
 
               <p className="text-xs text-gray-500 mt-4">
-                ※ 導入企業での平均値（2024年実績）
+                
               </p>
             </div>
           </div>
@@ -297,100 +297,6 @@ export default function ForCompanies() {
               <p className="text-sm text-gray-600">
                 全面導入と継続的なサポートを提供
               </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Case Studies */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#163300] mb-4">
-              導入実績
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              様々な業界でプロイーが選ばれています
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white border rounded-2xl p-6 shadow-lg">
-              <div className="text-center mb-6">
-                <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H9m0 0H5m0 0h2M7 7h10M7 11h4m6 0h4v4a1 1 0 01-1 1h-4M7 15h4m4 0h4" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-bold text-gray-900">IT企業 A社</h3>
-                <p className="text-sm text-gray-500">従業員数: 500名</p>
-              </div>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">面接時間短縮</span>
-                  <span className="font-bold text-[#163300]">-65%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">採用コスト削減</span>
-                  <span className="font-bold text-[#163300]">-40%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">候補者満足度</span>
-                  <span className="font-bold text-[#163300]">92%</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white border rounded-2xl p-6 shadow-lg">
-              <div className="text-center mb-6">
-                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-bold text-gray-900">金融会社 B社</h3>
-                <p className="text-sm text-gray-500">従業員数: 1,200名</p>
-              </div>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">評価の一貫性</span>
-                  <span className="font-bold text-[#163300]">+85%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">新卒定着率</span>
-                  <span className="font-bold text-[#163300]">+23%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">採用プロセス効率</span>
-                  <span className="font-bold text-[#163300]">+78%</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white border rounded-2xl p-6 shadow-lg">
-              <div className="text-center mb-6">
-                <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-10 h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H9m0 0H5m0 0h2M7 7h10M7 11h4m6 0h4v4a1 1 0 01-1 1h-4M7 15h4m4 0h4" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-bold text-gray-900">コンサル C社</h3>
-                <p className="text-sm text-gray-500">従業員数: 300名</p>
-              </div>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">選考精度向上</span>
-                  <span className="font-bold text-[#163300]">+42%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">面接官負荷軽減</span>
-                  <span className="font-bold text-[#163300]">-70%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">候補者体験向上</span>
-                  <span className="font-bold text-[#163300]">89%</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>

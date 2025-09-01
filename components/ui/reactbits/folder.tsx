@@ -5,7 +5,6 @@ interface InterviewData {
   id: string;
   companyName?: string;
   company_name?: string;
-  role: string;
   interviewFocus?: string;
   interview_focus?: string;
   created_at: string;
@@ -81,7 +80,7 @@ const Folder: React.FC<FolderProps> = ({
           key="retry"
           href={`/interview/new?company=${encodeURIComponent(
             interview.companyName || interview.company_name || ""
-          )}&role=${encodeURIComponent(interview.role)}&focus=${
+          )}&focus=${
             interview.interviewFocus || interview.interview_focus || ""
           }`}
           className="w-full h-full flex flex-col items-center justify-center p-2 text-center hover:bg-gray-50 rounded-lg transition-colors"

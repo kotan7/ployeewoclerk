@@ -12,6 +12,22 @@ const InterviewHistoryPage = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  // Helper function to translate interview focus to Japanese
+  const getInterviewFocusLabel = (focus: string) => {
+    const focusMap: { [key: string]: string } = {
+      consulting: "コンサルティング業界",
+      finance: "金融業界",
+      manufacturing: "メーカー・製造業界",
+      trading: "商社業界",
+      it: "IT・通信業界",
+      advertising: "広告・マスコミ業界",
+      hr: "人材業界",
+      infrastructure: "インフラ業界",
+      real_estate: "不動産・建設業界",
+    };
+    return focusMap[focus] || "面接練習";
+  };
+
   useEffect(() => {
     const fetchInterviews = async () => {
       try {
@@ -46,13 +62,24 @@ const InterviewHistoryPage = () => {
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <AutoSignIn nonClosableModal={true}>
-          <div className="mb-8 text-center">
-            <h1 className="text-4xl font-bold text-[#163300] mb-4 mt-4">
-              面接履歴
-            </h1>
-            <p className="text-gray-600">
-              これまでの面接練習履歴を確認できます
-            </p>
+          <div className="mb-8">
+            <div className="flex items-start justify-between mb-6">
+              <Link
+                href="/dashboard"
+                className="px-4 py-2 text-sm font-medium text-[#163300] bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                ← ダッシュボード
+              </Link>
+              <div className="flex-1 text-center">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#163300] mb-4">
+                  面接履歴
+                </h1>
+                <p className="text-base sm:text-lg text-gray-600">
+                  これまでの面接練習履歴を確認できます
+                </p>
+              </div>
+              <div className="w-[120px]"></div> {/* Spacer for centering */}
+            </div>
           </div>
 
           {loading ? (
@@ -112,11 +139,14 @@ const InterviewHistoryPage = () => {
                     id: string;
                     companyName?: string;
                     company_name?: string;
-                    role: string;
                     interviewFocus?: string;
                     interview_focus?: string;
                     created_at: string;
-                  }) => (
+                  }) => {
+                    const industryFocus = interview.interviewFocus || interview.interview_focus || "";
+                    const industryLabel = getInterviewFocusLabel(industryFocus);
+                    
+                    return (
                     <div
                       key={interview.id}
                       className="flex flex-col items-center"
@@ -143,7 +173,7 @@ const InterviewHistoryPage = () => {
                           {interview.companyName || interview.company_name}
                         </h3>
                         <p className="text-sm text-gray-600 font-medium">
-                          {interview.role}
+                          {industryLabel}
                         </p>
                         <div className="flex flex-col items-center space-y-1 text-sm text-gray-500">
                           <time className="text-xs">
@@ -159,7 +189,8 @@ const InterviewHistoryPage = () => {
                         </div>
                       </div>
                     </div>
-                  )
+                  );
+                  }
                 )}
               </div>
 

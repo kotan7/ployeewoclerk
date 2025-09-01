@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
+import { useAuth } from "@clerk/nextjs";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import logo from "../constants/logo.png";
@@ -127,6 +128,14 @@ const structuredData = {
 
 export default function Home() {
   const router = useRouter();
+  const { isSignedIn, isLoaded } = useAuth();
+
+  // Redirect logged-in users to dashboard
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      router.push("/dashboard");
+    }
+  }, [isLoaded, isSignedIn, router]);
 
   // Refs for GSAP animations
   const heroTitleRef = useRef<HTMLHeadingElement>(null);
@@ -173,6 +182,11 @@ export default function Home() {
 
   // GSAP animations
   useEffect(() => {
+    // Don't run animations if user is signed in (they'll be redirected)
+    if (!isLoaded || isSignedIn) {
+      return;
+    }
+
     // Register ScrollTrigger plugin
     gsap.registerPlugin(ScrollTrigger);
 
@@ -324,7 +338,24 @@ export default function Home() {
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
       ScrollTrigger.refresh();
     };
-  }, []);
+  }, [isLoaded, isSignedIn]);
+
+  // Show loading state while checking authentication
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-[#9fe870] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render homepage content if user is signed in (they'll be redirected)
+  if (isSignedIn) {
+    return null;
+  }
 
   return (
     <>
@@ -461,14 +492,14 @@ export default function Home() {
                   <br className="hidden sm:block" />
                   <span className="block sm:inline">
                     {" "}
-                    詳細な分析、リアルタイムフィードバック、そして成長を実感できる環境—すべてを統合したプラットフォームです。
+                    詳細な分析、リアルタイムフィードバック、そして成長を実感できる環境—すべてを統合した<br />プラットフォームです。
                   </span>
                 </p>
 
                 {/* Trusted by section */}
                 <div className="text-left">
                   <p className="text-white/60 text-xs sm:text-sm mobile-mb-small -mt-5">
-                    就活生・転職者から信頼されています
+                    就活生から信頼されています
                   </p>
                   <div className="overflow-hidden">
                     <img
@@ -644,7 +675,8 @@ export default function Home() {
                   <div className="space-y-4 sm:space-y-6">
                     <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed text-center lg:text-left">
                       AIとの<strong>リアルタイム対話</strong>
-                      で実践的な面接練習を行い、
+                      で実践的な面接練習を行い、<br />
+                      <strong>業界別特化した</strong>質問にも対応。
                       <strong>詳細な分析とフィードバック</strong>を通じて、
                       あなたの面接スキルを総合的に向上させます。
                     </p>
@@ -991,7 +1023,7 @@ export default function Home() {
                   今すぐAI面接練習を体験する
                 </button>
                 <p className="text-gray-500 text-xs sm:text-sm mt-3 sm:mt-4">
-                  無料で3回まで体験可能
+                  無料で月1回まで体験可能
                 </p>
               </div>
             </div>
@@ -1033,7 +1065,7 @@ export default function Home() {
                     内定を掴む
                   </h2>
                   <p className="text-gray-300 text-base sm:text-lg mobile-mb-medium leading-relaxed">
-                    プロイーで面接スキルを向上させ、理想の企業への内定を実現しましょう。
+                    プロイーで面接スキルを向上させ、<br />理想の企業への内定を実現しましょう。
                   </p>
                   <button
                     className="bg-[#9fe870] text-[#163300] w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold text-base sm:text-lg hover:bg-[#9fe870]/90 transition-all duration-300 hover:scale-105 shadow-lg"

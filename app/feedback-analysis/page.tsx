@@ -64,7 +64,7 @@ export default function FeedbackAnalysis() {
               </div>
               <h3 className="text-xl font-bold text-[#163300] mb-4">多角的評価</h3>
               <p className="text-gray-600">
-                内容の質、話し方、表情、姿勢など、複数の要素を総合的に評価し、バランスの取れた分析を提供します。
+                内容の質や話し方など、複数の要素を総合的に評価し、バランスの取れた分析を提供します。
               </p>
             </div>
 
@@ -136,7 +136,7 @@ export default function FeedbackAnalysis() {
 
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-700">表情・姿勢</span>
+                      <span className="text-sm font-medium text-gray-700">志望動機</span>
                       <span className="text-sm font-bold text-[#163300]">88/100</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
@@ -156,8 +156,8 @@ export default function FeedbackAnalysis() {
                     </h4>
                     <ul className="text-sm text-gray-600 space-y-1">
                       <li>• 論理的で構造化された回答</li>
-                      <li>• 具体的な事例を使用</li>
-                      <li>• 自然な表情と姿勢</li>
+                      <li>• 志望動機が説得力ある</li>
+                      <li>• 一貫性がみえる</li>
                     </ul>
                   </div>
 
@@ -169,8 +169,8 @@ export default function FeedbackAnalysis() {
                       改善点
                     </h4>
                     <ul className="text-sm text-gray-600 space-y-1">
-                      <li>• 話すスピードを少し落とす</li>
-                      <li>• より多くのアイコンタクト</li>
+                      <li>• 言葉が詰まらずに話せるように</li>
+                      <li>• より具体的な実績</li>
                       <li>• 結論を先に述べる</li>
                     </ul>
                   </div>
@@ -203,7 +203,7 @@ export default function FeedbackAnalysis() {
                   <div>
                     <h4 className="font-semibold text-[#163300] mb-2">項目別分析</h4>
                     <p className="text-gray-600">
-                      内容、話し方、姿勢など、複数の観点から詳細に分析。どの分野が得意で、どの分野に改善が必要かが明確になります。
+                      自己紹介、ガクチカ、志望動機、自身の強み・弱みの観点から詳細に分析。どの分野が得意で、どの分野に改善が必要かが明確になります。
                     </p>
                   </div>
                 </div>
@@ -215,7 +215,7 @@ export default function FeedbackAnalysis() {
                   <div>
                     <h4 className="font-semibold text-[#163300] mb-2">具体的な改善提案</h4>
                     <p className="text-gray-600">
-                      「もう少し早く話してください」ではなく「話すスピードを15%落として、重要なポイントで2秒間のポーズを入れましょう」といった具体的な提案をします。
+                      「面接時に自身の経験を語る際、過去の成功体験に加え、失敗から学んだことも交えることで、より深い自己分析ができるようになります。」といった具体的な提案をします。
                     </p>
                   </div>
                 </div>
@@ -262,9 +262,9 @@ export default function FeedbackAnalysis() {
               <div className="w-16 h-16 bg-[#9fe870]/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-[#163300]">3</span>
               </div>
-              <h3 className="font-semibold text-[#163300] mb-2">非言語分析</h3>
+              <h3 className="font-semibold text-[#163300] mb-2">業界への知識</h3>
               <p className="text-sm text-gray-600">
-                表情、姿勢、アイコンタクトなどの非言語要素を評価
+                業界へ対する熱意や「本気度」をはかる
               </p>
             </div>
 

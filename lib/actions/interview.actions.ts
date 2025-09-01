@@ -9,10 +9,7 @@ import { calculateSessionMinutes } from "../utils"
 type CreateInterview = {
   name: string;
   education: string;
-  experience?: string;
   companyName: string;
-  role: string;
-  jobDescription?: string;
   interviewFocus: "consulting" | "finance" | "manufacturing" | "trading" | "it" | "advertising" | "hr" | "infrastructure" | "real_estate";
 }
 
