@@ -4,23 +4,23 @@ import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
-import {
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-  useAuth,
-} from "@clerk/nextjs";
 import { gsap } from "gsap";
 import logo from "../../constants/logo.png";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { SignInForm } from "@/components/auth/SignInForm";
+import { SignUpForm } from "@/components/auth/SignUpForm";
+import { Button } from "@/components/ui/button";
+import { User, LogOut, Settings } from "lucide-react";
 
 const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const { isSignedIn } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   // Check if current page is home page
   const isHomePage = pathname === "/";
@@ -132,7 +132,7 @@ const Header = () => {
               <div
                 ref={logoRef}
                 className="cursor-pointer flex items-center space-x-3"
-                onClick={() => router.push(isSignedIn ? "/dashboard" : "/")}
+                onClick={() => router.push(user ? "/dashboard" : "/")}
               >
                 <Image
                   src={logo}
@@ -185,21 +185,68 @@ const Header = () => {
                 ref={buttonsRef}
                 className="hidden sm:flex items-center space-x-4"
               >
-                <SignedOut>
-                  <SignInButton mode="modal">
-                    <button className="text-[#163300] hover:text-[#9fe870] transition-colors font-medium">
+                {!user ? (
+                  <>
+                    <button 
+                      onClick={() => {
+                        setAuthMode('signin');
+                        setShowAuthModal(true);
+                      }}
+                      className="text-[#163300] hover:text-[#9fe870] transition-colors font-medium"
+                    >
                       ログイン
                     </button>
-                  </SignInButton>
-                  <SignUpButton mode="modal">
-                    <button className="bg-[#9fe870] text-[#163300] px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#8fd960] transition-colors shadow-sm text-sm lg:text-base">
+                    <button 
+                      onClick={() => {
+                        setAuthMode('signup');
+                        setShowAuthModal(true);
+                      }}
+                      className="bg-[#9fe870] text-[#163300] px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#8fd960] transition-colors shadow-sm text-sm lg:text-base"
+                    >
                       無料で始める
                     </button>
-                  </SignUpButton>
-                </SignedOut>
-                <SignedIn>
-                  <UserButton />
-                </SignedIn>
+                  </>
+                ) : (
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowUserMenu(!showUserMenu)}
+                      className="flex items-center space-x-2 p-2 rounded-full hover:bg-white/20 transition-colors"
+                    >
+                      <div className="w-8 h-8 bg-[#9fe870] rounded-full flex items-center justify-center">
+                        <User className="w-4 h-4 text-[#163300]" />
+                      </div>
+                    </button>
+                    
+                    {showUserMenu && (
+                      <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-lg border border-gray-200 py-2 z-50">
+                        <div className="px-4 py-2 border-b border-gray-100">
+                          <p className="text-sm font-medium text-gray-900">{user.email}</p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            router.push('/dashboard');
+                            setShowUserMenu(false);
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                        >
+                          <Settings className="w-4 h-4" />
+                          <span>ダッシュボード</span>
+                        </button>
+                        <button
+                          onClick={async () => {
+                            await signOut();
+                            setShowUserMenu(false);
+                            router.push('/');
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span>ログアウト</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Mobile Menu Button */}
@@ -283,29 +330,106 @@ const Header = () => {
 
                 {/* Mobile Auth Buttons */}
                 <div className="mt-4 pt-4 border-t border-gray-200/50 space-y-3">
-                  <SignedOut>
-                    <SignInButton mode="modal">
-                      <button className="w-full text-left px-4 py-3 text-[#163300] hover:text-[#9fe870] hover:bg-gray-50/50 rounded-lg transition-colors font-medium">
+                  {!user ? (
+                    <>
+                      <button 
+                        onClick={() => {
+                          setAuthMode('signin');
+                          setShowAuthModal(true);
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-3 text-[#163300] hover:text-[#9fe870] hover:bg-gray-50/50 rounded-lg transition-colors font-medium"
+                      >
                         ログイン
                       </button>
-                    </SignInButton>
-                    <SignUpButton mode="modal">
-                      <button className="w-full bg-[#9fe870] text-[#163300] px-4 py-3 rounded-lg font-medium hover:bg-[#8fd960] transition-colors shadow-sm">
+                      <button 
+                        onClick={() => {
+                          setAuthMode('signup');
+                          setShowAuthModal(true);
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="w-full bg-[#9fe870] text-[#163300] px-4 py-3 rounded-lg font-medium hover:bg-[#8fd960] transition-colors shadow-sm"
+                      >
                         無料で始める
                       </button>
-                    </SignUpButton>
-                  </SignedOut>
-                  <SignedIn>
-                    <div className="px-4 py-2">
-                      <UserButton />
-                    </div>
-                  </SignedIn>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => {
+                          router.push('/dashboard');
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-3 text-[#163300] hover:bg-gray-50/50 rounded-lg transition-colors font-medium flex items-center space-x-2"
+                      >
+                        <Settings className="w-4 h-4" />
+                        <span>ダッシュボード</span>
+                      </button>
+                      <button
+                        onClick={async () => {
+                          await signOut();
+                          setIsMobileMenuOpen(false);
+                          router.push('/');
+                        }}
+                        className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50/50 rounded-lg transition-colors font-medium flex items-center space-x-2"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>ログアウト</span>
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
           </div>
         )}
       </div>
+      
+      {/* Authentication Modal */}
+      {showAuthModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md relative">
+            <button
+              onClick={() => setShowAuthModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-[#163300] mb-2">
+                {authMode === 'signin' ? 'ログイン' : 'アカウント作成'}
+              </h2>
+              <p className="text-gray-600">
+                {authMode === 'signin' 
+                  ? 'アカウントにサインインしてください' 
+                  : '新しいアカウントを作成してください'
+                }
+              </p>
+            </div>
+            
+            {authMode === 'signin' ? (
+              <SignInForm onSuccess={() => setShowAuthModal(false)} />
+            ) : (
+              <SignUpForm onSuccess={() => setShowAuthModal(false)} />
+            )}
+            
+            <div className="mt-4 text-center">
+              <button
+                onClick={() => setAuthMode(authMode === 'signin' ? 'signup' : 'signin')}
+                className="text-sm text-[#163300] hover:underline"
+              >
+                {authMode === 'signin' 
+                  ? 'アカウントをお持ちでない方はこちら' 
+                  : '既にアカウントをお持ちの方はこちら'
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

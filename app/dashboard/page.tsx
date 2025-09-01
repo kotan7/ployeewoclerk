@@ -2,13 +2,15 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import AutoSignIn from "@/components/ui/AutoSignIn";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { canStartSession, getCurrentESUsage, getESPlanLimit, getUserPlanName, getUserPlanLimit } from "@/lib/actions/usage.actions";
 import { MessageCircle, History, Edit, FileText } from "lucide-react";
 import { PlanAndUsageWidgets } from "@/components/ui/plan-and-usage-widgets";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 const DashboardPage = () => {
   const router = useRouter();
+  const { user, loading } = useAuth();
   const [userInfo, setUserInfo] = useState<{
     planName: string;
     remainingInterviews: number;
@@ -30,34 +32,37 @@ const DashboardPage = () => {
   });
 
   useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        const [sessionInfo, planName, esUsage, esLimit, interviewLimit] = await Promise.all([
-          canStartSession(),
-          getUserPlanName(),
-          getCurrentESUsage(),
-          getESPlanLimit(),
-          getUserPlanLimit(),
-        ]);
+    // Only fetch user info if user is authenticated
+    if (!loading && user) {
+      const fetchUserInfo = async () => {
+        try {
+          const [sessionInfo, planName, esUsage, esLimit, interviewLimit] = await Promise.all([
+            canStartSession(),
+            getUserPlanName(),
+            getCurrentESUsage(),
+            getESPlanLimit(),
+            getUserPlanLimit(),
+          ]);
 
-        setUserInfo({
-          planName,
-          remainingInterviews: sessionInfo.remainingInterviews,
-          remainingES: Math.max(0, esLimit - esUsage),
-          planLimitInterviews: interviewLimit,
-          planLimitES: esLimit,
-          currentUsageInterviews: sessionInfo.currentUsage,
-          currentUsageES: esUsage,
-          isLoading: false,
-        });
-      } catch (error) {
-        console.error('Error fetching user info:', error);
-        setUserInfo(prev => ({ ...prev, isLoading: false }));
-      }
-    };
+          setUserInfo({
+            planName,
+            remainingInterviews: sessionInfo.remainingInterviews,
+            remainingES: Math.max(0, esLimit - esUsage),
+            planLimitInterviews: interviewLimit,
+            planLimitES: esLimit,
+            currentUsageInterviews: sessionInfo.currentUsage,
+            currentUsageES: esUsage,
+            isLoading: false,
+          });
+        } catch (error) {
+          console.error('Error fetching user info:', error);
+          setUserInfo(prev => ({ ...prev, isLoading: false }));
+        }
+      };
 
-    fetchUserInfo();
-  }, []);
+      fetchUserInfo();
+    }
+  }, [loading, user]);
 
   const dashboardOptions = [
     {
@@ -96,7 +101,7 @@ const DashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <AutoSignIn nonClosableModal={true}>
+      <ProtectedRoute>
         {/* Modern Hero Section */}
         <div className="bg-gradient-to-br from-white via-gray-50 to-[#f8fffe] pt-20 pb-1">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -313,7 +318,7 @@ const DashboardPage = () => {
             </div>
           </div>
         </footer>
-      </AutoSignIn>
+      </ProtectedRoute>
     </div>
   );
 };

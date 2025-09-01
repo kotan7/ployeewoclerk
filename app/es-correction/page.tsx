@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import AutoSignIn from "@/components/ui/AutoSignIn";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { getCurrentESUsage, getESPlanLimit } from "@/lib/actions/usage.actions";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 interface FormData {
   companyName: string;
@@ -20,6 +21,7 @@ interface FormErrors {
 
 const ESCorrectionPage = () => {
   const router = useRouter();
+  const { user, loading } = useAuth();
   const [formData, setFormData] = useState<FormData>({
     companyName: "",
     question: "",
@@ -139,35 +141,37 @@ const ESCorrectionPage = () => {
     }
   };
 
-  // Load usage information on component mount
+  // Load usage information on component mount - only when user is authenticated
   useEffect(() => {
-    const loadUsageInfo = async () => {
-      try {
-        const [currentUsage, planLimit] = await Promise.all([
-          getCurrentESUsage(),
-          getESPlanLimit()
-        ]);
-        
-        setUsageInfo({
-          currentUsage,
-          planLimit,
-          remainingCorrections: Math.max(0, planLimit - currentUsage)
-        });
-      } catch (error) {
-        console.error("Error loading usage info:", error);
-        // Set default values on error
-        setUsageInfo({
-          currentUsage: 0,
-          planLimit: 5,
-          remainingCorrections: 5
-        });
-      } finally {
-        setIsLoadingUsage(false);
-      }
-    };
+    if (!loading && user) {
+      const loadUsageInfo = async () => {
+        try {
+          const [currentUsage, planLimit] = await Promise.all([
+            getCurrentESUsage(),
+            getESPlanLimit()
+          ]);
+          
+          setUsageInfo({
+            currentUsage,
+            planLimit,
+            remainingCorrections: Math.max(0, planLimit - currentUsage)
+          });
+        } catch (error) {
+          console.error("Error loading usage info:", error);
+          // Set default values on error
+          setUsageInfo({
+            currentUsage: 0,
+            planLimit: 5,
+            remainingCorrections: 5
+          });
+        } finally {
+          setIsLoadingUsage(false);
+        }
+      };
 
-    loadUsageInfo();
-  }, []);
+      loadUsageInfo();
+    }
+  }, [loading, user]);
 
   const isFormValid = formData.companyName.trim() && 
                      formData.question.trim() && 

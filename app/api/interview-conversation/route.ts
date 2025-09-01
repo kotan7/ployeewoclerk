@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { TextToSpeechClient } from '@google-cloud/text-to-speech';
 import { getWorkflowState, saveWorkflowState } from '../../../lib/actions/interview.actions';
-import { CreateSupabaseClient } from '../../../lib/supbase';
-import { auth } from '@clerk/nextjs/server';
+import { supabaseAdmin } from '@/lib/supabase/client';
+import { auth } from '@/lib/supabase/auth';
 
 // Configure runtime for Vercel
 export const runtime = 'nodejs';
@@ -77,8 +77,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not authenticated" }, { status: 401 });
     }
     
-    const supabase = CreateSupabaseClient();
-    const { data: interviewData, error: interviewError } = await supabase
+    const { data: interviewData, error: interviewError } = await supabaseAdmin
       .from("interviews")
       .select("interviewFocus")
       .eq("id", effectiveInterviewId)

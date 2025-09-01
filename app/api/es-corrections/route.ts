@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { auth } from "@/lib/supabase/auth";
+import { supabaseAdmin } from "@/lib/supabase/client";
 
 export async function GET(request: NextRequest) {
   try {
@@ -52,7 +47,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get total count
-    const { count, error: countError } = await supabase
+    const { count, error: countError } = await supabaseAdmin
       .from("es_corrections")
       .select("*", { count: "exact", head: true })
       .eq("user_id", userId);
@@ -69,7 +64,7 @@ export async function GET(request: NextRequest) {
     const totalPages = Math.ceil(total / limit);
 
     // Get corrections with pagination
-    const { data: corrections, error } = await supabase
+    const { data: corrections, error } = await supabaseAdmin
       .from("es_corrections")
       .select("*")
       .eq("user_id", userId)

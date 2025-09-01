@@ -1,12 +1,7 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { auth } from "@/lib/supabase/auth";
+import { supabaseAdmin } from "@/lib/supabase/client";
 
 export interface ESCorrection {
   id: string;
@@ -45,8 +40,16 @@ export async function getUserESCorrections(
   try {
     const { userId } = await auth();
     
+    // Return empty result if not authenticated
     if (!userId) {
-      throw new Error("User not authenticated");
+      return {
+        corrections: [],
+        total: 0,
+        currentPage: page,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPrevPage: false,
+      };
     }
 
     const offset = (page - 1) * limit;
@@ -78,7 +81,7 @@ export async function getUserESCorrections(
     }
 
     // Get total count
-    const { count, error: countError } = await supabase
+    const { count, error: countError } = await supabaseAdmin
       .from("es_corrections")
       .select("*", { count: "exact", head: true })
       .eq("user_id", userId);
@@ -92,7 +95,7 @@ export async function getUserESCorrections(
     const totalPages = Math.ceil(total / limit);
 
     // Get corrections with pagination
-    const { data: corrections, error } = await supabase
+    const { data: corrections, error } = await supabaseAdmin
       .from("es_corrections")
       .select("*")
       .eq("user_id", userId)
@@ -137,7 +140,7 @@ export async function getAllESCorrections(
     const offset = (page - 1) * limit;
     
     // Build query
-    let query = supabase.from("es_corrections").select("*", { count: "exact" });
+    let query = supabaseAdmin.from("es_corrections").select("*", { count: "exact" });
     
     // Apply filters
     if (filter !== "all") {
@@ -198,7 +201,7 @@ export async function getAllESCorrections(
     }
 
     // Reset query for data fetch
-    query = supabase.from("es_corrections").select("*");
+    query = supabaseAdmin.from("es_corrections").select("*");
     
     // Apply same filters
     if (filter !== "all") {
@@ -252,11 +255,12 @@ export async function getESCorrectionById(id: string): Promise<ESCorrection | nu
   try {
     const { userId } = await auth();
     
+    // Return null if not authenticated
     if (!userId) {
-      throw new Error("User not authenticated");
+      return null;
     }
 
-    const { data: correction, error } = await supabase
+    const { data: correction, error } = await supabaseAdmin
       .from("es_corrections")
       .select("*")
       .eq("id", id)
@@ -290,7 +294,7 @@ export async function createESCorrection(data: {
       throw new Error("User not authenticated");
     }
 
-    const { data: correction, error } = await supabase
+    const { data: correction, error } = await supabaseAdmin
       .from("es_corrections")
       .insert({
         user_id: userId,
@@ -334,7 +338,7 @@ export async function updateESCorrectionWithFeedback(
       throw new Error("User not authenticated");
     }
 
-    const { data: correction, error } = await supabase
+    const { data: correction, error } = await supabaseAdmin
       .from("es_corrections")
       .update({
         ai_feedback: feedback.ai_feedback,
@@ -378,7 +382,7 @@ export async function deleteESCorrection(id: string): Promise<boolean> {
       throw new Error("User not authenticated");
     }
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from("es_corrections")
       .delete()
       .eq("id", id)
@@ -412,12 +416,21 @@ export async function getESCorrectionStats(userId?: string): Promise<{
     const { userId: currentUserId } = await auth();
     const targetUserId = userId || currentUserId;
     
+    // Return default stats if not authenticated
     if (!targetUserId) {
-      throw new Error("User not authenticated");
+      return {
+        total: 0,
+        completed: 0,
+        processing: 0,
+        failed: 0,
+        averageScore: 0,
+        highestScore: 0,
+        lowestScore: 0,
+      };
     }
 
     // Get all corrections for the user
-    const { data: corrections, error } = await supabase
+    const { data: corrections, error } = await supabaseAdmin
       .from("es_corrections")
       .select("overall_score, status")
       .eq("user_id", targetUserId);

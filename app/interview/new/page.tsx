@@ -51,7 +51,7 @@ const structuredData = {
   },
 };
 
-const page = () => {
+const page = async () => {
   return (
     <>
       <script

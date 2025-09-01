@@ -1,17 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { createClient } from "@supabase/supabase-js";
+import { auth } from "@/lib/supabase/auth";
+import { supabaseAdmin } from "@/lib/supabase/client";
 import OpenAI from 'openai';
 import { canStartESCorrection, trackESUsage } from "@/lib/actions/usage.actions";
 
 // Configure runtime for Vercel
 export const runtime = 'nodejs';
 export const maxDuration = 30;
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -148,7 +143,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create initial database record
-    const { data: esRecord, error: insertError } = await supabase
+    const { data: esRecord, error: insertError } = await supabaseAdmin
       .from("es_corrections")
       .insert({
         user_id: userId,
@@ -212,7 +207,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Update database record with results
-      const { error: updateError } = await supabase
+      const { error: updateError } = await supabaseAdmin
         .from("es_corrections")
         .update({
           ai_feedback: feedback,
@@ -249,7 +244,7 @@ export async function POST(request: NextRequest) {
       console.error("OpenAI API error:", openaiError);
       
       // Update database record with error status
-      await supabase
+      await supabaseAdmin
         .from("es_corrections")
         .update({ status: "failed" })
         .eq("id", esRecord.id);

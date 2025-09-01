@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
-import { jaJP } from "@clerk/localizations";
 import Header from "@/components/ui/Header";
 import ScrollRestoration from "@/components/ui/ScrollRestoration";
 import { Analytics } from "@vercel/analytics/next";
+import { AuthProvider } from "@/components/auth/AuthProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -86,55 +85,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider
-      localization={jaJP}
-      appearance={{
-        variables: {
-          colorPrimary: "#004526",
-        },
-        elements: {
-          modalContent: {
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            margin: "0",
-            animation: "none",
-            transition: "none",
-          },
-          modalBackdrop: {
-            position: "fixed",
-            top: "0",
-            left: "0",
-            width: "100vw",
-            height: "100vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: "9999",
-            animation: "none",
-            transition: "none",
-          },
-        },
-        signIn: {
-          variables: { colorPrimary: "#004526" },
-          elements: { modalContent: { position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)", margin: 0, animation: "none", transition: "none" } },
-        },
-        signUp: {
-          variables: { colorPrimary: "#004526" },
-          elements: { modalContent: { position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)", margin: 0, animation: "none", transition: "none" } },
-        },
-      }}
-    >
-      <html lang="ja" suppressHydrationWarning>
-        <body className="antialiased">
+    <html lang="ja" suppressHydrationWarning>
+      <body className="antialiased">
+        <AuthProvider>
           {/* Fonts are loaded via app/head.tsx */}
           <ScrollRestoration />
           <Header />
           {children}
           <Analytics />
-        </body>
-      </html>
-    </ClerkProvider>
+        </AuthProvider>
+      </body>
+    </html>
   );
 }

@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { auth } from "@/lib/supabase/auth";
+import { supabaseAdmin } from "@/lib/supabase/client";
 
 interface RouteParams {
   params: Promise<{
@@ -25,7 +20,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const { data: correction, error } = await supabase
+    const { data: correction, error } = await supabaseAdmin
       .from("es_corrections")
       .select("*")
       .eq("id", resolvedParams.id)

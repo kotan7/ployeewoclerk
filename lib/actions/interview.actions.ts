@@ -1,9 +1,35 @@
 "use server"
 
-import { auth } from "@clerk/nextjs/server"
-import { CreateSupabaseClient } from "../supbase"
+import { auth, createClient } from "@/lib/supabase/auth"
 import { trackInterviewSessionStart } from "./usage.actions"
 import { calculateSessionMinutes } from "../utils"
+
+// Helper function to verify authentication status
+export const verifyAuth = async (): Promise<{ isAuthenticated: boolean; userId?: string; error?: string }> => {
+    try {
+        const { userId, user, error } = await auth();
+        console.log("verifyAuth - userId:", userId, "error:", error?.message);
+        
+        if (error) {
+            console.error("Auth verification error:", error);
+            return {
+                isAuthenticated: false,
+                error: error.message
+            };
+        }
+        
+        return {
+            isAuthenticated: !!userId,
+            userId: userId || undefined
+        };
+    } catch (err) {
+        console.error("verifyAuth exception:", err);
+        return {
+            isAuthenticated: false,
+            error: err instanceof Error ? err.message : 'Unknown error'
+        };
+    }
+};
 
 // Type definition based on the form schema
 type CreateInterview = {
@@ -13,41 +39,63 @@ type CreateInterview = {
   interviewFocus: "consulting" | "finance" | "manufacturing" | "trading" | "it" | "advertising" | "hr" | "infrastructure" | "real_estate";
 }
 
+// Return type for createInterview
+type CreateInterviewResult = 
+  | { ok: true; interview: any }
+  | { ok: false; code: "UNAUTHENTICATED" | "DB_ERROR" | "USAGE_LIMIT_EXCEEDED"; message?: string }
 
-
-export const createInterview = async (formData: CreateInterview) => {
-    const {userId: author} = await auth()
+export const createInterview = async (formData: CreateInterview): Promise<CreateInterviewResult> => {
+    let authResult = await auth();
     
-    if (!author) {
-        throw new Error("User not authenticated")
+    // If no user found, try to get a fresh session one more time
+    if (!authResult.userId) {
+        console.log("Initial auth failed, attempting to get fresh session...");
+        authResult = await auth();
     }
     
-    const supabase = CreateSupabaseClient()
+    // Return error object instead of throwing
+    if (!authResult.userId) {
+        console.error("Authentication failed in createInterview:", authResult.error?.message);
+        return { ok: false, code: "UNAUTHENTICATED" as const };
+    }
+    
+    const supabase = await createClient();
     
     const {data, error} = await supabase
         .from("interviews")
         .insert({
             ...formData,
-            author
+            author: authResult.userId
         })
         .select();
 
     if (error) {
         console.error("Supabase error:", error)
-        throw new Error(`Database error: ${error.message}`)
+        return { ok: false, code: "DB_ERROR" as const, message: error.message };
     }
     
-    if (!data) {
-        throw new Error("No data returned from database")
+    if (!data || data.length === 0) {
+        return { ok: false, code: "DB_ERROR" as const, message: "No data returned from database" };
     }
 
-    return data[0];
+    console.log("Interview created successfully:", data[0].id);
+    return { ok: true, interview: data[0] };
 }
 
 export const getUserInterviews = async (page: number = 1, limit: number = 9) => {
     const {userId: author} = await auth()
     
-    const supabase = CreateSupabaseClient()
+    // Return empty result if not authenticated
+    if (!author) {
+        return {
+            interviews: [],
+            totalCount: 0,
+            currentPage: page,
+            totalPages: 0
+        };
+    }
+    
+    const supabase = await createClient()
     const offset = (page - 1) * limit;
     
     const {data, error, count} = await supabase
@@ -76,7 +124,7 @@ export const getAllInterviews = async (
     filter?: string, 
     sortBy: string = 'newest'
 ) => {
-    const supabase = CreateSupabaseClient()
+    const supabase = await createClient()
     const offset = (page - 1) * limit;
     
     let query = supabase
@@ -130,13 +178,14 @@ export const getAllInterviews = async (
 export const getFeedback = async (interviewId: string) => {
     const { userId } = await auth();
     
+    // Return null if not authenticated
     if (!userId) {
-        throw new Error("User not authenticated");
+        return null;
     }
 
     console.log("GetFeedback called for:", { interviewId, userId });
 
-    const supabase = CreateSupabaseClient();
+    const supabase = await createClient();
     
     // First, let's see all records for this interview (for debugging)
     const { data: allRecords } = await supabase
@@ -198,7 +247,7 @@ export const saveFeedback = async (feedbackData: any, interviewId?: string, sess
         userId
     });
 
-    const supabase = CreateSupabaseClient();
+    const supabase = await createClient();
     
     // Extract overall feedback to save in separate column
     const overallFeedback = feedbackData.overallFeedback || null;
@@ -282,11 +331,21 @@ export const saveFeedback = async (feedbackData: any, interviewId?: string, sess
 export const getWorkflowState = async (interviewId: string) => {
     const { userId } = await auth();
     
+    // Return default state if not authenticated
     if (!userId) {
-        throw new Error("User not authenticated");
+        return {
+            currentPhaseId: 'self_intro',
+            questionCounts: {},
+            fulfilled: {},
+            failedPhases: [],
+            finished: false,
+            conversationHistory: [],
+            sessionId: null,
+            workflowDefinition: null
+        };
     }
 
-    const supabase = CreateSupabaseClient();
+    const supabase = await createClient();
     const { data, error } = await supabase
         .from('session_history')
         .select('id, workflow_state, current_phase_id, question_counts, failed_phases, interview_finished, conversation_history')
@@ -346,7 +405,7 @@ export const saveWorkflowState = async (
         throw new Error("User not authenticated");
     }
 
-    const supabase = CreateSupabaseClient();
+    const supabase = await createClient();
     
     // Prepare the data to upsert
     const upsertData = {

@@ -1,13 +1,8 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { auth } from "@clerk/nextjs/server";
-import { createClient } from "@supabase/supabase-js";
+import { auth } from "@/lib/supabase/auth";
+import { supabaseAdmin } from "@/lib/supabase/client";
 import ESResultClient from "./ESResultClient";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 interface ESCorrectionData {
   id: string;
@@ -38,7 +33,7 @@ const ESResultPage = async ({ params }: PageProps) => {
   }
 
   // Fetch ES correction data
-  const { data: esData, error } = await supabase
+  const { data: esData, error } = await supabaseAdmin
     .from("es_corrections")
     .select("*")
     .eq("id", resolvedParams.id)

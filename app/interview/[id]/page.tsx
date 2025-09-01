@@ -1,6 +1,6 @@
 import React from "react";
-import { currentUser } from "@clerk/nextjs/server";
-import { CreateSupabaseClient } from "@/lib/supbase";
+import { auth } from "@/lib/supabase/auth";
+import { supabaseAdmin } from "@/lib/supabase/client";
 import { notFound, redirect } from "next/navigation";
 import { canStartSession } from "@/lib/actions/usage.actions";
 import InterviewSessionClient from "./InterviewSessionClient";
@@ -11,9 +11,9 @@ interface InterviewSessionProps {
 
 const InterviewSession = async ({ params }: InterviewSessionProps) => {
   const { id } = await params;
-  const user = await currentUser();
+  const { userId, user } = await auth();
 
-  if (!user) {
+  if (!userId) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
@@ -31,12 +31,11 @@ const InterviewSession = async ({ params }: InterviewSessionProps) => {
   // Fetch interview data
   let interview = null;
   try {
-    const supabase = CreateSupabaseClient();
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from("interviews")
       .select("*")
       .eq("id", id)
-      .eq("author", user.id)
+      .eq("author", userId)
       .single();
 
     if (error || !data) {

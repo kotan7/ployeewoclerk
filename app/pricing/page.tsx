@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { CheckoutButton } from "@/components/payments/CheckoutButton";
 
 export default function Pricing() {
   const router = useRouter();
@@ -86,64 +87,10 @@ export default function Pricing() {
               </div>
             </div>
 
-            {/* Starter Plan - New ¥500 Plan */}
+            {/* Basic Plan - ¥500 Plan */}
             <div className="bg-white rounded-3xl border-2 border-gray-200 p-6 relative">
               <div className="text-center">
-                <h3 className="text-lg font-bold text-gray-900 mb-2">スターター</h3>
-                <div className="mb-4">
-                  <span className="text-3xl font-bold text-[#163300]">¥300</span>
-                  <span className="text-gray-500">/月</span>
-                </div>
-                <p className="text-gray-600 mb-6 text-sm">
-                  もう少し練習したい方に
-                </p>
-                
-                <ul className="text-left space-y-3 mb-6 text-sm">
-                  <li className="flex items-center">
-                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    月10回まで面接練習
-                  </li>
-                  <li className="flex items-center">
-                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    ES添削20回
-                  </li>
-                  <li className="flex items-center">
-                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    面接履歴の保存
-                  </li>
-                  <li className="flex items-center">
-                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    詳細なフィードバック
-                  </li>
-                </ul>
-                
-                <button 
-                  onClick={() => router.push("/billing")}
-                  className="w-full bg-[#163300] text-white py-3 rounded-full font-semibold hover:bg-[#163300]/90 transition-colors"
-                >
-                  スタータープランを始める
-                </button>
-              </div>
-            </div>
-
-            {/* Pro Plan */}
-            <div className="bg-white rounded-3xl border-2 border-[#9fe870] p-6 relative">
-              <div className="absolute top-4 right-4">
-                <div className="bg-[#9fe870] text-[#163300] px-3 py-1 rounded-full text-xs font-semibold">
-                  人気
-                </div>
-              </div>
-              
-              <div className="text-center">
-                <h3 className="text-lg font-bold text-[#163300] mb-2">プロ</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">ベーシック</h3>
                 <div className="mb-4">
                   <span className="text-3xl font-bold text-[#163300]">¥500</span>
                   <span className="text-gray-500">/月</span>
@@ -163,7 +110,61 @@ export default function Pricing() {
                     <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
-                     <strong>50回</strong>のES添削
+                    <strong>20回</strong>のES添削
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    面接履歴の保存
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    詳細なフィードバック
+                  </li>
+                </ul>
+                
+                <CheckoutButton 
+                  planId="basic"
+                  planName="ベーシックプラン"
+                  price={500}
+                  className="w-full"
+                />
+              </div>
+            </div>
+
+            {/* Premium Plan */}
+            <div className="bg-white rounded-3xl border-2 border-[#9fe870] p-6 relative">
+              <div className="absolute top-4 right-4">
+                <div className="bg-[#9fe870] text-[#163300] px-3 py-1 rounded-full text-xs font-semibold">
+                  人気
+                </div>
+              </div>
+              
+              <div className="text-center">
+                <h3 className="text-lg font-bold text-[#163300] mb-2">プレミアム</h3>
+                <div className="mb-4">
+                  <span className="text-3xl font-bold text-[#163300]">¥2000</span>
+                  <span className="text-gray-500">/月</span>
+                </div>
+                <p className="text-gray-600 mb-6 text-sm">
+                  プロフェッショナルな面接対策
+                </p>
+                
+                <ul className="text-left space-y-3 mb-6 text-sm">
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    <strong>無制限</strong>の面接練習
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    <strong>無制限</strong>のES添削
                   </li>
                   <li className="flex items-center">
                     <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -181,16 +182,16 @@ export default function Pricing() {
                     <svg className="w-4 h-4 text-[#9fe870] mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
-                    優先サポート
+                    24/7優先サポート
                   </li>
                 </ul>
                 
-                <button 
-                  onClick={() => router.push("/billing")}
-                  className="w-full bg-[#9fe870] text-[#163300] py-3 rounded-full font-semibold hover:bg-[#8fd960] transition-colors"
-                >
-                  プロプランを始める
-                </button>
+                <CheckoutButton 
+                  planId="premium"
+                  planName="プレミアムプラン"
+                  price={2000}
+                  className="w-full"
+                />
               </div>
             </div>
 
