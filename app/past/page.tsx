@@ -62,13 +62,24 @@ const InterviewHistoryPage = () => {
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <AutoSignIn nonClosableModal={true}>
-          <div className="mb-8 text-center">
-            <h1 className="text-4xl font-bold text-[#163300] mb-4 mt-4">
-              面接履歴
-            </h1>
-            <p className="text-gray-600">
-              これまでの面接練習履歴を確認できます
-            </p>
+          <div className="mb-8">
+            <div className="flex items-start justify-between mb-6">
+              <Link
+                href="/dashboard"
+                className="px-4 py-2 text-sm font-medium text-[#163300] bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                ← ダッシュボード
+              </Link>
+              <div className="flex-1 text-center">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#163300] mb-4">
+                  面接履歴
+                </h1>
+                <p className="text-base sm:text-lg text-gray-600">
+                  これまでの面接練習履歴を確認できます
+                </p>
+              </div>
+              <div className="w-[120px]"></div> {/* Spacer for centering */}
+            </div>
           </div>
 
           {loading ? (

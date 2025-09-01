@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
+import { useAuth } from "@clerk/nextjs";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import logo from "../constants/logo.png";
@@ -127,6 +128,14 @@ const structuredData = {
 
 export default function Home() {
   const router = useRouter();
+  const { isSignedIn, isLoaded } = useAuth();
+
+  // Redirect logged-in users to dashboard
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      router.push("/dashboard");
+    }
+  }, [isLoaded, isSignedIn, router]);
 
   // Refs for GSAP animations
   const heroTitleRef = useRef<HTMLHeadingElement>(null);
@@ -173,6 +182,11 @@ export default function Home() {
 
   // GSAP animations
   useEffect(() => {
+    // Don't run animations if user is signed in (they'll be redirected)
+    if (!isLoaded || isSignedIn) {
+      return;
+    }
+
     // Register ScrollTrigger plugin
     gsap.registerPlugin(ScrollTrigger);
 
@@ -324,7 +338,24 @@ export default function Home() {
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
       ScrollTrigger.refresh();
     };
-  }, []);
+  }, [isLoaded, isSignedIn]);
+
+  // Show loading state while checking authentication
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-[#9fe870] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render homepage content if user is signed in (they'll be redirected)
+  if (isSignedIn) {
+    return null;
+  }
 
   return (
     <>

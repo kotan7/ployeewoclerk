@@ -10,6 +10,7 @@ import {
   SignedIn,
   SignedOut,
   UserButton,
+  useAuth,
 } from "@clerk/nextjs";
 import { gsap } from "gsap";
 import logo from "../../constants/logo.png";
@@ -17,6 +18,7 @@ import logo from "../../constants/logo.png";
 const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const { isSignedIn } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -130,7 +132,7 @@ const Header = () => {
               <div
                 ref={logoRef}
                 className="cursor-pointer flex items-center space-x-3"
-                onClick={() => router.push("/")}
+                onClick={() => router.push(isSignedIn ? "/dashboard" : "/")}
               >
                 <Image
                   src={logo}
