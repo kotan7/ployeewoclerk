@@ -306,11 +306,11 @@ export function InterviewForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm sm:text-base font-semibold text-[#163300]">
-                      会社名 <span className="text-red-500">*</span>
+                      会社名<span className="text-red-500">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="例: 株式会社サンプル"
+                        placeholder="例：株式会社〇〇（ない場合は「なし」と記入してください）"
                         className="h-10 sm:h-12 text-sm sm:text-base"
                         {...field}
                       />

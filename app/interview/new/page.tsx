@@ -5,7 +5,7 @@ import { InterviewForm } from "@/components/ui/InterviewForm";
 export const metadata: Metadata = {
   title: "新しい面接練習を始める | AI面接官との実践練習 - プロイー",
   description:
-    "AI面接官との実践的な面接練習を今すぐ開始。無料で3回まで利用可能。就活・転職の面接対策に最適な練習環境をご提供します。",
+    "AI面接官との実践的な面接練習を今すぐ開始。無料で1回まで利用可能。就活・転職の面接対策に最適な練習環境をご提供します。",
   keywords: [
     "面接練習開始",
     "AI面接練習",
