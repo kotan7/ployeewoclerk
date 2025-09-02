@@ -26,7 +26,7 @@ export async function getCurrentUsage(): Promise<number> {
     // No record found, create one with 0 usage
     const { data: inserted, error: insertError } = await supabase
       .from('usage_tracking')
-      .insert({ author: userId, month_year: monthStart(), minutes_used: 0 })
+      .insert({ author: userId, user_id: userId, minutes_used: 0, action: 'interview' })
       .select('minutes_used')
       .single();
     if (insertError) throw new Error(`Failed to create usage record: ${insertError.message}`);
@@ -83,8 +83,9 @@ export async function addInterviewUsage(): Promise<void> {
       .from('usage_tracking')
       .insert({
         author: userId,
-        month_year: monthStart(),
+        user_id: userId,
         minutes_used: 1,
+        action: 'interview',
       });
 
     if (insertError) {
@@ -143,8 +144,9 @@ export async function trackInterviewSessionStart(): Promise<void> {
       .from('usage_tracking')
       .insert({
         author: userId,
-        month_year: monthStart(),
+        user_id: userId,
         minutes_used: 1,
+        action: 'interview',
       });
 
     if (insertError) {
@@ -211,7 +213,7 @@ export async function getCurrentESUsage(): Promise<number> {
     // No record found, create one with 0 usage
     const { data: inserted, error: insertError } = await supabase
       .from('usage_tracking')
-      .insert({ author: userId, month_year: monthStart(), minutes_used: 0, es_corrections_used: 0 })
+      .insert({ author: userId, user_id: userId, minutes_used: 0, es_corrections_used: 0, action: 'es_correction' })
       .select('es_corrections_used')
       .single();
     if (insertError) throw new Error(`Failed to create ES usage record: ${insertError.message}`);
@@ -284,9 +286,10 @@ export async function trackESUsage(): Promise<void> {
       .from('usage_tracking')
       .insert({
         author: userId,
-        month_year: monthStart(),
+        user_id: userId,
         minutes_used: 0,
         es_corrections_used: 1,
+        action: 'es_correction',
       });
 
     if (insertError) {
