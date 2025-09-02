@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import Head from "next/head";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { CheckoutButton } from "@/components/payments/CheckoutButton";
-import { PLANS } from "@/lib/stripe/config";
+import { PLANS } from "@/lib/stripe/plans";
 
 export default function BillingPage() {
   useEffect(() => {

@@ -1,6 +1,7 @@
 "use server";
 
-import { stripe, STRIPE_CONFIG, PLANS, PlanId } from './config'
+import { stripe, STRIPE_CONFIG, SERVER_PLANS, PlanId } from './config'
+import { PLANS } from './plans'
 import { getUserProfile, updateUserProfile } from '../supabase/auth'
 import { getUserByStripeCustomerId } from '../supabase/users'
 import { auth } from '../supabase/auth'
@@ -32,8 +33,8 @@ export async function createCheckoutSession({
       throw new Error('User profile not found')
     }
 
-    const plan = PLANS[planId]
-    if (!plan.stripePriceId) {
+    const plan = SERVER_PLANS[planId]
+    if (planId === 'free' || !plan.stripePriceId) {
       throw new Error(`Plan ${planId} does not have a Stripe price ID`)
     }
 
@@ -194,7 +195,7 @@ async function handleSubscriptionCancellation(subscription: any) {
       await updateUserProfile({
         plan: 'free',
         subscription_status: 'canceled',
-        subscription_id: null
+        subscription_id: undefined
       }, user.id)
 
       console.log(`Cancelled subscription for user ${user.id}`)
@@ -293,9 +294,9 @@ export async function getUserSubscriptionInfo(userId?: string) {
         subscriptionInfo = {
           id: subscription.id,
           status: subscription.status,
-          current_period_start: new Date(subscription.current_period_start * 1000),
-          current_period_end: new Date(subscription.current_period_end * 1000),
-          cancel_at_period_end: subscription.cancel_at_period_end
+          current_period_start: new Date((subscription as any).current_period_start * 1000),
+          current_period_end: new Date((subscription as any).current_period_end * 1000),
+          cancel_at_period_end: (subscription as any).cancel_at_period_end
         }
       } catch (error) {
         console.error('Failed to fetch Stripe subscription:', error)

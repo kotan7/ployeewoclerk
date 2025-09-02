@@ -1,11 +1,12 @@
 import Stripe from 'stripe'
+import { PLANS, PlanId } from './plans'
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing STRIPE_SECRET_KEY environment variable')
 }
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-12-18.acacia',
+  apiVersion: '2025-08-27.basil',
   typescript: true
 })
 
@@ -18,43 +19,21 @@ export const STRIPE_CONFIG = {
   webhookSecret: process.env.STRIPE_WEBHOOK_SECRET!
 }
 
-// Plan configuration
-export const PLANS = {
+// Server-side plans with Stripe price IDs
+export const SERVER_PLANS = {
   free: {
-    name: 'フリープラン',
-    price: 0,
-    currency: 'jpy',
-    interval: null,
-    features: {
-      interviews: 1,
-      esCorrections: 5,
-      support: 'basic'
-    }
+    ...PLANS.free,
+    stripePriceId: null
   },
   basic: {
-    name: 'ベーシックプラン',
-    price: 500,
-    currency: 'jpy',
-    interval: 'month',
-    stripePriceId: process.env.STRIPE_BASIC_PRICE_ID!,
-    features: {
-      interviews: 20,
-      esCorrections: 20,
-      support: 'priority'
-    }
+    ...PLANS.basic,
+    stripePriceId: process.env.STRIPE_BASIC_PRICE_ID!
   },
   premium: {
-    name: 'プレミアムプラン',
-    price: 2000,
-    currency: 'jpy',
-    interval: 'month',
-    stripePriceId: process.env.STRIPE_PREMIUM_PRICE_ID!,
-    features: {
-      interviews: 999,
-      esCorrections: 999,
-      support: '24/7'
-    }
+    ...PLANS.premium,
+    stripePriceId: process.env.STRIPE_PREMIUM_PRICE_ID!
   }
 } as const
 
-export type PlanId = keyof typeof PLANS
+// Re-export for backward compatibility
+export { PLANS, type PlanId }

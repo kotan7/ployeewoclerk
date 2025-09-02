@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { createCheckoutSession } from '@/lib/stripe/utils'
-import { PlanId } from '@/lib/stripe/config'
+import { PlanId } from '@/lib/stripe/plans'
 
 interface CheckoutButtonProps {
   planId: PlanId
