@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
+import { InterviewRadarChart } from "@/components/ui/charter";
 import AutoSignIn from "@/components/ui/AutoSignIn";
 
 interface ESCorrectionData {
@@ -26,7 +27,6 @@ interface ESResultClientProps {
 
 const ESResultClient = ({ esData }: ESResultClientProps) => {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"feedback" | "original">("feedback");
 
   const formatFeedback = (feedback: string) => {
     // Split feedback into sections and format them
@@ -38,20 +38,29 @@ const ESResultClient = ({ esData }: ESResultClientProps) => {
       const content = sections[i + 1];
       
       if (title && content) {
+        // Skip "ES総合点" section as requested
+        if (title === "ES総合点") continue;
+        
+        // Merge "ESの構成" and "基本チェック" into one section
+        if (title === "ESの構成" || title === "基本チェック") {
+          const existingStructureIndex = formattedSections.findIndex(s => s.title === "構成と基本チェック");
+          if (existingStructureIndex >= 0) {
+            formattedSections[existingStructureIndex].content += "\n\n" + content.trim();
+          } else {
+            formattedSections.push({ title: "構成と基本チェック", content: content.trim() });
+          }
+          continue;
+        }
+        
         formattedSections.push({ title, content: content.trim() });
       }
     }
 
-    return formattedSections;
+    // Ensure we only have 3 sections maximum
+    return formattedSections.slice(0, 3);
   };
 
   const feedbackSections = formatFeedback(esData.ai_feedback);
-
-  const getScoreColor = (score: number) => {
-    if (score >= 90) return "#9fe870";
-    if (score >= 80) return "#ff8c5a";
-    return "#ef4444";
-  };
 
   const getScoreLabel = (score: number) => {
     if (score >= 90) return "優秀";
@@ -83,75 +92,59 @@ const ESResultClient = ({ esData }: ESResultClientProps) => {
             </p>
           </div>
 
-          {/* Overall Score */}
+          {/* Merged Overall Score and Detailed Scores */}
           <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-lg border border-gray-100 mb-6 sm:mb-8 lg:mb-10">
             <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#163300] mb-6 sm:mb-8 text-center">
               総合評価
             </h2>
-            <div className="text-center">
-              <div className="flex items-end gap-2 sm:gap-3 justify-center mb-4">
-                <span className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight text-[#163300]">
-                  {esData.overall_score}
-                </span>
-                <span className="pb-1 sm:pb-2 text-base sm:text-lg text-gray-500 font-medium">
-                  /100
-                </span>
-              </div>
-              <p className="text-lg sm:text-xl font-semibold text-[#163300] mb-4">
-                {getScoreLabel(esData.overall_score)}
-              </p>
-              <div className="w-full max-w-md mx-auto h-3 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className={`h-3 rounded-full transition-all duration-700 ${
-                    esData.overall_score >= 90
-                      ? "bg-[#9fe870]"
-                      : esData.overall_score >= 70
-                      ? "bg-[#fbbf24]"
-                      : "bg-[#f97316]"
-                  }`}
-                  style={{ width: `${esData.overall_score}%` }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Detailed Scores */}
-          <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-lg border border-gray-100 mb-6 sm:mb-8 lg:mb-10">
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#163300] mb-6 sm:mb-8 text-center">
-              詳細スコア
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                { score: esData.match_score, label: "求める人材とのマッチ", key: "match" },
-                { score: esData.structure_score, label: "ESの構成", key: "structure" },
-                { score: esData.basic_score, label: "基本チェック", key: "basic" }
-              ].map((item, index) => (
-                <div key={item.key} className="p-4 sm:p-6 rounded-xl border border-gray-200 bg-gray-50 hover:shadow-md transition-all duration-300">
-                  <div className="flex items-start justify-between gap-4 mb-4">
-                    <h3 className="text-base sm:text-lg font-semibold text-[#163300]">
-                      {item.label}
-                    </h3>
-                    <div className="flex items-end gap-1">
-                      <span className="text-2xl sm:text-3xl font-bold text-[#163300]">
-                        {item.score}
-                      </span>
-                      <span className="text-sm text-gray-500 pb-1">/100</span>
-                    </div>
+            
+            {/* Two-column layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-start">
+              {/* Left Column: Score and Summary */}
+              <div className="space-y-4 sm:space-y-6">
+                {/* Overall Score Display */}
+                <div className="text-center lg:text-left">
+                  <div className="flex items-end gap-2 sm:gap-3 justify-center lg:justify-start">
+                    <span className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight text-[#163300]">
+                      {esData.overall_score}
+                    </span>
+                    <span className="pb-1 sm:pb-2 text-base sm:text-lg text-gray-500 font-medium">
+                      /100
+                    </span>
                   </div>
-                  <div className="w-full h-2 bg-gray-200 rounded-full mb-2 overflow-hidden">
-                    <div
-                      className={`h-2 rounded-full transition-all duration-700 ${
-                        item.score >= 90
-                          ? "bg-[#9fe870]"
-                          : item.score >= 70
-                          ? "bg-[#fbbf24]"
-                          : "bg-[#f97316]"
-                      }`}
-                      style={{ width: `${item.score}%` }}
-                    />
-                  </div>
+                  <p className="text-lg sm:text-xl font-semibold text-[#163300] mt-2">
+                    {getScoreLabel(esData.overall_score)}
+                  </p>
                 </div>
-              ))}
+
+                {/* Overall Summary */}
+                <div className="bg-gray-50 rounded-xl p-3 sm:p-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-[#163300] mb-2">
+                    総合フィードバック
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed text-xs sm:text-sm">
+                    あなたのエントリーシートは全体的に{getScoreLabel(esData.overall_score).toLowerCase()}です。
+                    各項目のスコアを参考に、より効果的なES作成を目指しましょう。
+                  </p>
+                </div>
+              </div>
+
+              {/* Right Column: Radar Chart */}
+              <div className="flex justify-center lg:justify-start">
+                <div className="w-full max-w-[300px] sm:max-w-[400px] lg:max-w-[500px]">
+                  <InterviewRadarChart
+                    data={[
+                      { criteria: "マッチ度", score: esData.match_score },
+                      { criteria: "構成力", score: esData.structure_score },
+                      { criteria: "基本チェック", score: esData.basic_score },
+                      { criteria: "具体性", score: Math.round((esData.match_score + esData.structure_score) / 2) },
+                      { criteria: "説得力", score: Math.round((esData.structure_score + esData.basic_score) / 2) }
+                    ]}
+                    frameless={true}
+                    className="w-full"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -199,13 +192,13 @@ const ESResultClient = ({ esData }: ESResultClientProps) => {
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mt-8 sm:mt-12 lg:mt-16 justify-center">
             <button
               onClick={() => router.push("/es-correction")}
-              className="bg-[#9fe870] text-[#163300] hover:bg-[#8fd960] w-full sm:w-auto px-6 sm:px-8 lg:px-10 py-3 sm:py-4 lg:py-6 text-base sm:text-lg font-semibold rounded-2xl sm:rounded-3xl min-w-0 sm:min-w-[220px] shadow-md hover:shadow-lg transition-all duration-200"
+              className="bg-[#9fe870] text-[#163300] hover:bg-[#8fd960] w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 text-base sm:text-lg font-semibold rounded-xl sm:rounded-2xl min-w-0 sm:min-w-[200px] shadow-md hover:shadow-lg transition-all duration-200"
             >
               新しいES添削を始める
             </button>
             <button
               onClick={() => router.push("/es-correction/history")}
-              className="w-full sm:w-auto px-6 sm:px-8 lg:px-10 py-3 sm:py-4 lg:py-6 text-base sm:text-lg font-semibold border border-gray-300 rounded-2xl sm:rounded-3xl min-w-0 sm:min-w-[220px] hover:bg-gray-50 transition-all duration-200"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 text-base sm:text-lg font-semibold border border-gray-300 rounded-xl sm:rounded-2xl min-w-0 sm:min-w-[200px] hover:bg-gray-50 transition-all duration-200"
             >
               過去のES添削を見る
             </button>

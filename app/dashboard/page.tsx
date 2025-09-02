@@ -105,9 +105,9 @@ const DashboardPage = () => {
         {/* Modern Hero Section */}
         <div className="bg-gradient-to-br from-white via-gray-50 to-[#f8fffe] pt-20 pb-1">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-10">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-[#163300] to-[#2F4F3F] bg-clip-text text-transparent mb-6">
-                おかえりなさい！
+            <div className="text-left mb-10">
+              <h1 className="text-2xl text-center sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-[#163300] to-[#2F4F3F] bg-clip-text text-transparent mb-6">
+                ダッシュボード
               </h1>
             </div>
 
@@ -131,10 +131,10 @@ const DashboardPage = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           {/* Welcome Message */}
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#163300] mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#163300] mb-4 -mt-8 text-left">
               何から始めますか？
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-sm text-gray-600 max-w-2xl leading-relaxed text-left">
               AI面接練習とES添削で、あなたの就活・転職活動を全面サポート
             </p>
           </div>
@@ -175,41 +175,10 @@ const DashboardPage = () => {
             })}
           </div>
 
-          {/* Modern Quick Actions */}
-          <div className="text-center">
-            <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl p-10 shadow-xl border border-gray-100">
-              <h3 className="text-2xl font-bold text-[#163300] mb-4">
-                今すぐ始めよう
-              </h3>
-              <p className="text-gray-600 mb-10 text-lg leading-relaxed">
-                面接練習またはES添削で、理想の未来への第一歩を踏み出しましょう
-              </p>
-              <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                <button
-                  onClick={() => router.push("/interview/new")}
-                  className="group px-10 py-4 bg-gradient-to-r from-[#9fe870] to-[#8fd960] text-[#163300] rounded-2xl font-bold transition-all duration-300 hover:shadow-[0_15px_30px_rgba(159,232,112,0.4)] hover:scale-105 hover:-translate-y-1"
-                >
-                  <span className="flex items-center justify-center space-x-2">
-                    <MessageCircle className="w-5 h-5" />
-                    <span>面接練習を始める</span>
-                  </span>
-                </button>
-                <button
-                  onClick={() => router.push("/es-correction")}
-                  className="group px-10 py-4 bg-white border-2 border-[#9fe870] text-[#163300] rounded-2xl font-bold transition-all duration-300 hover:bg-[#9fe870] hover:shadow-[0_15px_30px_rgba(159,232,112,0.3)] hover:scale-105 hover:-translate-y-1"
-                >
-                  <span className="flex items-center justify-center space-x-2">
-                    <Edit className="w-5 h-5" />
-                    <span>ES添削を試す</span>
-                  </span>
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Footer */}
-        <footer className="bg-gradient-to-br from-[#f8fffe] to-white border-t border-gray-100 mt-20">
+        <footer className="bg-gradient-to-br from-[#f8fffe] to-white border-t border-gray-100 mt-10">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12">
               {/* Logo and Company Info */}
