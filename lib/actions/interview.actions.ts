@@ -407,21 +407,27 @@ export const saveWorkflowState = async (
 
     const supabase = await createClient();
     
+    // Generate a unique session ID for new sessions
+    const sessionId = `session_${interviewId}_${Date.now()}`;
+    
     // Prepare the data to upsert
     const upsertData = {
         user_id: userId,
         interview_id: interviewId,
+        session_id: sessionId, // Add the required session_id field
         workflow_state: {
             ...workflowState,
             workflowDefinition: workflowState.workflowDefinition
         },
+        state: {}, // Add required state field (can be empty object)
         current_phase_id: workflowState.currentPhaseId,
         question_counts: workflowState.questionCounts,
         failed_phases: workflowState.failedPhases,
         interview_finished: workflowState.finished,
         conversation_history: conversationHistory,
         created_at: new Date().toISOString(),
-
+        updated_at: new Date().toISOString(),
+        last_message_at: new Date().toISOString(),
     };
 
     // First try to update existing record, then insert if not exists
@@ -449,7 +455,8 @@ export const saveWorkflowState = async (
                 failed_phases: workflowState.failedPhases,
                 interview_finished: workflowState.finished,
                 conversation_history: conversationHistory,
-        
+                updated_at: new Date().toISOString(),
+                last_message_at: new Date().toISOString(),
             })
             .eq('id', existingData.id)
             .select();
@@ -464,7 +471,8 @@ export const saveWorkflowState = async (
     const { data, error } = result;
 
     if (error) {
-        console.error("Database error:", error);
+        console.error("Database error saving workflow state:", error);
+        console.error("Attempted data:", upsertData);
         throw new Error(`Failed to save workflow state: ${error.message}`);
     }
 

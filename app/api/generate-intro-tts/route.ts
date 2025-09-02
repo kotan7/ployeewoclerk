@@ -4,15 +4,29 @@ import { TextToSpeechClient } from '@google-cloud/text-to-speech';
 // Configure runtime for Vercel
 export const runtime = 'nodejs';
 
-// Initialize TTS client with proper credentials handling
-let ttsClient: TextToSpeechClient;
-if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
-  // Use JSON credentials for deployment (Vercel, etc.)
-  const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
-  ttsClient = new TextToSpeechClient({ credentials });
-} else {
-  // Use file path for local development
-  ttsClient = new TextToSpeechClient();
+// Initialize TTS client with proper credentials handling and error checking
+let ttsClient: TextToSpeechClient | null = null;
+
+try {
+  if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+    // Use JSON credentials for deployment (Vercel, etc.)
+    const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+    
+    // Validate credentials have required fields
+    if (credentials.project_id && credentials.client_email && credentials.private_key) {
+      ttsClient = new TextToSpeechClient({ credentials });
+      console.log('Google TTS client initialized successfully');
+    } else {
+      console.error('Invalid Google credentials - missing required fields');
+    }
+  } else {
+    // Use file path for local development
+    ttsClient = new TextToSpeechClient();
+    console.log('Google TTS client initialized with default credentials');
+  }
+} catch (error) {
+  console.error('Failed to initialize Google TTS client:', error);
+  ttsClient = null;
 }
 
 export async function POST(request: NextRequest) {
@@ -22,6 +36,16 @@ export async function POST(request: NextRequest) {
 
     if (!text) {
       return NextResponse.json({ error: "Text is required" }, { status: 400 });
+    }
+
+    // Check if TTS client is available
+    if (!ttsClient) {
+      console.log('Google TTS not available, returning fallback response');
+      return NextResponse.json({ 
+        error: "TTS service temporarily unavailable",
+        fallback: true,
+        text: text
+      }, { status: 503 });
     }
 
     // Generate TTS audio using the same settings as interview conversation
@@ -50,14 +74,11 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Error in generate-intro-tts route:", error);
     
-    if (error instanceof Error) {
-      return NextResponse.json({ 
-        error: `Failed to generate TTS: ${error.message}` 
-      }, { status: 500 });
-    }
-    
+    // Return fallback response instead of error
     return NextResponse.json({ 
-      error: "Failed to generate TTS" 
-    }, { status: 500 });
+      error: "TTS service temporarily unavailable",
+      fallback: true,
+      text: request.body ? (await request.json()).text : "面接を開始します"
+    }, { status: 503 });
   }
 }

@@ -511,6 +511,32 @@ export function useInterviewSession(interviewId?: string) {
         // Continue with interview even if tracking fails
       }
 
+      // Initialize interview session in database if interviewId is provided
+      let sessionInitialized = false;
+      if (interviewId) {
+        try {
+          console.log("Initializing interview session in database...");
+          const initResponse = await fetch('/api/initialize-interview-session', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ interviewId }),
+          });
+          
+          const initResult = await initResponse.json();
+          if (initResult.success) {
+            console.log("Interview session initialized successfully", initResult);
+            sessionInitialized = true;
+          } else {
+            console.warn("Failed to initialize interview session:", initResult);
+          }
+        } catch (initError) {
+          console.warn("Error initializing interview session:", initError);
+          // Continue with interview even if initialization fails
+        }
+      }
+
       // NOTE: Usage limit already checked on server-side before page load
       console.log("Starting interview - usage tracking complete");
 
@@ -532,7 +558,11 @@ export function useInterviewSession(interviewId?: string) {
       analyserRef.current.fftSize = 2048;
       analyserRef.current.smoothingTimeConstant = 0.8;
 
-      setConversationHistory([]);
+      // Only clear conversation history if session wasn't initialized in database
+      if (!sessionInitialized) {
+        setConversationHistory([]);
+      }
+      
       setInterviewPhase("introduction");
       setCandidateInfo({});
       setResponse("");
@@ -547,13 +577,67 @@ export function useInterviewSession(interviewId?: string) {
       setIsActive(true);
       setError("");
 
-      // Send initial introduction prompt when interview starts
-      if (conversationHistory.length === 0) {
-        setTimeout(() => {
-          const introMessage = "本日は面接にお越しいただきありがとうございます。まずは簡単に自己紹介をお願いします。";
+      // Load existing conversation history from database if session was initialized
+      if (sessionInitialized && interviewId) {
+        try {
+          console.log("Loading existing conversation history from database...");
+          const workflowResponse = await fetch('/api/get-workflow-state', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ interviewId }),
+          });
+          
+          const workflowResult = await workflowResponse.json();
+          
+          if (workflowResult.success && workflowResult.workflowData.conversationHistory && workflowResult.workflowData.conversationHistory.length > 0) {
+            console.log("Loaded conversation history:", workflowResult.workflowData.conversationHistory);
+            setConversationHistory(workflowResult.workflowData.conversationHistory);
+            
+            // Set the intro message as the current response
+            const lastAssistantMessage = workflowResult.workflowData.conversationHistory
+              .filter((msg: any) => msg.role === 'assistant')
+              .pop();
+            
+            if (lastAssistantMessage) {
+              setResponse(lastAssistantMessage.content);
+              // Play the intro message
+              generateAndPlayIntroAudio(lastAssistantMessage.content);
+            }
+          } else {
+            // Fallback: add intro message locally if database doesn't have it
+            const introMessage = "本日は面接にお越しいただきありがとうございます。まずは簡潔に自己紹介をお願いします。";
+            setResponse(introMessage);
+            
+            const newMessage = {
+              role: "assistant" as const,
+              content: introMessage,
+              timestamp: Date.now(),
+            };
+            setConversationHistory([newMessage]);
+            generateAndPlayIntroAudio(introMessage);
+          }
+        } catch (loadError) {
+          console.warn("Error loading conversation history:", loadError);
+          // Fallback to local intro message
+          const introMessage = "本日は面接にお越しいただきありがとうございます。まずは簡潔に自己紹介をお願いします。";
           setResponse(introMessage);
           
-          // Add to conversation history
+          const newMessage = {
+            role: "assistant" as const,
+            content: introMessage,
+            timestamp: Date.now(),
+          };
+          setConversationHistory([newMessage]);
+          generateAndPlayIntroAudio(introMessage);
+        }
+      } else {
+        // Fallback: add intro message locally if no session initialization
+        setTimeout(() => {
+          const introMessage = "本日は面接にお越しいただきありがとうございます。まずは簡潔に自己紹介をお願いします。";
+          setResponse(introMessage);
+          
           const newMessage = {
             role: "assistant" as const,
             content: introMessage,
@@ -561,7 +645,6 @@ export function useInterviewSession(interviewId?: string) {
           };
           setConversationHistory([newMessage]);
           
-          // Play introduction audio using Google TTS (same as interview conversation)
           generateAndPlayIntroAudio(introMessage);
         }, 1000);
       }
@@ -632,12 +715,12 @@ export function useInterviewSession(interviewId?: string) {
     }
   }, []);
 
-  // Function to generate and play introduction audio using Google TTS
+  // Function to generate and play introduction audio using Google TTS with fallback
   const generateAndPlayIntroAudio = useCallback(async (message: string) => {
     try {
       setIsPlayingTTS(true);
       
-      // Call a new API endpoint that generates Google TTS for the intro message
+      // Call the TTS API endpoint
       const response = await fetch("/api/generate-intro-tts", {
         method: "POST",
         headers: {
@@ -648,13 +731,10 @@ export function useInterviewSession(interviewId?: string) {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`TTS API request failed with status ${response.status}`);
-      }
-
       const data = await response.json();
 
-      if (data.audio) {
+      // Check if we got audio data or need to fallback
+      if (response.ok && data.audio) {
         const audioData = `data:${data.mimeType};base64,${data.audio}`;
         const audio = new Audio(audioData);
 
@@ -675,30 +755,42 @@ export function useInterviewSession(interviewId?: string) {
           console.error("Intro audio playback error:", e);
           currentAudioRef.current = null;
           setIsPlayingTTS(false);
-          startNewRecordingSession();
+          // Fallback to browser speech synthesis
+          useBrowserTTS(message);
         };
 
         await audio.play();
       } else {
-        setIsPlayingTTS(false);
-        startNewRecordingSession();
+        // TTS service unavailable, use browser fallback
+        console.log("TTS service unavailable, using browser speech synthesis");
+        useBrowserTTS(message);
       }
     } catch (error) {
       console.error("Error generating intro TTS:", error);
-      setIsPlayingTTS(false);
-      // Fallback to browser speech synthesis if Google TTS fails
-      if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(message);
-        utterance.lang = 'ja-JP';
-        utterance.rate = 0.9;
-        utterance.onend = () => {
-          setIsPlayingTTS(false);
-          startNewRecordingSession();
-        };
-        speechSynthesis.speak(utterance);
-      } else {
+      // Fallback to browser speech synthesis
+      useBrowserTTS(message);
+    }
+  }, []);
+
+  // Browser TTS fallback function
+  const useBrowserTTS = useCallback((message: string) => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(message);
+      utterance.lang = 'ja-JP';
+      utterance.rate = 0.9;
+      utterance.onend = () => {
+        setIsPlayingTTS(false);
         startNewRecordingSession();
-      }
+      };
+      utterance.onerror = () => {
+        setIsPlayingTTS(false);
+        startNewRecordingSession();
+      };
+      speechSynthesis.speak(utterance);
+    } else {
+      // No TTS available, just start recording
+      setIsPlayingTTS(false);
+      startNewRecordingSession();
     }
   }, []);
 
