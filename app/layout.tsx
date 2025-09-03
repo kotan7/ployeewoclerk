@@ -7,7 +7,10 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.ployee.net"),
-  title: "AI面接練習プラットフォーム「プロイー」| 24時間対応で内定率UP",
+  title: {
+    default: "AI面接練習プラットフォーム「プロイー」| 24時間対応で内定率UP",
+    template: "%s | プロイー - AI面接練習プラットフォーム"
+  },
   description:
     "AI面接官との実践練習で面接突破率を5倍向上。リアルタイム分析・個別フィードバック付き。就活生95%が「自信がついた」と評価。無料体験3回まで。",
   keywords: [
@@ -48,7 +51,7 @@ export const metadata: Metadata = {
     siteName: "プロイー",
     images: [
       {
-        url: "https://www.ployee.net/og-image.jpg",
+        url: "https://www.ployee.net/opengraph-image",
         width: 1200,
         height: 630,
         alt: "プロイー - AI面接練習プラットフォーム",
@@ -60,7 +63,7 @@ export const metadata: Metadata = {
     title: "AI面接練習プラットフォーム「プロイー」| 24時間対応",
     description:
       "AI面接官との実践練習で面接突破率を5倍向上。リアルタイム分析・個別フィードバック付き。",
-    images: ["https://www.ployee.net/og-image.jpg"],
+    images: ["https://www.ployee.net/opengraph-image"],
     creator: "@ployee_jp",
   },
   alternates: {
@@ -75,7 +78,9 @@ export const metadata: Metadata = {
   },
   other: {
     "google-site-verification": "XJ-vAmABbw4EGfp06PisjYYfdO8v6yxpo-BAIZv-OjM",
+    "format-detection": "telephone=no",
   },
+  category: "education",
 };
 
 

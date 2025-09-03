@@ -80,7 +80,7 @@ const structuredData = {
   ],
   screenshot: {
     "@type": "ImageObject",
-    url: "https://www.ployee.net/screenshot.png",
+    url: "https://www.ployee.net/opengraph-image",
     caption: "AI面接練習プラットフォームのスクリーンショット",
   },
   potentialAction: {
@@ -109,7 +109,7 @@ const structuredData = {
       "AI面接官との実践練習で面接突破率を5倍向上",
     primaryImageOfPage: {
       "@type": "ImageObject",
-      url: "https://www.ployee.net/og-image.jpg",
+      url: "https://www.ployee.net/opengraph-image",
     },
     speakable: {
       "@type": "SpeakableSpecification",
@@ -182,8 +182,8 @@ export default function Home() {
 
   // GSAP animations
   useEffect(() => {
-    // Don't run animations if user is signed in (they'll be redirected)
-    if (loading || user) {
+    // Don't run animations if user is signed in (they'll be redirected) or on server
+    if (typeof window === 'undefined' || loading || user) {
       return;
     }
 
@@ -340,8 +340,11 @@ export default function Home() {
     };
   }, [loading, user]);
 
-  // Show loading state while checking authentication
-  if (loading) {
+  // For SEO: Always render content for crawlers, handle client-side redirects after hydration
+  const shouldShowContent = typeof window === 'undefined' || (!loading && !user);
+  
+  // Show loading state only on client-side while checking authentication
+  if (typeof window !== 'undefined' && loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
@@ -352,19 +355,41 @@ export default function Home() {
     );
   }
 
-  // Don't render homepage content if user is signed in (they'll be redirected)
-  if (user) {
+  // Don't render homepage content if user is signed in (only on client-side)
+  if (typeof window !== 'undefined' && user) {
     return null;
   }
 
   return (
     <>
-
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <div className="min-h-screen bg-white relative">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "プロイー",
+            alternateName: "Ployee",
+            url: "https://www.ployee.net",
+            logo: "https://www.ployee.net/opengraph-image",
+            description: "AI面接官との実践練習で面接突破率を5倍向上させるプラットフォーム",
+            foundingDate: "2024",
+            sameAs: [
+              "https://twitter.com/ployee_jp"
+            ],
+            contactPoint: {
+              "@type": "ContactPoint",
+              contactType: "customer service",
+              url: "https://www.ployee.net/contact"
+            }
+          })
+        }}
+      />
+      {shouldShowContent && <div className="min-h-screen bg-white relative">
         {/* Main content wrapper */}
         <div ref={mainContentRef} className="relative bg-white">
           {/* Hero Section */}
@@ -1225,7 +1250,7 @@ export default function Home() {
             </div>
           </div>
         </footer>
-      </div>
+      </div>}
     </>
   );
 }
